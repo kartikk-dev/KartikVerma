@@ -1,30 +1,77 @@
-# MovieFlex Pro UI refresh
 
-This patch refreshes the MovieFlex UI while keeping the current Astro project structure and local API approach.
+# Kartik Verma | Full Stack Engineering Portfolio
 
-## Included
+A personal portfolio showcasing my approach to full-stack engineering, responsive interface design, backend systems, APIs, databases, and digital product development.
 
-- `src/pages/projects/movieflex.astro` — centered hero hierarchy, persistent light/dark toggle, lightly animated layered feature cards, improved 3D movie cards, accessible focus styling, and animated Back to top control.
-- `src/pages/api/movieflex.ts` — Astro API route for TMDB search/discovery, genres, regions, details, provider availability, and reviews.
-- `src/layouts/MovieFlexLegalLayout.astro` — matching dark-mode toggle, centered legal-page titles, matching focus states, and Back to top control.
-- `src/pages/privacy.astro`, `terms.astro`, `cookies.astro`, `privacy-settings.astro`, `copyright.astro`, `sources.astro` — existing policy/attribution pages using the shared layout.
-- `public/movieflex-icon.svg` — custom lightweight SVG favicon.
+## About
 
-## Install
+I am Kartik Verma, a full-stack engineer interested in building useful digital products through thoughtful design and practical engineering.
 
-1. Make a backup of your current `src/pages/projects/movieflex.astro` and other included pages.
-2. Merge this bundle's `src` and `public` folders into the existing Astro project root. Allow folder merging, and replace only the files included in this bundle.
-3. Keep your existing `astro.config.mjs`, `package.json`, and `.env` unchanged.
-4. Ensure the root `.env` contains `TMDB_READ_ACCESS_TOKEN=...` with your actual TMDB Read Access Token. Never commit `.env` or expose the token using a `PUBLIC_` or `VITE_` variable.
-5. Restart the dev server: `npm run dev`.
-6. Open `http://localhost:4321/projects/movieflex/`.
+This portfolio brings together my selected projects, technology stack, engineering approach, technical writing, and contact information.
 
-## Theme and motion
+## Featured Projects
 
-The light/dark choice is saved in browser localStorage under `movieflex-theme`. The feature cards have low-amplitude independent motion and depth on hover/focus. `prefers-reduced-motion` disables the nonessential animations.
+- **Serviq:** A field-service management concept focused on work orders, operations, and workflow visibility.
+- **MovieFlex:** A movie discovery experience focused on browsing and exploring films.
+- **AI Business Intelligence:** An analytics concept for exploring business information through visual summaries.
 
-## Verification notes
+## Portfolio Features
 
-Inline JavaScript blocks were checked with Node's syntax checker. A full Astro build was not run against your local project, so run `npm run build` after merging. The TMDB API requires a valid server-side token and network connectivity.
+- Responsive layouts for desktop and mobile.
+- Interactive engineering and technology sections.
+- Project previews and selected work.
+- Blog and technical writing section.
+- Contact links for collaboration.
+- Review submission interface with moderation support, when configured.
 
-The legal content is a project-specific starter draft, not jurisdiction-specific legal advice. Review it for the actual operator, jurisdiction, retention practices, and deployment behavior before publishing.
+## Technology
+
+The portfolio uses Astro, TypeScript, HTML, CSS, and JavaScript. Supabase can be used for the portfolio review workflow when the required environment configuration and database policies are set up.
+
+## Run Locally
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+Run Astro diagnostics:
+
+```bash
+npm run check
+```
+
+Build the production site:
+
+```bash
+npm run build
+```
+
+## Environment Variables
+
+Create a local `.env` file for development when required.
+
+Never commit `.env` files, private API keys, service-role keys, passwords, or access tokens. Configure deployment environment variables through the hosting provider's environment settings.
+
+Variables prefixed with `PUBLIC_` may be exposed to browser code. Never use that prefix for private credentials.
+
+## Deployment
+
+This project can be deployed to Vercel using the GitHub repository integration.
+
+For a standard static Astro build, the output directory is `dist`. Configure any required environment variables in Vercel before deploying features that depend on external services.
+
+## Security
+
+Do not commit secrets or local diagnostic files. Review Git changes before committing or pushing, and use appropriate database access policies for any public-facing submission forms.
+
+## License
+
+Unless a separate license is added to this repository, the source code is not automatically granted an open-source license.
