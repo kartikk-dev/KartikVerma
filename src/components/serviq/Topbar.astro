@@ -1,0 +1,397 @@
+---
+---
+
+<header class="topbar">
+  <button
+    type="button"
+    class="mobile-menu"
+    id="mobile-menu"
+    aria-label="Open navigation"
+    aria-controls="sidebar"
+    aria-expanded="false"
+  >
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <div class="breadcrumb" aria-label="Breadcrumb">
+    <span>SERVIQ</span>
+    <i aria-hidden="true">/</i>
+    <strong id="breadcrumb-current">Overview</strong>
+  </div>
+
+  <div class="topbar-center">
+    <label class="global-search">
+      <span aria-hidden="true">⌕</span>
+      <input
+        type="search"
+        id="global-search"
+        placeholder="Search work orders, customers, technicians..."
+        autocomplete="off"
+        aria-label="Search work orders"
+      />
+      <kbd>Ctrl K</kbd>
+    </label>
+  </div>
+
+  <div class="topbar-actions">
+    <button
+      class="icon-button"
+      type="button"
+      aria-label="Notifications"
+      id="notification-button"
+    >
+      <span class="notification-dot" aria-hidden="true"></span>◔
+    </button>
+
+    <div class="topbar-date" id="date-button" aria-label="Today's date">
+      <span id="serviq-topbar-date">TODAY</span>
+      <b>Workspace</b>
+    </div>
+
+    <button
+      class="topbar-avatar"
+      type="button"
+      aria-label="Account menu"
+      id="serviq-topbar-account"
+      aria-haspopup="true"
+      aria-expanded="false"
+    >
+      KV
+    </button>
+  </div>
+</header>
+
+<script>
+  const dateLabel = document.querySelector<HTMLElement>("#serviq-topbar-date");
+  const avatar = document.querySelector<HTMLElement>("#serviq-topbar-account");
+
+  const formatDate = (): void => {
+    if (dateLabel) {
+      dateLabel.textContent = new Intl.DateTimeFormat("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+        .format(new Date())
+        .toUpperCase();
+    }
+  };
+
+  const updateAvatar = (): void => {
+    if (!avatar) return;
+
+    try {
+      const raw = localStorage.getItem("serviq_workspace_setup");
+
+      if (!raw) {
+        avatar.textContent = "KV";
+        return;
+      }
+
+      const data: unknown = JSON.parse(raw);
+
+      if (!data || typeof data !== "object" || Array.isArray(data)) return;
+
+      const record = data as Record<string, unknown>;
+      const profile =
+        record.profile &&
+        typeof record.profile === "object" &&
+        !Array.isArray(record.profile)
+          ? (record.profile as Record<string, unknown>)
+          : {};
+
+      const name = [
+        record.name,
+        record.userName,
+        record.fullName,
+        record.ownerName,
+        profile.name,
+      ].find(
+        (value): value is string =>
+          typeof value === "string" && value.trim().length > 0,
+      );
+
+      avatar.textContent = name
+        ? name
+            .trim()
+            .split(/\s+/)
+            .slice(0, 2)
+            .map((part) => part[0].toUpperCase())
+            .join("")
+        : "KV";
+    } catch {
+      avatar.textContent = "KV";
+    }
+  };
+
+  const search = document.querySelector<HTMLInputElement>("#global-search");
+
+  search?.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      search.value = "";
+      search.dispatchEvent(new Event("input", { bubbles: true }));
+      search.blur();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+      event.preventDefault();
+      search?.focus();
+    }
+  });
+
+  window.addEventListener("storage", updateAvatar);
+
+  formatDate();
+  updateAvatar();
+</script>
+
+<style is:global>
+  .topbar {
+    display: grid;
+    grid-template-columns: minmax(130px, 0.7fr) minmax(200px, 1fr) minmax(
+        170px,
+        0.7fr
+      );
+    align-items: center;
+    gap: 18px;
+    min-height: 72px;
+    padding: 0 28px;
+    border-bottom: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+    background: rgba(7, 16, 13, 0.84);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .topbar .breadcrumb {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 10px;
+    color: var(--dim, #69776f);
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .topbar .breadcrumb strong {
+    overflow: hidden;
+    color: var(--text, #edf3ed);
+    font-size: 11px;
+    font-weight: 650;
+    text-overflow: ellipsis;
+  }
+
+  .topbar .topbar-center {
+    display: flex;
+    min-width: 0;
+    justify-content: center;
+  }
+
+  .topbar .global-search {
+    display: flex;
+    width: min(100%, 460px);
+    min-width: 0;
+    min-height: 41px;
+    align-items: center;
+    gap: 10px;
+    padding: 0 12px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+    border-radius: 11px;
+    background: rgba(255, 255, 255, 0.025);
+  }
+
+  .topbar .global-search:focus-within {
+    border-color: rgba(214, 181, 104, 0.5);
+  }
+
+  .topbar .global-search > span {
+    color: var(--muted, #97a59c);
+    font-size: 20px;
+  }
+
+  .topbar .global-search input {
+    width: 100%;
+    min-width: 0;
+    flex: 1;
+    border: 0;
+    outline: 0;
+    color: var(--text, #edf3ed);
+    background: transparent;
+    font: inherit;
+    font-size: 12px;
+  }
+
+  .topbar .global-search input::placeholder {
+    color: var(--dim, #69776f);
+  }
+
+  .topbar .global-search kbd {
+    flex: 0 0 auto;
+    padding: 4px 6px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+    border-radius: 5px;
+    color: var(--muted, #97a59c);
+    font-size: 9px;
+    white-space: nowrap;
+  }
+
+  .topbar .topbar-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .topbar .icon-button,
+  .topbar .topbar-avatar {
+    position: relative;
+    display: grid;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    place-items: center;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+    border-radius: 11px;
+    color: var(--text, #edf3ed);
+    background: rgba(255, 255, 255, 0.025);
+    cursor: pointer;
+    transition:
+      border-color 150ms ease,
+      background 150ms ease;
+  }
+
+  .topbar .icon-button:hover,
+  .topbar .topbar-avatar:hover {
+    border-color: rgba(214, 181, 104, 0.35);
+    background: rgba(214, 181, 104, 0.045);
+  }
+
+  .topbar .notification-dot {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    width: 6px;
+    height: 6px;
+    border: 1px solid var(--bg, #07100d);
+    border-radius: 50%;
+    background: #d6b568;
+  }
+
+  .topbar .topbar-date {
+    display: grid;
+    gap: 3px;
+    min-width: 86px;
+    padding: 2px 8px;
+    color: var(--muted, #97a59c);
+  }
+
+  .topbar .topbar-date > span {
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: 0.035em;
+  }
+
+  .topbar .topbar-date > b {
+    color: var(--dim, #69776f);
+    font-size: 9px;
+    font-weight: 500;
+  }
+
+  .topbar .topbar-avatar {
+    border-color: rgba(214, 181, 104, 0.25);
+    color: #e9ecdf;
+    background: linear-gradient(145deg, #36483c, #162119);
+    font-size: 11px;
+    font-weight: 750;
+  }
+
+  .topbar .mobile-menu {
+    display: none;
+  }
+
+  @media (max-width: 1050px) {
+    .topbar {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 12px;
+      padding: 0 18px;
+    }
+
+    .topbar .mobile-menu {
+      display: flex;
+      width: 36px;
+      height: 36px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.025);
+      cursor: pointer;
+    }
+
+    .topbar .mobile-menu span {
+      display: block;
+      width: 15px;
+      height: 1.5px;
+      border-radius: 3px;
+      background: var(--text, #edf3ed);
+    }
+
+    .topbar .breadcrumb {
+      display: none;
+    }
+
+    .topbar .global-search {
+      max-width: 100%;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .topbar {
+      min-height: 64px;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      padding: 0 12px;
+      gap: 9px;
+    }
+
+    .topbar .topbar-actions {
+      gap: 6px;
+    }
+
+    .topbar .icon-button,
+    .topbar .topbar-avatar {
+      width: 34px;
+      height: 34px;
+      flex-basis: 34px;
+    }
+
+    .topbar .topbar-date {
+      display: none;
+    }
+
+    .topbar .global-search {
+      min-height: 37px;
+      gap: 7px;
+      padding: 0 8px;
+    }
+
+    .topbar .global-search input {
+      font-size: 11px;
+    }
+
+    .topbar .global-search kbd {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .topbar .icon-button,
+    .topbar .topbar-avatar {
+      transition: none;
+    }
+  }
+</style>

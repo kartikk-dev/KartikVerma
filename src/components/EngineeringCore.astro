@@ -1,0 +1,1619 @@
+
+---
+const layers = [
+  {
+    title: "Experience",
+    category: "Discovery",
+    subtitle: "Understand the problem first.",
+    description:
+      "Begin with the people, requirements, context, and intended outcome. Understand what the product needs to solve before deciding how to build it.",
+    focus: ["User needs", "Requirements", "Product goals"],
+    visual: "experience",
+    accent: "#E44752",
+  },
+  {
+    title: "Interface",
+    category: "Interaction design",
+    subtitle: "Make every interaction clear.",
+    description:
+      "Build interfaces that make information easy to understand. Responsive layouts, meaningful feedback, accessibility, and consistent interaction patterns all matter.",
+    focus: ["Responsive UI", "Accessibility", "Usability"],
+    visual: "interface",
+    accent: "#59B8FF",
+  },
+  {
+    title: "Application",
+    category: "Application logic",
+    subtitle: "Define how the product works.",
+    description:
+      "Connect components, state, validation, and business rules into predictable application behaviour. Keep responsibilities clear and implementation maintainable.",
+    focus: ["Component design", "State", "Validation"],
+    visual: "application",
+    accent: "#C4B5FD",
+  },
+  {
+    title: "Data",
+    category: "Data architecture",
+    subtitle: "Give information a reliable structure.",
+    description:
+      "Model data carefully, define relationships, validate inputs, and handle loading and error states. Good data design makes an application easier to trust and extend.",
+    focus: ["Data models", "Databases", "Integrity"],
+    visual: "data",
+    accent: "#F7C948",
+  },
+  {
+    title: "Intelligence",
+    category: "Problem solving",
+    subtitle: "Turn information into useful outcomes.",
+    description:
+      "Use analytical thinking, automation, and AI capabilities where they solve a real problem. Keep outputs relevant, understandable, and grounded in the available context.",
+    focus: ["Analysis", "Automation", "AI workflows"],
+    visual: "intelligence",
+    accent: "#B79AFF",
+  },
+  {
+    title: "Integration",
+    category: "Connected systems",
+    subtitle: "Make every part work together.",
+    description:
+      "Connect services through consistent APIs, authentication, data contracts, and error handling. Treat integrations as part of the product, not an afterthought.",
+    focus: ["APIs", "Authentication", "Reliability"],
+    visual: "integration",
+    accent: "#4FD1B5",
+  },
+  {
+    title: "Production",
+    category: "Delivery and reliability",
+    subtitle: "Prepare the system for real use.",
+    description:
+      "Think beyond a successful local run. Consider performance, secure configuration, deployment, observability, and the maintenance a product needs over time.",
+    focus: ["Performance", "Deployment", "Maintainability"],
+    visual: "production",
+    accent: "#FFA45B",
+  },
+];
+---
+
+<section
+  id="engineering-core"
+  class="engineering-section"
+  aria-labelledby="engineering-heading"
+>
+  <div class="engineering-atmosphere" aria-hidden="true"></div>
+  <div class="engineering-cursor-glow" data-engineering-glow aria-hidden="true"></div>
+
+  <div class="engineering-container">
+    <header class="engineering-header">
+      <span class="engineering-heading-rule" aria-hidden="true"></span>
+
+      <h2 id="engineering-heading">
+        The thinking behind
+        <span>the build.</span>
+      </h2>
+
+      <p>
+        A product is more than its interface. I treat requirements, application
+        logic, data, integrations, and delivery as connected parts of one system.
+      </p>
+    </header>
+
+    <div class="engineering-carousel">
+      <div
+        class="engineering-stage"
+        data-engineering-stage
+        aria-label="Engineering principles"
+        aria-roledescription="carousel"
+      >
+        <div class="engineering-ring" data-engineering-ring>
+          {layers.map((layer) => (
+            <article
+              class={`engineering-card engineering-card--${layer.visual}`}
+              data-engineering-card
+              data-engineering-visual={layer.visual}
+              style={`--engineering-accent: ${layer.accent};`}
+              aria-label={`${layer.title}: ${layer.description}`}
+              tabindex="0"
+            >
+              <div class="engineering-card-top">
+                <span class="engineering-category">{layer.category}</span>
+                <span class="engineering-card-status" aria-hidden="true"></span>
+              </div>
+
+              <div class={`engineering-visual engineering-visual--${layer.visual}`} aria-hidden="true">
+                {layer.visual === "experience" && (
+                  <div class="experience-art">
+                    <span class="experience-orbit experience-orbit-a"></span>
+                    <span class="experience-orbit experience-orbit-b"></span>
+                    <span class="experience-orbit experience-orbit-c"></span>
+                    <span class="experience-core"></span>
+                    <span class="experience-cross experience-cross-a"></span>
+                    <span class="experience-cross experience-cross-b"></span>
+                  </div>
+                )}
+
+                {layer.visual === "interface" && (
+                  <div class="interface-art">
+                    <div class="interface-window-top">
+                      <span></span><span></span><span></span>
+                    </div>
+                    <div class="interface-window-body">
+                      <span class="interface-sidebar"></span>
+                      <div class="interface-content">
+                        <span class="interface-line line-wide"></span>
+                        <span class="interface-line line-short"></span>
+                        <div class="interface-blocks">
+                          <span></span><span></span><span></span>
+                        </div>
+                        <span class="interface-line line-medium"></span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {layer.visual === "application" && (
+                  <div class="application-art">
+                    <span class="app-connector app-connector-a"></span>
+                    <span class="app-connector app-connector-b"></span>
+                    <span class="app-connector app-connector-c"></span>
+                    <span class="app-node app-node-a"><i></i></span>
+                    <span class="app-node app-node-b"><i></i></span>
+                    <span class="app-node app-node-c"><i></i></span>
+                    <span class="app-node app-node-d"><i></i></span>
+                  </div>
+                )}
+
+                {layer.visual === "data" && (
+                  <div class="data-art">
+                    <div class="data-gridline"></div>
+                    <div class="data-gridline"></div>
+                    <div class="data-gridline"></div>
+                    <div class="data-bars">
+                      <span style="--bar-height: 35%"></span>
+                      <span style="--bar-height: 52%"></span>
+                      <span style="--bar-height: 43%"></span>
+                      <span style="--bar-height: 72%"></span>
+                      <span style="--bar-height: 59%"></span>
+                      <span style="--bar-height: 91%"></span>
+                      <span style="--bar-height: 69%"></span>
+                      <span style="--bar-height: 81%"></span>
+                    </div>
+                    <div class="data-base"></div>
+                  </div>
+                )}
+
+                {layer.visual === "intelligence" && (
+                  <div class="intelligence-art">
+                    <span class="intelligence-orbit intelligence-orbit-a"></span>
+                    <span class="intelligence-orbit intelligence-orbit-b"></span>
+                    <span class="intelligence-orbit intelligence-orbit-c"></span>
+                    <span class="intelligence-node intelligence-node-a"></span>
+                    <span class="intelligence-node intelligence-node-b"></span>
+                    <span class="intelligence-node intelligence-node-c"></span>
+                    <span class="intelligence-node intelligence-node-d"></span>
+                    <span class="intelligence-core"></span>
+                  </div>
+                )}
+
+                {layer.visual === "integration" && (
+                  <div class="integration-art">
+                    <span class="integration-path integration-path-a"></span>
+                    <span class="integration-path integration-path-b"></span>
+                    <span class="integration-path integration-path-c"></span>
+                    <span class="integration-node integration-node-a"><i></i></span>
+                    <span class="integration-node integration-node-b"><i></i></span>
+                    <span class="integration-node integration-node-c"><i></i></span>
+                  </div>
+                )}
+
+                {layer.visual === "production" && (
+                  <div class="production-art">
+                    <div class="production-window">
+                      <div class="production-window-top">
+                        <span></span><span></span><span></span>
+                      </div>
+                      <div class="production-command">
+                        <i></i><span></span>
+                      </div>
+                      <div class="production-command production-command-second">
+                        <i></i><span></span>
+                      </div>
+                      <div class="production-success">
+                        <span></span>
+                        <i></i>
+                      </div>
+                      <div class="production-progress"><span></span></div>
+                    </div>
+                    <span class="production-orbit"></span>
+                  </div>
+                )}
+              </div>
+
+              <div class="engineering-card-content">
+                <h3>{layer.title}</h3>
+                <p class="engineering-card-subtitle">{layer.subtitle}</p>
+                <p class="engineering-card-description">{layer.description}</p>
+
+                <div class="engineering-focus">
+                  {layer.focus.map((item) => (
+                    <span>{item}</span>
+                  ))}
+                </div>
+              </div>
+
+              <span class="engineering-card-bottom" aria-hidden="true"></span>
+            </article>
+          ))}
+        </div>
+
+        <div class="engineering-empty" data-engineering-empty hidden>
+          No engineering principles are available.
+        </div>
+      </div>
+
+      <div class="engineering-controls">
+        <button
+          class="engineering-arrow"
+          type="button"
+          data-engineering-prev
+          aria-label="Previous engineering principle"
+        >
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M19 12H5M12 19l-7-7 7-7"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+
+        <span class="engineering-control-label">EXPLORE THE PROCESS</span>
+
+        <button
+          class="engineering-arrow"
+          type="button"
+          data-engineering-next
+          aria-label="Next engineering principle"
+        >
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M5 12h14M12 5l7 7-7 7"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <footer class="engineering-footer">
+      <span aria-hidden="true"></span>
+      <p>Clear decisions. Connected systems. Maintainable software.</p>
+    </footer>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>(".engineering-section").forEach((section) => {
+    if (section.dataset.engineeringInitialized === "true") return;
+    section.dataset.engineeringInitialized = "true";
+
+    const stage = section.querySelector<HTMLElement>("[data-engineering-stage]");
+    const ring = section.querySelector<HTMLElement>("[data-engineering-ring]");
+    const glow = section.querySelector<HTMLElement>("[data-engineering-glow]");
+    const empty = section.querySelector<HTMLElement>("[data-engineering-empty]");
+    const prevButton = section.querySelector<HTMLButtonElement>("[data-engineering-prev]");
+    const nextButton = section.querySelector<HTMLButtonElement>("[data-engineering-next]");
+
+    const cards = Array.from(
+      section.querySelectorAll<HTMLElement>("[data-engineering-card]"),
+    );
+
+    if (
+      !stage ||
+      !ring ||
+      !glow ||
+      !empty ||
+      !prevButton ||
+      !nextButton ||
+      cards.length === 0
+    ) {
+      return;
+    }
+
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    );
+
+    const finePointer = window.matchMedia(
+      "(hover: hover) and (pointer: fine)",
+    );
+
+    let activeIndex = 0;
+    let activeCards = [...cards];
+    let rotationTimer: number | null = null;
+    let isInView = false;
+    let pointerStartX: number | null = null;
+    let cursorFrame: number | null = null;
+    let cursorX = 0;
+    let cursorY = 0;
+
+    const ROTATION_INTERVAL = 4600;
+
+    const getOffset = (index: number, current: number, total: number): number => {
+      if (total <= 1) return 0;
+
+      let offset = (index - current + total) % total;
+      if (offset > total / 2) offset -= total;
+      return offset;
+    };
+
+    const stopRotation = () => {
+      if (rotationTimer !== null) {
+        window.clearTimeout(rotationTimer);
+        rotationTimer = null;
+      }
+    };
+
+    const positionCards = () => {
+      if (activeCards.length === 0 || stage.clientWidth === 0) return;
+
+      const isPhone = window.innerWidth <= 640;
+      const maxVisibleDistance = isPhone ? 1 : 2;
+
+      const step = Math.max(
+        isPhone ? 234 : 295,
+        Math.min(
+          isPhone ? 255 : 340,
+          stage.clientWidth * (isPhone ? 0.68 : 0.285),
+        ),
+      );
+
+      activeCards.forEach((card, index) => {
+        const offset = getOffset(index, activeIndex, activeCards.length);
+        const distance = Math.abs(offset);
+        const visible = distance <= maxVisibleDistance;
+
+        const scale =
+          distance === 0
+            ? 1
+            : Math.max(isPhone ? 0.83 : 0.79, 1 - distance * 0.085);
+
+        const rotation = offset * -5;
+        const depth = distance * (isPhone ? 26 : 38);
+
+        card.style.transform =
+          `translate(-50%, -50%) translateX(${offset * step}px) ` +
+          `translateZ(${-depth}px) rotateY(${rotation}deg) scale(${scale})`;
+
+        card.style.opacity = !visible
+          ? "0"
+          : distance === 0
+            ? "1"
+            : distance === 1
+              ? isPhone ? "0.42" : "0.58"
+              : "0.22";
+
+        // Keep the active card completely sharp. Neighbouring cards only
+        // receive a very light focus falloff, rather than a heavy blur.
+        card.style.filter =
+          distance === 0 || reducedMotion.matches
+            ? "none"
+            : `blur(${Math.min(0.7, distance * 0.28)}px)`;
+
+        card.style.visibility = visible ? "visible" : "hidden";
+        card.style.pointerEvents = visible ? "auto" : "none";
+        card.style.zIndex = String(20 - distance);
+        card.tabIndex = visible ? 0 : -1;
+
+        card.classList.toggle("is-active", distance === 0);
+        card.setAttribute("aria-hidden", String(!visible));
+        card.setAttribute("aria-current", distance === 0 ? "true" : "false");
+      });
+    };
+
+    const scheduleRotation = () => {
+      stopRotation();
+
+      if (
+        activeCards.length <= 1 ||
+        reducedMotion.matches ||
+        !isInView ||
+        document.visibilityState !== "visible"
+      ) {
+        return;
+      }
+
+      rotationTimer = window.setTimeout(() => {
+        moveTo(activeIndex + 1);
+      }, ROTATION_INTERVAL);
+    };
+
+    const moveTo = (index: number): void => {
+      if (activeCards.length === 0) return;
+
+      activeIndex =
+        ((index % activeCards.length) + activeCards.length) %
+        activeCards.length;
+
+      positionCards();
+      scheduleRotation();
+    };
+
+    const resetTilt = (card: HTMLElement): void => {
+      card.style.setProperty("--card-tilt-x", "0deg");
+      card.style.setProperty("--card-tilt-y", "0deg");
+    };
+
+    cards.forEach((card) => {
+      card.addEventListener("click", () => {
+        const index = activeCards.indexOf(card);
+        if (index !== -1) moveTo(index);
+      });
+
+      card.addEventListener("keydown", (event: KeyboardEvent) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          const index = activeCards.indexOf(card);
+          if (index !== -1) moveTo(index);
+        } else if (event.key === "ArrowRight") {
+          event.preventDefault();
+          moveTo(activeIndex + 1);
+        } else if (event.key === "ArrowLeft") {
+          event.preventDefault();
+          moveTo(activeIndex - 1);
+        }
+      });
+
+      card.addEventListener("pointermove", (event: PointerEvent) => {
+        if (
+          !finePointer.matches ||
+          reducedMotion.matches ||
+          event.pointerType !== "mouse"
+        ) {
+          return;
+        }
+
+        const bounds = card.getBoundingClientRect();
+        if (!bounds.width || !bounds.height) return;
+
+        const x = (event.clientX - bounds.left) / bounds.width;
+        const y = (event.clientY - bounds.top) / bounds.height;
+
+        card.style.setProperty(
+          "--card-tilt-x",
+          `${((0.5 - y) * 3).toFixed(2)}deg`,
+        );
+
+        card.style.setProperty(
+          "--card-tilt-y",
+          `${((x - 0.5) * 4).toFixed(2)}deg`,
+        );
+      });
+
+      card.addEventListener("pointerleave", () => resetTilt(card));
+      card.addEventListener("blur", () => resetTilt(card));
+    });
+
+    prevButton.addEventListener("click", () => {
+      moveTo(activeIndex - 1);
+    });
+
+    nextButton.addEventListener("click", () => {
+      moveTo(activeIndex + 1);
+    });
+
+    stage.addEventListener("pointerdown", (event: PointerEvent) => {
+      if (event.pointerType === "mouse") return;
+      pointerStartX = event.clientX;
+    });
+
+    stage.addEventListener("pointerup", (event: PointerEvent) => {
+      if (pointerStartX === null) return;
+
+      const delta = event.clientX - pointerStartX;
+      pointerStartX = null;
+
+      if (Math.abs(delta) > 45) {
+        moveTo(activeIndex + (delta < 0 ? 1 : -1));
+      }
+    });
+
+    stage.addEventListener("pointercancel", () => {
+      pointerStartX = null;
+    });
+
+    // The cursor glow follows slowly, so it feels like light, not a cursor trail.
+    section.addEventListener("pointermove", (event: PointerEvent) => {
+      if (
+        !finePointer.matches ||
+        reducedMotion.matches ||
+        event.pointerType !== "mouse"
+      ) {
+        return;
+      }
+
+      const bounds = section.getBoundingClientRect();
+      cursorX = event.clientX - bounds.left;
+      cursorY = event.clientY - bounds.top;
+
+      if (cursorFrame !== null) return;
+
+      cursorFrame = window.requestAnimationFrame(() => {
+        glow.style.left = `${cursorX}px`;
+        glow.style.top = `${cursorY}px`;
+        glow.classList.add("is-visible");
+        cursorFrame = null;
+      });
+    });
+
+    section.addEventListener("pointerleave", () => {
+      glow.classList.remove("is-visible");
+    });
+
+    window.addEventListener("resize", positionCards, { passive: true });
+    document.addEventListener("visibilitychange", scheduleRotation);
+
+    reducedMotion.addEventListener("change", () => {
+      if (reducedMotion.matches) {
+        glow.classList.remove("is-visible");
+        cards.forEach(resetTilt);
+      }
+
+      positionCards();
+      scheduleRotation();
+    });
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isInView = Boolean(entry?.isIntersecting);
+        scheduleRotation();
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(stage);
+
+    ring.hidden = false;
+    empty.hidden = true;
+    positionCards();
+  });
+</script>
+
+<style>
+  .engineering-section {
+    --engineering-bg: #0d090b;
+    --engineering-surface: #151012;
+    --engineering-text: #f5e7e8;
+    --engineering-muted: #b7a7aa;
+    --engineering-accent: #e44752;
+
+    position: relative;
+    isolation: isolate;
+    width: 100%;
+    padding: clamp(75px, 8.2vw, 115px) clamp(18px, 6vw, 88px);
+    overflow: clip;
+    color: var(--engineering-text);
+    background:
+      linear-gradient(180deg, #100a0c, #0b0809 64%);
+    scroll-margin-top: 95px;
+  }
+
+  .engineering-section *,
+  .engineering-section *::before,
+  .engineering-section *::after {
+    box-sizing: border-box;
+  }
+
+  .engineering-atmosphere {
+    position: absolute;
+    z-index: -3;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse at 50% 12%, rgba(228, 71, 82, 0.085), transparent 37%),
+      radial-gradient(ellipse at 4% 65%, rgba(101, 48, 65, 0.075), transparent 32%),
+      radial-gradient(ellipse at 96% 78%, rgba(83, 39, 51, 0.07), transparent 31%);
+  }
+
+  .engineering-cursor-glow {
+    position: absolute;
+    z-index: -1;
+    top: 35%;
+    left: 50%;
+    width: 420px;
+    height: 420px;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(
+      circle,
+      rgba(228, 71, 82, 0.105) 0%,
+      rgba(228, 71, 82, 0.045) 30%,
+      transparent 72%
+    );
+    filter: blur(20px);
+    transform: translate(-50%, -50%);
+    transition:
+      left 500ms cubic-bezier(0.2, 0.65, 0.2, 1),
+      top 500ms cubic-bezier(0.2, 0.65, 0.2, 1),
+      opacity 300ms ease;
+    will-change: left, top;
+  }
+
+  .engineering-cursor-glow.is-visible {
+    opacity: 1;
+  }
+
+  .engineering-container {
+    position: relative;
+    width: 100%;
+    max-width: 1220px;
+    margin-inline: auto;
+  }
+
+  .engineering-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 850px;
+    margin: 0 auto clamp(29px, 4.2vw, 46px);
+    text-align: center;
+  }
+
+  .engineering-heading-rule {
+    display: block;
+    width: 31px;
+    height: 3px;
+    margin-bottom: 18px;
+    background: var(--engineering-accent);
+    box-shadow: 0 0 16px rgba(228, 71, 82, 0.35);
+  }
+
+  .engineering-header h2 {
+    margin: 0;
+    color: var(--engineering-text);
+    font-size: clamp(2.45rem, 5.2vw, 4.4rem);
+    font-weight: 680;
+    letter-spacing: -0.055em;
+    line-height: 1.08;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+  }
+
+  .engineering-header h2 span {
+    display: block;
+    color: #e66a73;
+  }
+
+  .engineering-header > p {
+    max-width: 720px;
+    margin: 19px 0 0;
+    color: var(--engineering-muted);
+    font-size: 0.94rem;
+    line-height: 1.85;
+  }
+
+  .engineering-carousel {
+    position: relative;
+    width: 100%;
+    perspective: 1400px;
+  }
+
+  .engineering-stage {
+    position: relative;
+    min-height: 450px;
+    overflow: hidden;
+    perspective: 1300px;
+    perspective-origin: 50% 45%;
+    transform-style: preserve-3d;
+    touch-action: pan-y;
+  }
+
+  .engineering-ring {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+  }
+
+  .engineering-ring[hidden],
+  .engineering-empty[hidden] {
+    display: none !important;
+  }
+
+  .engineering-card {
+    --engineering-accent: #e44752;
+    --card-tilt-x: 0deg;
+    --card-tilt-y: 0deg;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    flex-direction: column;
+    width: min(345px, calc(100% - 32px));
+    min-height: 355px;
+    max-height: 390px;
+    padding: clamp(20px, 2.6vw, 27px);
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--engineering-accent) 34%, #302126);
+    border-radius: 15px;
+    background:
+      radial-gradient(
+        ellipse at 95% 0%,
+        color-mix(in srgb, var(--engineering-accent) 12%, transparent),
+        transparent 48%
+      ),
+      linear-gradient(150deg, #191114, #100c0e 77%);
+    transform-origin: center center;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    outline: none;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      transform 680ms cubic-bezier(0.2, 0.68, 0.2, 1),
+      opacity 530ms ease,
+      filter 530ms ease,
+      border-color 240ms ease,
+      box-shadow 260ms ease,
+      background-color 260ms ease;
+    will-change: transform, opacity, filter;
+  }
+
+  .engineering-card.is-active {
+    border-color: color-mix(in srgb, var(--engineering-accent) 78%, #fff 0%);
+    background:
+      radial-gradient(
+        ellipse at 100% 0%,
+        color-mix(in srgb, var(--engineering-accent) 16%, transparent),
+        transparent 49%
+      ),
+      linear-gradient(150deg, #1b1215, #100c0e 77%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.075),
+      0 22px 54px rgba(0, 0, 0, 0.34),
+      0 0 0 1px color-mix(in srgb, var(--engineering-accent) 13%, transparent),
+      0 0 30px color-mix(in srgb, var(--engineering-accent) 15%, transparent);
+  }
+
+  .engineering-card.is-active:hover,
+  .engineering-card.is-active:focus-visible {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.085),
+      0 25px 60px rgba(0, 0, 0, 0.37),
+      0 0 0 1px color-mix(in srgb, var(--engineering-accent) 17%, transparent),
+      0 0 36px color-mix(in srgb, var(--engineering-accent) 22%, transparent);
+  }
+
+  .engineering-card:focus-visible {
+    outline: 2px solid var(--engineering-accent);
+    outline-offset: 4px;
+  }
+
+  .engineering-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .engineering-category {
+    color: var(--engineering-accent);
+    font-size: 0.66rem;
+    font-weight: 750;
+    letter-spacing: 0.12em;
+    line-height: 1.6;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+  }
+
+  .engineering-card-status {
+    width: 7px;
+    height: 7px;
+    flex: 0 0 auto;
+    border: 1px solid var(--engineering-accent);
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--engineering-accent) 65%, transparent);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--engineering-accent) 32%, transparent);
+  }
+
+  .engineering-visual {
+    position: relative;
+    display: grid;
+    flex: 0 0 102px;
+    height: 102px;
+    place-items: center;
+    margin-top: 17px;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--engineering-accent) 19%, #302126);
+    border-radius: 9px;
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--engineering-accent) 5%, #151012), #100b0d);
+    transform: translateZ(10px);
+  }
+
+  .engineering-visual::before {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    background-size: 21px 21px;
+    content: "";
+    mask-image: radial-gradient(ellipse at center, #000 0%, transparent 80%);
+  }
+
+  /* Discovery visual */
+
+  .experience-art {
+    position: relative;
+    width: 86px;
+    height: 86px;
+  }
+
+  .experience-orbit {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    aspect-ratio: 1;
+    border: 1px solid color-mix(in srgb, var(--engineering-accent) 43%, transparent);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .experience-orbit-a { width: 30px; }
+  .experience-orbit-b { width: 55px; }
+  .experience-orbit-c { width: 80px; border-style: dashed; opacity: 0.65; }
+
+  .experience-core {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 12px;
+    height: 12px;
+    border: 2px solid #ffd0d4;
+    border-radius: 50%;
+    background: var(--engineering-accent);
+    box-shadow: 0 0 18px color-mix(in srgb, var(--engineering-accent) 65%, transparent);
+    transform: translate(-50%, -50%);
+    animation: engineering-core-pulse 3s ease-in-out infinite;
+  }
+
+  .experience-cross {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #f9b9c0;
+    box-shadow: 0 0 8px var(--engineering-accent);
+  }
+
+  .experience-cross-a { top: 8px; right: 19px; }
+  .experience-cross-b { bottom: 9px; left: 21px; }
+
+  /* Interface visual */
+
+  .interface-art {
+    width: min(176px, 78%);
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--engineering-accent) 42%, #302126);
+    border-radius: 6px;
+    background: #120f13;
+    box-shadow: 0 0 22px color-mix(in srgb, var(--engineering-accent) 8%, transparent);
+  }
+
+  .interface-window-top {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 17px;
+    padding-inline: 7px;
+    border-bottom: 1px solid #33262c;
+  }
+
+  .interface-window-top span {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--engineering-accent);
+    opacity: 0.8;
+  }
+
+  .interface-window-body {
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr);
+    gap: 9px;
+    min-height: 60px;
+    padding: 9px;
+  }
+
+  .interface-sidebar {
+    border: 1px solid #3b2730;
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--engineering-accent) 14%, #161015);
+  }
+
+  .interface-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .interface-line {
+    display: block;
+    height: 4px;
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--engineering-accent) 57%, #302126);
+  }
+
+  .line-wide { width: 86%; }
+  .line-short { width: 53%; opacity: 0.6; }
+  .line-medium { width: 72%; opacity: 0.55; }
+
+  .interface-blocks {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    margin-top: 2px;
+  }
+
+  .interface-blocks span {
+    height: 18px;
+    border: 1px solid #41323d;
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--engineering-accent) 10%, #151015);
+  }
+
+  /* Application flow visual */
+
+  .application-art {
+    position: relative;
+    width: 180px;
+    max-width: 85%;
+    height: 78px;
+  }
+
+  .app-connector {
+    position: absolute;
+    height: 1px;
+    background: color-mix(in srgb, var(--engineering-accent) 58%, #302126);
+    transform-origin: left center;
+  }
+
+  .app-connector-a { top: 39px; left: 33px; width: 58px; }
+  .app-connector-b { top: 39px; left: 91px; width: 57px; }
+  .app-connector-c { top: 39px; left: 63px; width: 30px; transform: rotate(90deg); opacity: 0.7; }
+
+  .app-node {
+    position: absolute;
+    display: grid;
+    width: 28px;
+    height: 28px;
+    place-items: center;
+    border: 1px solid var(--engineering-accent);
+    border-radius: 8px;
+    background: #19131b;
+    box-shadow: 0 0 14px color-mix(in srgb, var(--engineering-accent) 12%, transparent);
+  }
+
+  .app-node i {
+    display: block;
+    width: 7px;
+    height: 7px;
+    border-radius: 2px;
+    background: var(--engineering-accent);
+  }
+
+  .app-node-a { top: 25px; left: 7px; }
+  .app-node-b { top: 25px; left: 77px; }
+  .app-node-c { top: 25px; right: 7px; }
+  .app-node-d { top: 50px; left: 77px; transform: scale(0.73); opacity: 0.74; }
+
+  /* Data visual */
+
+  .data-art {
+    position: relative;
+    width: min(210px, 82%);
+    height: 77px;
+  }
+
+  .data-gridline {
+    position: absolute;
+    right: 0;
+    left: 0;
+    height: 1px;
+    background: color-mix(in srgb, var(--engineering-accent) 12%, transparent);
+  }
+
+  .data-gridline:nth-child(1) { top: 16%; }
+  .data-gridline:nth-child(2) { top: 49%; }
+  .data-gridline:nth-child(3) { top: 82%; }
+
+  .data-bars {
+    position: absolute;
+    right: 4px;
+    bottom: 2px;
+    left: 4px;
+    display: flex;
+    align-items: flex-end;
+    gap: 7px;
+    height: 73px;
+  }
+
+  .data-bars span {
+    display: block;
+    width: 100%;
+    height: var(--bar-height);
+    border: 1px solid color-mix(in srgb, var(--engineering-accent) 70%, #fff 0%);
+    border-radius: 3px 3px 0 0;
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--engineering-accent) 85%, white),
+      color-mix(in srgb, var(--engineering-accent) 22%, #100d0e)
+    );
+    transform-origin: bottom;
+    animation: engineering-bar-rise 3.6s ease-in-out infinite alternate;
+  }
+
+  .data-bars span:nth-child(even) { animation-delay: -1.1s; }
+  .data-bars span:nth-child(3n) { animation-delay: -2s; }
+
+  .data-base {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 1px;
+    background: color-mix(in srgb, var(--engineering-accent) 45%, #302126);
+  }
+
+  /* Intelligence visual */
+
+  .intelligence-art {
+    position: relative;
+    width: 86px;
+    height: 86px;
+    animation: engineering-orbit-spin 22s linear infinite;
+  }
+
+  .intelligence-orbit {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60px;
+    height: 27px;
+    border: 1px solid color-mix(in srgb, var(--engineering-accent) 43%, transparent);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .intelligence-orbit-a { transform: translate(-50%, -50%) rotate(0deg); }
+  .intelligence-orbit-b { transform: translate(-50%, -50%) rotate(60deg); }
+  .intelligence-orbit-c { transform: translate(-50%, -50%) rotate(-60deg); }
+
+  .intelligence-node,
+  .intelligence-core {
+    position: absolute;
+    display: block;
+    border-radius: 50%;
+    background: var(--engineering-accent);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--engineering-accent) 60%, transparent);
+  }
+
+  .intelligence-core {
+    top: 50%;
+    left: 50%;
+    width: 12px;
+    height: 12px;
+    border: 2px solid #eee4ff;
+    transform: translate(-50%, -50%);
+  }
+
+  .intelligence-node { width: 5px; height: 5px; }
+  .intelligence-node-a { top: 7px; left: 40px; }
+  .intelligence-node-b { top: 37px; right: 3px; }
+  .intelligence-node-c { bottom: 6px; left: 39px; }
+  .intelligence-node-d { top: 40px; left: 4px; }
+
+  /* Integration visual */
+
+  .integration-art {
+    position: relative;
+    width: 188px;
+    max-width: 85%;
+    height: 78px;
+  }
+
+  .integration-path {
+    position: absolute;
+    left: 28px;
+    width: 132px;
+    height: 1px;
+    background: color-mix(in srgb, var(--engineering-accent) 55%, #302126);
+    transform-origin: center;
+  }
+
+  .integration-path-a { top: 24px; transform: rotate(16deg); }
+  .integration-path-b { top: 39px; }
+  .integration-path-c { top: 54px; transform: rotate(-16deg); }
+
+  .integration-node {
+    position: absolute;
+    display: grid;
+    width: 29px;
+    height: 29px;
+    place-items: center;
+    border: 1px solid var(--engineering-accent);
+    border-radius: 8px;
+    background: #111716;
+    box-shadow: 0 0 15px color-mix(in srgb, var(--engineering-accent) 9%, transparent);
+  }
+
+  .integration-node i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--engineering-accent);
+  }
+
+  .integration-node-a { top: 25px; left: 8px; }
+  .integration-node-b { top: 25px; left: calc(50% - 14px); }
+  .integration-node-c { top: 25px; right: 8px; }
+
+  /* Production visual */
+
+  .production-art {
+    position: relative;
+    display: grid;
+    width: min(200px, 85%);
+    height: 86px;
+    place-items: center;
+  }
+
+  .production-window {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    padding: 0 10px 10px;
+    border: 1px solid color-mix(in srgb, var(--engineering-accent) 41%, #302126);
+    border-radius: 6px;
+    background: #120e10;
+    box-shadow: 0 0 23px color-mix(in srgb, var(--engineering-accent) 8%, transparent);
+  }
+
+  .production-window-top {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 17px;
+    margin-inline: -10px;
+    padding-inline: 8px;
+    border-bottom: 1px solid #34252a;
+  }
+
+  .production-window-top span {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--engineering-accent);
+  }
+
+  .production-command {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 9px;
+  }
+
+  .production-command i {
+    width: 4px;
+    height: 4px;
+    border-right: 1px solid var(--engineering-accent);
+    border-bottom: 1px solid var(--engineering-accent);
+    transform: rotate(-45deg);
+  }
+
+  .production-command span {
+    width: 58%;
+    height: 3px;
+    border-radius: 2px;
+    background: #59424a;
+  }
+
+  .production-command-second span { width: 36%; }
+
+  .production-success {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px;
+    color: #d8f6e8;
+  }
+
+  .production-success span {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #4fd1a1;
+    box-shadow: 0 0 8px rgba(79, 209, 161, 0.28);
+  }
+
+  .production-success i {
+    width: 42%;
+    height: 3px;
+    border-radius: 2px;
+    background: #3e8068;
+  }
+
+  .production-progress {
+    height: 2px;
+    margin-top: 10px;
+    overflow: hidden;
+    background: #3a2a30;
+  }
+
+  .production-progress span {
+    display: block;
+    width: 65%;
+    height: 100%;
+    background: var(--engineering-accent);
+    transform-origin: left;
+    animation: engineering-progress 3.5s ease-in-out infinite alternate;
+  }
+
+  .engineering-card-content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    margin-top: 20px;
+    transform: translateZ(12px);
+  }
+
+  .engineering-card-content h3 {
+    margin: 0;
+    color: var(--engineering-text);
+    font-size: clamp(1.3rem, 1.8vw, 1.55rem);
+    font-weight: 680;
+    letter-spacing: -0.04em;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+
+  .engineering-card-subtitle {
+    margin: 9px 0 0;
+    color: var(--engineering-accent);
+    font-size: 0.84rem;
+    font-weight: 650;
+    line-height: 1.6;
+  }
+
+  .engineering-card-description {
+    display: -webkit-box;
+    margin: 10px 0 0;
+    overflow: hidden;
+    color: #c6b8bc;
+    font-size: 0.79rem;
+    line-height: 1.75;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+  }
+
+  .engineering-focus {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: auto;
+    padding-top: 14px;
+  }
+
+  .engineering-focus span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 25px;
+    padding: 5px 8px;
+    border: 1px solid color-mix(in srgb, var(--engineering-accent) 24%, #302126);
+    border-radius: 4px;
+    color: #d1c1c5;
+    background: color-mix(in srgb, var(--engineering-accent) 5%, #130e10);
+    font-size: 0.64rem;
+    line-height: 1.35;
+  }
+
+  .engineering-card-bottom {
+    position: absolute;
+    right: 22px;
+    bottom: 0;
+    left: 22px;
+    height: 1px;
+    pointer-events: none;
+    background: linear-gradient(90deg, var(--engineering-accent), transparent);
+    opacity: 0.65;
+  }
+
+  .engineering-empty {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: var(--engineering-muted);
+    font-size: 0.85rem;
+  }
+
+  .engineering-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 2px;
+  }
+
+  .engineering-arrow {
+    display: grid;
+    width: 43px;
+    height: 43px;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 1px solid #4b3037;
+    border-radius: 7px;
+    color: #f5e7e8;
+    background: linear-gradient(180deg, #1a1114, #120d0f);
+    cursor: pointer;
+    transition:
+      border-color 180ms ease,
+      color 180ms ease,
+      background 180ms ease,
+      transform 180ms ease;
+  }
+
+  .engineering-arrow svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  .engineering-arrow:hover {
+    border-color: var(--engineering-accent);
+    color: #fff;
+    background: #251317;
+    transform: translateY(-2px);
+  }
+
+  .engineering-arrow:focus-visible {
+    outline: 2px solid #ff9299;
+    outline-offset: 4px;
+  }
+
+  .engineering-control-label {
+    color: #a9969b;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+  }
+
+  .engineering-footer {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 30px;
+    text-align: center;
+  }
+
+  .engineering-footer > span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    flex: 0 0 auto;
+    margin-top: 9px;
+    background: var(--engineering-accent);
+  }
+
+  .engineering-footer p {
+    margin: 0;
+    color: #a9989c;
+    font-size: 0.79rem;
+    line-height: 1.8;
+  }
+
+  @keyframes engineering-core-pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(0.92); }
+    50% { transform: translate(-50%, -50%) scale(1.12); }
+  }
+
+  @keyframes engineering-bar-rise {
+    from { transform: scaleY(0.82); filter: brightness(0.85); }
+    to { transform: scaleY(1); filter: brightness(1.1); }
+  }
+
+  @keyframes engineering-orbit-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes engineering-progress {
+    from { transform: scaleX(0.58); }
+    to { transform: scaleX(1); }
+  }
+
+  @media (max-width: 800px) {
+    .engineering-section {
+      padding: 73px 20px;
+    }
+
+    .engineering-header h2 {
+      font-size: clamp(2.35rem, 7.6vw, 3.5rem);
+    }
+
+    .engineering-header > p {
+      font-size: 0.88rem;
+    }
+
+    .engineering-stage {
+      min-height: 440px;
+      perspective: 950px;
+    }
+
+    .engineering-card {
+      width: min(330px, calc(100% - 30px));
+      min-height: 355px;
+      max-height: 390px;
+      padding: 21px;
+    }
+
+    .engineering-visual {
+      flex-basis: 96px;
+      height: 96px;
+    }
+
+    .engineering-card-content {
+      margin-top: 18px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .engineering-section {
+      padding: 65px 14px;
+      scroll-margin-top: 82px;
+    }
+
+    .engineering-heading-rule {
+      margin-bottom: 16px;
+    }
+
+    .engineering-header {
+      margin-bottom: 27px;
+    }
+
+    .engineering-header h2 {
+      font-size: clamp(2.15rem, 8.7vw, 2.85rem);
+      line-height: 1.12;
+    }
+
+    .engineering-header > p {
+      margin-top: 15px;
+      font-size: 0.84rem;
+      line-height: 1.8;
+    }
+
+    .engineering-stage {
+      min-height: 452px;
+      perspective: 780px;
+    }
+
+    .engineering-card {
+      width: min(310px, calc(100% - 20px));
+      min-height: 370px;
+      max-height: 410px;
+      padding: 19px;
+      border-radius: 13px;
+    }
+
+    .engineering-visual {
+      flex-basis: 91px;
+      height: 91px;
+      margin-top: 14px;
+    }
+
+    .engineering-card-content {
+      margin-top: 16px;
+    }
+
+    .engineering-card-content h3 {
+      font-size: 1.32rem;
+    }
+
+    .engineering-card-description {
+      font-size: 0.77rem;
+      line-height: 1.7;
+      -webkit-line-clamp: 4;
+      line-clamp: 4;
+    }
+
+    .engineering-focus {
+      gap: 5px;
+      padding-top: 12px;
+    }
+
+    .engineering-focus span {
+      min-height: 24px;
+      padding: 4px 7px;
+      font-size: 0.61rem;
+    }
+
+    .engineering-controls {
+      gap: 12px;
+    }
+
+    .engineering-arrow {
+      width: 40px;
+      height: 40px;
+    }
+
+    .engineering-control-label {
+      font-size: 0.59rem;
+      letter-spacing: 0.09em;
+    }
+
+    .engineering-footer {
+      margin-top: 23px;
+    }
+
+    .engineering-footer p {
+      font-size: 0.75rem;
+    }
+  }
+
+  @media (max-width: 350px) {
+    .engineering-section {
+      padding-inline: 11px;
+    }
+
+    .engineering-stage {
+      min-height: 466px;
+    }
+
+    .engineering-card {
+      width: calc(100% - 16px);
+      min-height: 380px;
+      padding: 17px;
+    }
+
+    .engineering-card-description {
+      font-size: 0.74rem;
+    }
+
+    .engineering-focus span {
+      font-size: 0.59rem;
+    }
+  }
+
+  @media (hover: none) {
+    .engineering-card,
+    .engineering-card.is-active {
+      transform-style: flat;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .engineering-section *,
+    .engineering-section *::before,
+    .engineering-section *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      transition-delay: 0ms !important;
+    }
+
+    .engineering-cursor-glow {
+      display: none;
+    }
+  }
+</style>

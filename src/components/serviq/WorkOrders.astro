@@ -1,0 +1,982 @@
+---
+---
+
+<section class="view serviq-work-orders" data-panel="work-orders">
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">OPERATIONS / WORK ORDERS</span>
+      <h1>
+        Work <em>orders.</em>
+      </h1>
+      <p>One operational record from request to payment.</p>
+    </div>
+
+    <div class="heading-actions">
+      <button
+        class="secondary-action"
+        id="serviq-export-work-orders"
+        type="button"
+      >
+        <span>↓</span>
+        Export CSV
+      </button>
+      <button class="primary-action" id="new-work-order-2" type="button">
+        <span>+</span>
+        New Work Order
+      </button>
+    </div>
+  </div>
+
+  <div
+    class="serviq-wo-feedback"
+    id="serviq-wo-feedback"
+    role="status"
+    aria-live="polite"
+    hidden
+  ></div>
+
+  <section
+    class="serviq-wo-summary"
+    id="serviq-wo-summary"
+    aria-label="Work order summary"
+  ></section>
+
+  <section class="serviq-wo-toolbar" aria-label="Work order filters">
+    <label class="serviq-wo-search">
+      <span aria-hidden="true">⌕</span>
+      <input
+        type="search"
+        id="serviq-wo-search"
+        placeholder="Search ID, customer, service or technician..."
+        autocomplete="off"
+        aria-label="Search work orders"
+      />
+    </label>
+
+    <label class="serviq-wo-filter">
+      <span>Work status</span>
+      <select id="serviq-wo-status">
+        <option value="all">All work orders</option>
+        <option value="active">Active</option>
+        <option value="New">New</option>
+        <option value="Assigned">Assigned</option>
+        <option value="En Route">En Route</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Waiting for Parts">Waiting for Parts</option>
+        <option value="completed">Completed / Closed</option>
+      </select>
+    </label>
+
+    <label class="serviq-wo-filter">
+      <span>Priority</span>
+      <select id="serviq-wo-priority">
+        <option value="all">All priorities</option>
+        <option value="Urgent">Urgent</option>
+        <option value="High">High</option>
+        <option value="Medium">Medium</option>
+        <option value="Low">Low</option>
+      </select>
+    </label>
+
+    <label class="serviq-wo-filter">
+      <span>Sort by</span>
+      <select id="serviq-wo-sort">
+        <option value="newest">Newest first</option>
+        <option value="amount-desc">Highest amount</option>
+        <option value="amount-asc">Lowest amount</option>
+        <option value="priority">Priority</option>
+        <option value="customer">Customer name</option>
+      </select>
+    </label>
+  </section>
+
+  <div class="serviq-wo-results-heading">
+    <div>
+      <span class="panel-label">WORK ORDER REGISTER</span>
+      <h2>All service records</h2>
+    </div>
+    <span class="serviq-wo-result-count" id="serviq-wo-result-count">
+      Loading...
+    </span>
+  </div>
+
+  <section
+    class="serviq-wo-list"
+    id="serviq-wo-list"
+    aria-label="Work order list"
+  >
+    <div class="serviq-wo-table-head" aria-hidden="true">
+      <span>WORK ORDER</span>
+      <span>CUSTOMER / SERVICE</span>
+      <span>TECHNICIAN</span>
+      <span>PRIORITY</span>
+      <span>STATUS</span>
+      <span>AMOUNT</span>
+      <span>ACTIONS</span>
+    </div>
+    <div id="serviq-wo-rows" class="serviq-wo-rows" aria-live="polite"></div>
+  </section>
+
+  <div class="serviq-wo-empty" id="serviq-wo-empty" hidden>
+    <span aria-hidden="true">▤</span>
+    <h3>No work orders found</h3>
+    <p>Try a different search or adjust your filters.</p>
+    <button class="secondary-action" id="serviq-wo-reset" type="button">
+      Clear filters
+    </button>
+  </div>
+</section>
+
+<script>
+  import { getState, subscribe, updateWorkOrder } from "../../lib/serviq/store";
+
+  import type { WorkOrder } from "../../data/serviq/workOrders";
+
+  const summary = document.querySelector<HTMLElement>("#serviq-wo-summary");
+  const searchInput =
+    document.querySelector<HTMLInputElement>("#serviq-wo-search");
+  const statusFilter =
+    document.querySelector<HTMLSelectElement>("#serviq-wo-status");
+  const priorityFilter = document.querySelector<HTMLSelectElement>(
+    "#serviq-wo-priority",
+  );
+  const sortSelect =
+    document.querySelector<HTMLSelectElement>("#serviq-wo-sort");
+  const resultCount = document.querySelector<HTMLElement>(
+    "#serviq-wo-result-count",
+  );
+  const list = document.querySelector<HTMLElement>("#serviq-wo-list");
+  const rows = document.querySelector<HTMLElement>("#serviq-wo-rows");
+  const emptyState = document.querySelector<HTMLElement>("#serviq-wo-empty");
+  const feedback = document.querySelector<HTMLElement>("#serviq-wo-feedback");
+
+  if (
+    summary &&
+    searchInput &&
+    statusFilter &&
+    priorityFilter &&
+    sortSelect &&
+    resultCount &&
+    list &&
+    rows &&
+    emptyState &&
+    feedback
+  ) {
+    const priorities = ["Urgent", "High", "Medium", "Low"];
+    let feedbackTimeout: ReturnType<typeof setTimeout> | undefined;
+
+    const escapeHtml = (value: unknown): string =>
+      String(value ?? "").replace(/[&<>"']/g, (character) => {
+        const entities: Record<string, string> = {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        };
+        return entities[character] ?? character;
+      });
+
+    const currency = (amount: number): string =>
+      new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 0,
+      }).format(amount);
+
+    const isClosed = (status: string): boolean =>
+      [
+        "completed",
+        "complete",
+        "closed",
+        "cancelled",
+        "canceled",
+        "invoiced",
+        "paid",
+      ].includes(status.trim().toLowerCase());
+
+    const statusClass = (status: string): string =>
+      status.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
+    const priorityClass = (priority: string): string =>
+      priority.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
+    const showFeedback = (
+      message: string,
+      kind: "success" | "error" = "success",
+    ): void => {
+      if (feedbackTimeout) clearTimeout(feedbackTimeout);
+
+      feedback.textContent = message;
+      feedback.className = `serviq-wo-feedback ${kind}`;
+      feedback.hidden = false;
+
+      feedbackTimeout = setTimeout(() => {
+        feedback.hidden = true;
+      }, 3500);
+    };
+
+    const renderSummary = (orders: WorkOrder[]): void => {
+      const open = orders.filter((order) => !isClosed(order.status));
+      const unassigned = open.filter(
+        (order) => !order.technicianId || order.technicianId === "unassigned",
+      );
+      const urgent = open.filter(
+        (order) =>
+          order.priority.toLowerCase() === "urgent" ||
+          order.priority.toLowerCase() === "high",
+      );
+      const totalValue = open.reduce((sum, order) => sum + order.amount, 0);
+
+      const metrics = [
+        {
+          label: "OPEN WORK ORDERS",
+          value: open.length,
+          detail: `${orders.length} total records`,
+          tone: "gold",
+          icon: "▤",
+        },
+        {
+          label: "HIGH PRIORITY",
+          value: urgent.length,
+          detail: "Urgent and high priority",
+          tone: "red",
+          icon: "!",
+        },
+        {
+          label: "UNASSIGNED",
+          value: unassigned.length,
+          detail: "Awaiting technician assignment",
+          tone: "amber",
+          icon: "◎",
+        },
+        {
+          label: "OPEN JOB VALUE",
+          value: currency(totalValue),
+          detail: "Estimated value of open jobs",
+          tone: "green",
+          icon: "₹",
+        },
+      ];
+
+      summary.innerHTML = metrics
+        .map(
+          (metric) => `
+        <article class="serviq-wo-metric ${metric.tone}">
+          <div class="serviq-wo-metric-top">
+            <span>${escapeHtml(metric.label)}</span>
+            <span class="serviq-wo-metric-icon" aria-hidden="true">${metric.icon}</span>
+          </div>
+          <strong>${escapeHtml(metric.value)}</strong>
+          <small>${escapeHtml(metric.detail)}</small>
+        </article>
+      `,
+        )
+        .join("");
+    };
+
+    const render = (): void => {
+      const allOrders = getState().workOrders;
+      const query = searchInput.value.trim().toLowerCase();
+      const status = statusFilter.value;
+      const priority = priorityFilter.value;
+      const sort = sortSelect.value;
+
+      renderSummary(allOrders);
+
+      const filtered = allOrders.filter((order) => {
+        const searchable = [
+          order.id,
+          order.customer,
+          order.service,
+          order.category,
+          order.location,
+          order.technician,
+          order.status,
+          order.priority,
+        ]
+          .join(" ")
+          .toLowerCase();
+
+        const matchesSearch = searchable.includes(query);
+        const matchesPriority =
+          priority === "all" || order.priority === priority;
+        const closed = isClosed(order.status);
+
+        let matchesStatus = true;
+
+        if (status === "active") matchesStatus = !closed;
+        else if (status === "completed") matchesStatus = closed;
+        else if (status !== "all") matchesStatus = order.status === status;
+
+        return matchesSearch && matchesPriority && matchesStatus;
+      });
+
+      const priorityWeight = (value: string): number => {
+        const index = priorities.indexOf(value);
+        return index < 0 ? priorities.length : index;
+      };
+
+      filtered.sort((first, second) => {
+        if (sort === "amount-desc") return second.amount - first.amount;
+        if (sort === "amount-asc") return first.amount - second.amount;
+        if (sort === "priority")
+          return (
+            priorityWeight(first.priority) - priorityWeight(second.priority)
+          );
+        if (sort === "customer")
+          return first.customer.localeCompare(second.customer);
+        return second.id.localeCompare(first.id, undefined, { numeric: true });
+      });
+
+      resultCount.textContent = `${filtered.length} of ${allOrders.length} work order${allOrders.length === 1 ? "" : "s"}`;
+
+      list.hidden = filtered.length === 0;
+      emptyState.hidden = filtered.length > 0;
+
+      rows.innerHTML = filtered
+        .map((order) => {
+          const statusOptions = [
+            ...new Set([
+              "New",
+              "Assigned",
+              "Accepted",
+              "En Route",
+              "Arrived",
+              "Diagnosing",
+              "In Progress",
+              "Waiting for Parts",
+              "Completed",
+              "Invoiced",
+              "Paid",
+              "Cancelled",
+              order.status,
+            ]),
+          ];
+
+          return `
+          <article class="serviq-wo-row">
+            <div class="serviq-wo-primary">
+              <button type="button" class="work-order-trigger serviq-wo-id" data-work-order="${escapeHtml(order.id)}">
+                ${escapeHtml(order.id)}
+              </button>
+              <small>${escapeHtml(order.scheduled || "Schedule not set")}</small>
+            </div>
+
+            <div class="serviq-wo-customer">
+              <strong>${escapeHtml(order.customer)}</strong>
+              <small>${escapeHtml(order.service)} · ${escapeHtml(order.location)}</small>
+            </div>
+
+            <div class="serviq-wo-technician">
+              <strong>${escapeHtml(order.technician || "Unassigned")}</strong>
+              <small>${escapeHtml(order.category)}</small>
+            </div>
+
+            <span class="serviq-wo-priority ${priorityClass(order.priority)}">
+              <i></i>${escapeHtml(order.priority)}
+            </span>
+
+            <label class="serviq-wo-status-control">
+              <span class="serviq-wo-status ${statusClass(order.status)}">
+                <i></i>${escapeHtml(order.status)}
+              </span>
+              <select data-action="status" data-work-order-id="${escapeHtml(order.id)}" aria-label="Change status for ${escapeHtml(order.id)}">
+                ${statusOptions
+                  .map(
+                    (option) => `
+                  <option value="${escapeHtml(option)}" ${option === order.status ? "selected" : ""}>${escapeHtml(option)}</option>
+                `,
+                  )
+                  .join("")}
+              </select>
+            </label>
+
+            <strong class="serviq-wo-amount">${escapeHtml(currency(order.amount))}</strong>
+
+            <div class="serviq-wo-actions">
+              <button type="button" class="serviq-wo-edit" data-edit-work-order="${escapeHtml(order.id)}">Edit</button>
+              <button type="button" class="work-order-trigger serviq-wo-view" data-work-order="${escapeHtml(order.id)}">Details</button>
+            </div>
+          </article>
+        `;
+        })
+        .join("");
+    };
+
+    document
+      .querySelector<HTMLButtonElement>("#serviq-wo-reset")
+      ?.addEventListener("click", () => {
+        searchInput.value = "";
+        statusFilter.value = "all";
+        priorityFilter.value = "all";
+        sortSelect.value = "newest";
+        render();
+      });
+
+    searchInput.addEventListener("input", render);
+    statusFilter.addEventListener("change", render);
+    priorityFilter.addEventListener("change", render);
+    sortSelect.addEventListener("change", render);
+
+    rows.addEventListener("change", (event) => {
+      const target = event.target;
+
+      if (
+        !(target instanceof HTMLSelectElement) ||
+        target.dataset.action !== "status"
+      )
+        return;
+
+      const id = target.dataset.workOrderId;
+      if (!id) return;
+
+      try {
+        const updated = updateWorkOrder(id, { status: target.value });
+
+        if (updated) {
+          showFeedback(`${updated.id} moved to ${updated.status}.`);
+        } else {
+          showFeedback("Work order could not be found.", "error");
+        }
+      } catch (error) {
+        showFeedback(
+          error instanceof Error
+            ? error.message
+            : "Unable to update work order.",
+          "error",
+        );
+        render();
+      }
+    });
+
+    document
+      .querySelector<HTMLButtonElement>("#serviq-export-work-orders")
+      ?.addEventListener("click", () => {
+        const orders = getState().workOrders;
+        const headers = [
+          "ID",
+          "Customer",
+          "Service",
+          "Category",
+          "Location",
+          "Technician",
+          "Status",
+          "Priority",
+          "Scheduled",
+          "Amount",
+          "Issue",
+        ];
+
+        const quote = (value: unknown): string =>
+          `"${String(value ?? "").replace(/"/g, '""')}"`;
+
+        const csv = [
+          headers,
+          ...orders.map((order) => [
+            order.id,
+            order.customer,
+            order.service,
+            order.category,
+            order.location,
+            order.technician,
+            order.status,
+            order.priority,
+            order.scheduled,
+            order.amount,
+            order.issue,
+          ]),
+        ]
+          .map((row) => row.map(quote).join(","))
+          .join("\r\n");
+
+        const url = URL.createObjectURL(
+          new Blob([csv], { type: "text/csv;charset=utf-8;" }),
+        );
+        const anchor = document.createElement("a");
+
+        anchor.href = url;
+        anchor.download = `serviq-work-orders-${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.append(anchor);
+        anchor.click();
+        anchor.remove();
+        URL.revokeObjectURL(url);
+
+        showFeedback("Work order CSV export prepared.");
+      });
+
+    subscribe(render);
+    render();
+  }
+</script>
+
+<style is:global>
+  .serviq-wo-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 15px;
+    margin: 28px 0 24px;
+  }
+
+  .serviq-wo-metric {
+    min-width: 0;
+    padding: 20px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.09));
+    border-radius: 17px;
+    background: var(--panel, #101814);
+  }
+
+  .serviq-wo-metric-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    color: var(--muted, #97a59c);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .serviq-wo-metric-icon {
+    display: grid;
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    place-items: center;
+    border: 1px solid currentColor;
+    border-radius: 10px;
+  }
+
+  .serviq-wo-metric.gold .serviq-wo-metric-icon {
+    color: var(--gold, #d6b568);
+  }
+  .serviq-wo-metric.red .serviq-wo-metric-icon {
+    color: #f09a9a;
+  }
+  .serviq-wo-metric.amber .serviq-wo-metric-icon {
+    color: #e6c078;
+  }
+  .serviq-wo-metric.green .serviq-wo-metric-icon {
+    color: #79d9a3;
+  }
+
+  .serviq-wo-metric > strong {
+    display: block;
+    margin: 13px 0 6px;
+    color: var(--text, #edf3ed);
+    font-size: clamp(25px, 2vw, 33px);
+    font-weight: 680;
+    letter-spacing: -0.04em;
+    overflow-wrap: anywhere;
+  }
+
+  .serviq-wo-metric > small {
+    color: var(--muted, #97a59c);
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  .serviq-wo-toolbar {
+    display: flex;
+    align-items: end;
+    gap: 12px;
+    margin-bottom: 30px;
+    padding: 16px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.09));
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.018);
+  }
+
+  .serviq-wo-search {
+    display: flex;
+    min-width: 170px;
+    min-height: 44px;
+    flex: 1;
+    align-items: center;
+    gap: 10px;
+    padding: 0 12px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+    border-radius: 10px;
+    background: var(--panel, #101814);
+    color: var(--muted, #97a59c);
+  }
+
+  .serviq-wo-search > span {
+    font-size: 21px;
+  }
+
+  .serviq-wo-search input {
+    width: 100%;
+    min-width: 0;
+    padding: 10px 0;
+    border: 0;
+    outline: none;
+    color: var(--text, #edf3ed);
+    background: transparent;
+    font: inherit;
+    font-size: 12px;
+  }
+
+  .serviq-wo-filter {
+    display: grid;
+    min-width: 130px;
+    gap: 7px;
+  }
+
+  .serviq-wo-filter > span {
+    color: var(--muted, #97a59c);
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: 0.045em;
+    text-transform: uppercase;
+  }
+
+  .serviq-wo-filter select {
+    width: 100%;
+    min-height: 44px;
+    padding: 0 26px 0 10px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+    border-radius: 10px;
+    color: var(--text, #edf3ed);
+    background: var(--panel, #101814);
+    font: inherit;
+    font-size: 11px;
+  }
+
+  .serviq-wo-results-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .serviq-wo-results-heading h2 {
+    margin: 7px 0 0;
+    color: var(--text, #edf3ed);
+    font-size: 21px;
+    font-weight: 620;
+  }
+
+  .serviq-wo-result-count {
+    color: var(--muted, #97a59c);
+    font-size: 11px;
+  }
+
+  .serviq-wo-list {
+    overflow: hidden;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.09));
+    border-radius: 16px;
+    background: var(--panel, #101814);
+  }
+
+  .serviq-wo-table-head,
+  .serviq-wo-row {
+    display: grid;
+    grid-template-columns:
+      minmax(105px, 0.8fr)
+      minmax(170px, 1.4fr)
+      minmax(120px, 1fr)
+      minmax(85px, 0.6fr)
+      minmax(120px, 0.85fr)
+      minmax(90px, 0.65fr)
+      minmax(105px, 0.8fr);
+    align-items: center;
+    gap: 14px;
+  }
+
+  .serviq-wo-table-head {
+    padding: 15px 18px;
+    border-bottom: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+    color: var(--muted, #97a59c);
+    font-size: 9px;
+    font-weight: 750;
+    letter-spacing: 0.05em;
+  }
+
+  .serviq-wo-row {
+    padding: 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+    transition: background 150ms ease;
+  }
+
+  .serviq-wo-row:last-child {
+    border-bottom: 0;
+  }
+  .serviq-wo-row:hover {
+    background: rgba(255, 255, 255, 0.018);
+  }
+
+  .serviq-wo-primary,
+  .serviq-wo-customer,
+  .serviq-wo-technician {
+    display: grid;
+    min-width: 0;
+    gap: 6px;
+  }
+
+  .serviq-wo-id {
+    width: fit-content;
+    padding: 0;
+    border: 0;
+    color: var(--gold, #d6b568);
+    background: transparent;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 750;
+    cursor: pointer;
+  }
+
+  .serviq-wo-primary small,
+  .serviq-wo-customer small,
+  .serviq-wo-technician small {
+    color: var(--muted, #97a59c);
+    font-size: 10px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  .serviq-wo-customer strong,
+  .serviq-wo-technician strong {
+    color: var(--text, #edf3ed);
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  .serviq-wo-priority {
+    display: inline-flex;
+    width: fit-content;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted, #97a59c);
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .serviq-wo-priority i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .serviq-wo-priority.urgent,
+  .serviq-wo-priority.high {
+    color: #ef9595;
+  }
+  .serviq-wo-priority.medium {
+    color: #e6c078;
+  }
+  .serviq-wo-priority.low {
+    color: #79d9a3;
+  }
+
+  .serviq-wo-status-control {
+    display: grid;
+    min-width: 0;
+    gap: 7px;
+  }
+
+  .serviq-wo-status {
+    display: inline-flex;
+    width: fit-content;
+    max-width: 100%;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+    border-radius: 8px;
+    color: var(--muted, #97a59c);
+    font-size: 10px;
+    line-height: 1.4;
+  }
+
+  .serviq-wo-status i {
+    width: 6px;
+    height: 6px;
+    flex: 0 0 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .serviq-wo-status.completed,
+  .serviq-wo-status.paid,
+  .serviq-wo-status.invoiced {
+    color: #79d9a3;
+  }
+
+  .serviq-wo-status.waiting-for-parts,
+  .serviq-wo-status.new {
+    color: #e6c078;
+  }
+
+  .serviq-wo-status.cancelled {
+    color: #ef9595;
+  }
+
+  .serviq-wo-status-control select {
+    width: 100%;
+    min-width: 0;
+    min-height: 31px;
+    padding: 4px 6px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.09));
+    border-radius: 7px;
+    color: var(--muted, #97a59c);
+    background: var(--panel, #101814);
+    font: inherit;
+    font-size: 10px;
+  }
+
+  .serviq-wo-amount {
+    color: var(--text, #edf3ed);
+    font-size: 12px;
+    font-weight: 680;
+    overflow-wrap: anywhere;
+  }
+
+  .serviq-wo-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .serviq-wo-edit,
+  .serviq-wo-view {
+    min-height: 31px;
+    padding: 0 8px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+    border-radius: 8px;
+    color: var(--text, #edf3ed);
+    background: rgba(255, 255, 255, 0.025);
+    font: inherit;
+    font-size: 10px;
+    cursor: pointer;
+  }
+
+  .serviq-wo-edit:hover,
+  .serviq-wo-view:hover {
+    border-color: rgba(214, 181, 104, 0.4);
+  }
+
+  .serviq-wo-feedback {
+    margin: 18px 0 0;
+    padding: 12px 15px;
+    border: 1px solid rgba(121, 217, 163, 0.25);
+    border-radius: 11px;
+    color: #a1e8bb;
+    background: rgba(121, 217, 163, 0.055);
+    font-size: 12px;
+    line-height: 1.55;
+  }
+
+  .serviq-wo-feedback.error {
+    border-color: rgba(237, 117, 117, 0.3);
+    color: #f0a5a5;
+    background: rgba(237, 117, 117, 0.06);
+  }
+
+  .serviq-wo-feedback[hidden],
+  .serviq-wo-list[hidden],
+  .serviq-wo-empty[hidden] {
+    display: none !important;
+  }
+
+  .serviq-wo-empty {
+    padding: 50px 20px;
+    border: 1px dashed var(--line, rgba(255, 255, 255, 0.12));
+    border-radius: 17px;
+    text-align: center;
+  }
+
+  .serviq-wo-empty > span {
+    color: var(--gold, #d6b568);
+    font-size: 26px;
+  }
+
+  .serviq-wo-empty h3 {
+    margin: 13px 0 7px;
+    color: var(--text, #edf3ed);
+    font-size: 18px;
+  }
+
+  .serviq-wo-empty p {
+    margin: 0 0 16px;
+    color: var(--muted, #97a59c);
+    font-size: 12px;
+  }
+
+  @media (max-width: 1250px) {
+    .serviq-wo-table-head {
+      display: none;
+    }
+
+    .serviq-wo-row {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .serviq-wo-actions {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 1050px) {
+    .serviq-wo-summary {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .serviq-wo-toolbar {
+      flex-wrap: wrap;
+    }
+    .serviq-wo-search {
+      flex-basis: 100%;
+    }
+    .serviq-wo-filter {
+      flex: 1;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .serviq-wo-toolbar {
+      align-items: stretch;
+      padding: 12px;
+      gap: 10px;
+    }
+    .serviq-wo-filter {
+      min-width: calc(50% - 6px);
+    }
+    .serviq-wo-filter select {
+      font-size: 10px;
+      padding-left: 8px;
+    }
+    .serviq-wo-row {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      padding: 15px;
+      gap: 14px 10px;
+    }
+    .serviq-wo-customer {
+      grid-column: 1 / -1;
+    }
+    .serviq-wo-actions {
+      grid-column: 1 / -1;
+    }
+    .serviq-wo-results-heading {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .serviq-wo-metric {
+      padding: 14px;
+    }
+    .serviq-wo-metric > strong {
+      font-size: 24px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .serviq-wo-row {
+      transition: none;
+    }
+  }
+</style>

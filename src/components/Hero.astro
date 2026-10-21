@@ -1,0 +1,1662 @@
+
+---
+const carouselCards = [
+  {
+    title: "Frontend Engineering",
+    category: "Interface development",
+    description:
+      "Responsive interfaces, accessible interactions, and component systems designed around real users.",
+    accent: "#F05B82",
+    visual: "interface",
+  },
+  {
+    title: "Backend Systems",
+    category: "Application engineering",
+    description:
+      "Reliable APIs, server-side logic, validation, and data flows built for maintainability.",
+    accent: "#E44752",
+    visual: "backend",
+  },
+  {
+    title: "Product Thinking",
+    category: "Design and delivery",
+    description:
+      "Practical decisions that connect user needs, product goals, and dependable implementation.",
+    accent: "#E8C0CB",
+    visual: "product",
+  },
+];
+---
+
+<section id="home" class="hero-section" aria-labelledby="hero-heading">
+  <div class="hero-background" aria-hidden="true">
+    <div class="hero-background-glow"></div>
+    <div class="hero-background-grid"></div>
+  </div>
+
+  <div class="hero-container">
+    <div class="hero-content">
+      <p class="hero-eyebrow">
+        <span class="hero-status-dot" aria-hidden="true"></span>
+        FULL STACK ENGINEERING
+      </p>
+
+      <h1 id="hero-heading" class="hero-heading">
+        <span class="hero-name">Kartik Verma</span>
+        <span class="hero-role">Full Stack Engineer</span>
+      </h1>
+
+      <p class="hero-intro">
+        I build digital products that bring thoughtful design, practical
+        engineering, and dependable functionality together.
+      </p>
+
+      <div class="hero-manifesto" aria-live="polite">
+        <span class="manifesto-marker" aria-hidden="true"></span>
+        <p data-hero-manifesto>Designing experiences with intent.</p>
+      </div>
+
+      <p class="hero-description">
+        From responsive interfaces to backend services, APIs, and databases,
+        I focus on building applications that feel intuitive, work reliably,
+        and remain maintainable as they grow.
+      </p>
+
+      <div class="hero-actions">
+        <a class="hero-button hero-button-primary" href="#projects">
+          <span>Explore Projects</span>
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M7 17 17 7M8 7h9v9"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </a>
+
+        <a class="hero-button hero-button-secondary" href="#contact">
+          Let's Connect
+        </a>
+      </div>
+
+      <div class="hero-specialties" aria-label="Areas of focus">
+        <span>Frontend</span>
+        <span>Backend</span>
+        <span>APIs</span>
+        <span>Databases</span>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="hero-portrait-stage">
+        <div class="portrait-aura" aria-hidden="true"></div>
+        <div class="portrait-orbit portrait-orbit-outer" aria-hidden="true"></div>
+        <div class="portrait-orbit portrait-orbit-inner" aria-hidden="true"></div>
+
+        <span class="portrait-corner portrait-corner-top-left" aria-hidden="true"></span>
+        <span class="portrait-corner portrait-corner-top-right" aria-hidden="true"></span>
+        <span class="portrait-corner portrait-corner-bottom-left" aria-hidden="true"></span>
+        <span class="portrait-corner portrait-corner-bottom-right" aria-hidden="true"></span>
+
+        <img
+          class="hero-portrait"
+          src="/memoji/kartik-pc.png"
+          alt="Kartik Verma working on a laptop"
+          width="600"
+          height="600"
+          fetchpriority="high"
+          decoding="async"
+        />
+
+        <div class="portrait-caption">
+          <span class="portrait-caption-indicator" aria-hidden="true"></span>
+          <span>Design. Build. Refine.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- The carousel now spans the full hero container, not just the portrait column. -->
+  <div class="hero-carousel-wrap">
+    <div class="hero-carousel-heading">
+      <div>
+        <p class="carousel-eyebrow">WHAT I WORK ON</p>
+        <h2>Ideas turned into working products.</h2>
+      </div>
+      <p class="carousel-heading-description">
+        Explore the engineering principles behind my work.
+      </p>
+    </div>
+
+    <div
+      class="hero-carousel"
+      data-hero-carousel
+      aria-label="Engineering focus"
+      aria-roledescription="carousel"
+    >
+      <div class="hero-carousel-stage" data-hero-carousel-stage>
+        {
+          carouselCards.map((card) => (
+            <article
+              class={`hero-carousel-card hero-carousel-card--${card.visual}`}
+              data-hero-card
+              style={`--card-accent: ${card.accent};`}
+              tabindex="0"
+              aria-label={`${card.title}. ${card.description}`}
+            >
+              <div class="carousel-card-top">
+                <span class="carousel-card-category">{card.category}</span>
+                <span class="carousel-card-status" aria-hidden="true"></span>
+              </div>
+
+              <div class="carousel-card-content">
+                <span class="carousel-card-symbol" aria-hidden="true">
+                  {card.visual === "interface" && (
+                    <svg viewBox="0 0 32 32" fill="none">
+                      <rect x="4" y="5" width="24" height="22" rx="4" stroke="currentColor" stroke-width="1.6" />
+                      <path d="M4 11h24M10 8h.1M13.5 8h.1M8 16h7M8 20h15M8 23h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                    </svg>
+                  )}
+
+                  {card.visual === "backend" && (
+                    <svg viewBox="0 0 32 32" fill="none">
+                      <rect x="5" y="5" width="22" height="8" rx="2" stroke="currentColor" stroke-width="1.6" />
+                      <rect x="5" y="19" width="22" height="8" rx="2" stroke="currentColor" stroke-width="1.6" />
+                      <path d="M10 9h.1M14 9h.1M10 23h.1M14 23h.1M16 13v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                    </svg>
+                  )}
+
+                  {card.visual === "product" && (
+                    <svg viewBox="0 0 32 32" fill="none">
+                      <path d="M16 3.5 19.6 12l8.9 4-8.9 3.8L16 28.5l-3.8-8.7L3.5 16l8.7-4L16 3.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
+                      <circle cx="16" cy="16" r="3" stroke="currentColor" stroke-width="1.6" />
+                    </svg>
+                  )}
+                </span>
+
+                <div class="carousel-card-copy">
+                  <h3>{card.title}</h3>
+                  <p>{card.description}</p>
+                </div>
+              </div>
+
+              <div class="carousel-card-visual" aria-hidden="true">
+                {card.visual === "interface" && (
+                  <div class="mini-interface">
+                    <span></span><span></span><span></span>
+                    <div class="mini-interface-content">
+                      <i></i><i></i>
+                    </div>
+                  </div>
+                )}
+
+                {card.visual === "backend" && (
+                  <div class="mini-backend">
+                    <span></span><span></span><span></span>
+                  </div>
+                )}
+
+                {card.visual === "product" && (
+                  <div class="mini-product">
+                    <span></span><span></span><span></span>
+                  </div>
+                )}
+              </div>
+
+              <span class="carousel-card-bottom" aria-hidden="true"></span>
+            </article>
+          ))
+        }
+      </div>
+
+      <div class="hero-carousel-footer">
+        <p class="carousel-footer-label" data-hero-active-title>
+          Frontend Engineering
+        </p>
+
+        <div class="carousel-controls">
+          <button
+            class="carousel-arrow"
+            type="button"
+            data-hero-prev
+            aria-label="Previous engineering focus"
+          >
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+
+          <div class="carousel-indicators" aria-label="Choose an engineering focus">
+            {carouselCards.map((card, index) => (
+              <button
+                type="button"
+                class="carousel-indicator"
+                data-hero-indicator
+                data-hero-index={index}
+                aria-label={`Show ${card.title}`}
+                aria-pressed={index === 0 ? "true" : "false"}
+              ></button>
+            ))}
+          </div>
+
+          <button
+            class="carousel-arrow"
+            type="button"
+            data-hero-next
+            aria-label="Next engineering focus"
+          >
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-bottom-fade" aria-hidden="true"></div>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>(".hero-section").forEach((root) => {
+    if (root.dataset.heroInitialized === "true") return;
+    root.dataset.heroInitialized = "true";
+
+    const carousel = root.querySelector<HTMLElement>("[data-hero-carousel]");
+    const stage = root.querySelector<HTMLElement>("[data-hero-carousel-stage]");
+    const cards = Array.from(
+      root.querySelectorAll<HTMLElement>("[data-hero-card]"),
+    );
+    const indicators = Array.from(
+      root.querySelectorAll<HTMLButtonElement>("[data-hero-indicator]"),
+    );
+    const activeTitle = root.querySelector<HTMLElement>(
+      "[data-hero-active-title]",
+    );
+    const previousButton = root.querySelector<HTMLButtonElement>(
+      "[data-hero-prev]",
+    );
+    const nextButton = root.querySelector<HTMLButtonElement>(
+      "[data-hero-next]",
+    );
+    const manifesto = root.querySelector<HTMLElement>("[data-hero-manifesto]");
+
+    if (
+      !carousel ||
+      !stage ||
+      cards.length === 0 ||
+      !activeTitle ||
+      !previousButton ||
+      !nextButton
+    ) {
+      return;
+    }
+
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    );
+
+    let activeIndex = 0;
+    let rotationTimer: number | null = null;
+    let phraseTimer: number | null = null;
+    let isInView = false;
+    let isPaused = false;
+    let phraseIndex = 0;
+    let pointerStartX: number | null = null;
+
+    const phrases = [
+      "Designing experiences with intent.",
+      "Engineering systems that scale.",
+      "Building products people can trust.",
+    ];
+
+    const ROTATION_INTERVAL = 4200;
+    const PHRASE_INTERVAL = 3500;
+
+    const circularOffset = (
+      index: number,
+      current: number,
+      total: number,
+    ): number => {
+      let offset = (index - current + total) % total;
+      if (offset > total / 2) offset -= total;
+      return offset;
+    };
+
+    const positionCards = (): void => {
+      if (stage.clientWidth === 0) return;
+
+      const compactLayout = window.innerWidth <= 780;
+      const stageWidth = stage.clientWidth;
+
+      const cardWidth = compactLayout
+        ? Math.min(355, Math.max(250, stageWidth - 28))
+        : Math.min(350, (stageWidth - 42) / 3);
+
+      // On desktop the stage is wide enough for three complete cards.
+      // On phones only the selected card is visible, at full readable width.
+      const step = compactLayout
+        ? 0
+        : cardWidth + Math.min(18, stageWidth * 0.02);
+
+      cards.forEach((card, index) => {
+        const offset = circularOffset(index, activeIndex, cards.length);
+        const distance = Math.abs(offset);
+        const visible = compactLayout ? distance === 0 : distance <= 1;
+        const scale = distance === 0 ? 1 : 0.93;
+        const rotation = compactLayout ? 0 : offset * -4;
+        const depth = distance === 0 ? 0 : 24;
+
+        card.style.width = `${cardWidth}px`;
+        card.style.transform =
+          `translate(-50%, -50%) translateX(${offset * step}px) ` +
+          `translateZ(${-depth}px) rotateY(${rotation}deg) scale(${scale})`;
+
+        // Keep every visible card crisp and readable.
+        card.style.filter = "none";
+        card.style.opacity = visible
+          ? distance === 0 ? "1" : "0.95"
+          : "0";
+        card.style.visibility = visible ? "visible" : "hidden";
+        card.style.pointerEvents = visible ? "auto" : "none";
+        card.style.zIndex = String(10 - distance);
+        card.tabIndex = visible ? 0 : -1;
+        card.setAttribute("aria-hidden", String(!visible));
+        card.setAttribute("aria-current", distance === 0 ? "true" : "false");
+        card.classList.toggle("is-active", distance === 0);
+      });
+
+      indicators.forEach((indicator, index) => {
+        const active = index === activeIndex;
+        indicator.classList.toggle("is-active", active);
+        indicator.setAttribute("aria-pressed", String(active));
+      });
+
+      activeTitle.textContent =
+        cards[activeIndex].querySelector("h3")?.textContent?.trim() ?? "";
+    };
+
+    const stopRotation = (): void => {
+      if (rotationTimer !== null) {
+        window.clearTimeout(rotationTimer);
+        rotationTimer = null;
+      }
+    };
+
+    const scheduleRotation = (): void => {
+      stopRotation();
+
+      if (
+        cards.length <= 1 ||
+        reducedMotion.matches ||
+        !isInView ||
+        isPaused ||
+        document.visibilityState !== "visible"
+      ) {
+        return;
+      }
+
+      rotationTimer = window.setTimeout(() => {
+        moveTo(activeIndex + 1);
+      }, ROTATION_INTERVAL);
+    };
+
+    const moveTo = (index: number): void => {
+      activeIndex = ((index % cards.length) + cards.length) % cards.length;
+      positionCards();
+      scheduleRotation();
+    };
+
+    const stopPhraseRotation = (): void => {
+      if (phraseTimer !== null) {
+        window.clearTimeout(phraseTimer);
+        phraseTimer = null;
+      }
+    };
+
+    const schedulePhraseRotation = (): void => {
+      stopPhraseRotation();
+
+      if (!manifesto || reducedMotion.matches || !isInView) return;
+
+      phraseTimer = window.setTimeout(() => {
+        phraseIndex = (phraseIndex + 1) % phrases.length;
+        manifesto.classList.add("is-changing");
+
+        window.setTimeout(() => {
+          if (!manifesto) return;
+          manifesto.textContent = phrases[phraseIndex];
+          manifesto.classList.remove("is-changing");
+        }, 180);
+
+        schedulePhraseRotation();
+      }, PHRASE_INTERVAL);
+    };
+
+    cards.forEach((card, index) => {
+      card.addEventListener("click", () => moveTo(index));
+
+      card.addEventListener("keydown", (event: KeyboardEvent) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          moveTo(index);
+        } else if (event.key === "ArrowRight") {
+          event.preventDefault();
+          moveTo(activeIndex + 1);
+        } else if (event.key === "ArrowLeft") {
+          event.preventDefault();
+          moveTo(activeIndex - 1);
+        }
+      });
+
+      card.addEventListener("pointermove", (event: PointerEvent) => {
+        if (
+          reducedMotion.matches ||
+          event.pointerType !== "mouse" ||
+          !card.classList.contains("is-active")
+        ) {
+          return;
+        }
+
+        const bounds = card.getBoundingClientRect();
+        if (bounds.width === 0 || bounds.height === 0) return;
+
+        const x = (event.clientX - bounds.left) / bounds.width;
+        const y = (event.clientY - bounds.top) / bounds.height;
+
+        card.style.setProperty(
+          "--card-tilt-x",
+          `${((0.5 - y) * 3).toFixed(2)}deg`,
+        );
+        card.style.setProperty(
+          "--card-tilt-y",
+          `${((x - 0.5) * 4).toFixed(2)}deg`,
+        );
+      });
+
+      card.addEventListener("pointerleave", () => {
+        card.style.setProperty("--card-tilt-x", "0deg");
+        card.style.setProperty("--card-tilt-y", "0deg");
+      });
+    });
+
+    indicators.forEach((indicator) => {
+      indicator.addEventListener("click", () => {
+        const index = Number(indicator.dataset.heroIndex);
+        if (Number.isInteger(index)) moveTo(index);
+      });
+    });
+
+    previousButton.addEventListener("click", () => moveTo(activeIndex - 1));
+    nextButton.addEventListener("click", () => moveTo(activeIndex + 1));
+
+    carousel.addEventListener("mouseenter", () => {
+      isPaused = true;
+      stopRotation();
+    });
+
+    carousel.addEventListener("mouseleave", () => {
+      isPaused = false;
+      scheduleRotation();
+    });
+
+    carousel.addEventListener("focusin", () => {
+      isPaused = true;
+      stopRotation();
+    });
+
+    carousel.addEventListener("focusout", (event: FocusEvent) => {
+      if (
+        event.relatedTarget instanceof Node &&
+        carousel.contains(event.relatedTarget)
+      ) {
+        return;
+      }
+
+      isPaused = false;
+      scheduleRotation();
+    });
+
+    stage.addEventListener("pointerdown", (event: PointerEvent) => {
+      if (event.pointerType === "mouse") return;
+      pointerStartX = event.clientX;
+    });
+
+    stage.addEventListener("pointerup", (event: PointerEvent) => {
+      if (pointerStartX === null) return;
+
+      const delta = event.clientX - pointerStartX;
+      pointerStartX = null;
+
+      if (Math.abs(delta) > 42) {
+        moveTo(activeIndex + (delta < 0 ? 1 : -1));
+      }
+    });
+
+    stage.addEventListener("pointercancel", () => {
+      pointerStartX = null;
+    });
+
+    window.addEventListener("resize", positionCards, { passive: true });
+    document.addEventListener("visibilitychange", scheduleRotation);
+
+    reducedMotion.addEventListener("change", () => {
+      positionCards();
+      scheduleRotation();
+
+      if (reducedMotion.matches && manifesto) {
+        stopPhraseRotation();
+        manifesto.textContent = phrases[0];
+        manifesto.classList.remove("is-changing");
+      } else {
+        schedulePhraseRotation();
+      }
+    });
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isInView = Boolean(entry?.isIntersecting);
+
+        if (isInView) {
+          scheduleRotation();
+          schedulePhraseRotation();
+        } else {
+          stopRotation();
+          stopPhraseRotation();
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(root);
+
+    positionCards();
+
+    if (manifesto && reducedMotion.matches) {
+      manifesto.textContent = phrases[0];
+    }
+  });
+</script>
+
+<style>
+  .hero-section {
+    --hero-text: #f7eff1;
+    --hero-muted: #b9a9ad;
+    --hero-pink: #f05b82;
+    --hero-crimson: #e44752;
+
+    position: relative;
+    isolation: isolate;
+    width: 100%;
+    max-width: 100%;
+    padding: clamp(125px, 14vh, 165px) clamp(18px, 6vw, 88px) 70px;
+    overflow: clip;
+    color: var(--hero-text);
+    background:
+      radial-gradient(ellipse at 90% 20%, rgba(240, 91, 130, 0.065), transparent 37%),
+      linear-gradient(180deg, #0d090b, #0b0809 76%);
+    scroll-margin-top: 95px;
+  }
+
+  .hero-section *,
+  .hero-section *::before,
+  .hero-section *::after {
+    box-sizing: border-box;
+  }
+
+  .hero-background {
+    position: absolute;
+    z-index: -2;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .hero-background-glow {
+    position: absolute;
+    top: -180px;
+    left: 50%;
+    width: min(800px, 100vw);
+    height: 650px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(228, 71, 82, 0.08), rgba(240, 91, 130, 0.025) 38%, transparent 70%);
+    filter: blur(24px);
+    transform: translateX(-50%);
+    animation: hero-atmosphere-breathe 9s ease-in-out infinite alternate;
+  }
+
+  .hero-background-grid {
+    position: absolute;
+    inset: 0;
+    opacity: 0.12;
+    background-image:
+      linear-gradient(rgba(240, 91, 130, 0.065) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(240, 91, 130, 0.065) 1px, transparent 1px);
+    background-size: 55px 55px;
+    mask-image: linear-gradient(to bottom, #000 0%, transparent 79%);
+  }
+
+  .hero-container {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(330px, 0.9fr);
+    align-items: center;
+    gap: clamp(30px, 5vw, 70px);
+    width: 100%;
+    max-width: 1240px;
+    margin-inline: auto;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    min-width: 0;
+    animation: hero-content-enter 800ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  .hero-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    margin: 0 0 22px;
+    color: #e4b4be;
+    font-size: 0.69rem;
+    font-weight: 750;
+    letter-spacing: 0.16em;
+    line-height: 1.7;
+  }
+
+  .hero-status-dot {
+    width: 7px;
+    height: 7px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: var(--hero-pink);
+    box-shadow: 0 0 13px rgba(240, 91, 130, 0.4);
+    animation: hero-status-pulse 2.5s ease-in-out infinite;
+  }
+
+  .hero-heading {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: -0.065em;
+    line-height: 1.07;
+  }
+
+  .hero-name {
+    display: block;
+    max-width: 100%;
+    color: var(--hero-text);
+    font-size: clamp(3.1rem, 5.7vw, 5.2rem);
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+    animation: hero-title-reveal 800ms cubic-bezier(0.2, 0.7, 0.2, 1) 100ms both;
+  }
+
+  .hero-role {
+    display: block;
+    margin-top: 12px;
+    color: var(--hero-pink);
+    font-size: clamp(1.2rem, 2.1vw, 1.65rem);
+    font-weight: 650;
+    letter-spacing: -0.035em;
+    line-height: 1.35;
+    animation: hero-title-reveal 800ms cubic-bezier(0.2, 0.7, 0.2, 1) 200ms both;
+  }
+
+  .hero-intro {
+    max-width: 590px;
+    margin: 22px 0 0;
+    color: #e0d2d5;
+    font-size: clamp(0.94rem, 1.25vw, 1.06rem);
+    font-weight: 450;
+    line-height: 1.85;
+  }
+
+  .hero-manifesto {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 27px;
+    margin-top: 13px;
+  }
+
+  .manifesto-marker {
+    display: block;
+    width: 7px;
+    height: 7px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: var(--hero-pink);
+    box-shadow: 0 0 10px rgba(240, 91, 130, 0.3);
+  }
+
+  .hero-manifesto p {
+    margin: 0;
+    color: var(--hero-pink);
+    font-size: 0.83rem;
+    font-weight: 650;
+    line-height: 1.6;
+    transition: opacity 180ms ease, transform 180ms ease;
+  }
+
+  .hero-manifesto p.is-changing {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  .hero-description {
+    max-width: 570px;
+    margin: 12px 0 0;
+    color: var(--hero-muted);
+    font-size: 0.86rem;
+    line-height: 1.85;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 25px;
+  }
+
+  .hero-button {
+    position: relative;
+    display: inline-flex;
+    min-height: 46px;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 15px;
+    overflow: hidden;
+    border: 1px solid #563039;
+    border-radius: 5px;
+    color: #f8edef;
+    background: #130d10;
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 680;
+    line-height: 1.4;
+    text-decoration: none;
+    transition: transform 180ms ease, background 180ms ease, box-shadow 180ms ease;
+  }
+
+  .hero-button svg {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 auto;
+  }
+
+  .hero-button-primary {
+    border-color: var(--hero-pink);
+    color: #fff;
+    background: linear-gradient(180deg, #f16d8d, #e44768);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  .hero-button-primary:hover {
+    background: linear-gradient(180deg, #fa7997, #ed5476);
+    box-shadow: 0 5px 22px rgba(240, 91, 130, 0.21);
+    transform: translateY(-2px);
+  }
+
+  .hero-button-secondary:hover {
+    border-color: var(--hero-pink);
+    background: #211216;
+    transform: translateY(-2px);
+  }
+
+  .hero-specialties {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 23px;
+  }
+
+  .hero-specialties span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 27px;
+    padding: 5px 9px;
+    border: 1px solid #332329;
+    border-radius: 4px;
+    color: #b9a9ad;
+    background: rgba(18, 12, 15, 0.64);
+    font-size: 0.66rem;
+    line-height: 1.4;
+  }
+
+  /* Portrait */
+
+  .hero-visual {
+    position: relative;
+    min-width: 0;
+    animation: hero-visual-enter 900ms cubic-bezier(0.2, 0.7, 0.2, 1) 130ms both;
+  }
+
+  .hero-portrait-stage {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    min-width: 0;
+    min-height: clamp(320px, 34vw, 425px);
+    place-items: center;
+    overflow: hidden;
+    border: 1px solid rgba(240, 91, 130, 0.19);
+    border-radius: 13px;
+    background:
+      radial-gradient(ellipse at 50% 49%, rgba(240, 91, 130, 0.12), transparent 44%),
+      linear-gradient(150deg, rgba(28, 15, 20, 0.8), rgba(12, 8, 10, 0.94));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 20px 50px rgba(0, 0, 0, 0.17);
+  }
+
+  .portrait-aura {
+    position: absolute;
+    z-index: -1;
+    top: 18%;
+    left: 50%;
+    width: min(82%, 390px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: rgba(240, 91, 130, 0.14);
+    filter: blur(48px);
+    transform: translateX(-50%);
+    animation: hero-aura-breathe 6s ease-in-out infinite alternate;
+  }
+
+  .portrait-orbit {
+    position: absolute;
+    z-index: -1;
+    top: 47%;
+    left: 50%;
+    aspect-ratio: 1;
+    border: 1px solid rgba(240, 91, 130, 0.15);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .portrait-orbit-outer {
+    width: min(90%, 420px);
+    animation: hero-orbit-rotate 45s linear infinite;
+  }
+
+  .portrait-orbit-inner {
+    width: min(69%, 325px);
+    border-style: dashed;
+    border-color: rgba(240, 91, 130, 0.11);
+    animation: hero-orbit-rotate 55s linear infinite reverse;
+  }
+
+  .portrait-corner {
+    position: absolute;
+    z-index: 4;
+    width: 21px;
+    height: 21px;
+    pointer-events: none;
+    border-color: rgba(240, 91, 130, 0.72);
+    border-style: solid;
+  }
+
+  .portrait-corner-top-left { top: 0; left: 0; border-width: 1px 0 0 1px; }
+  .portrait-corner-top-right { top: 0; right: 0; border-width: 1px 1px 0 0; }
+  .portrait-corner-bottom-left { bottom: 0; left: 0; border-width: 0 0 1px 1px; }
+  .portrait-corner-bottom-right { right: 0; bottom: 0; border-width: 0 1px 1px 0; }
+
+  .hero-portrait {
+    position: relative;
+    z-index: 2;
+    display: block;
+    width: min(100%, 475px);
+    max-height: 455px;
+    object-fit: contain;
+    object-position: center bottom;
+    filter: drop-shadow(0 22px 31px rgba(0, 0, 0, 0.3));
+    transform: translateY(9px);
+    animation: hero-portrait-float 6s ease-in-out infinite;
+    transition: filter 300ms ease;
+    pointer-events: none;
+  }
+
+  .hero-portrait-stage:hover .hero-portrait {
+    filter: drop-shadow(0 22px 31px rgba(0, 0, 0, 0.3)) drop-shadow(0 0 22px rgba(240, 91, 130, 0.12));
+  }
+
+  .portrait-caption {
+    position: absolute;
+    z-index: 5;
+    right: 18px;
+    bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #d8c5ca;
+    font-size: 0.65rem;
+    font-weight: 550;
+  }
+
+  .portrait-caption-indicator {
+    display: block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--hero-pink);
+  }
+
+  /* Full-width 3D carousel */
+
+  .hero-carousel-wrap {
+    width: 100%;
+    max-width: 1240px;
+    margin: clamp(40px, 5vw, 64px) auto 0;
+  }
+
+  .hero-carousel-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 26px;
+    margin-bottom: 19px;
+  }
+
+  .carousel-eyebrow {
+    margin: 0 0 9px;
+    color: #e4b4be;
+    font-size: 0.64rem;
+    font-weight: 750;
+    letter-spacing: 0.14em;
+  }
+
+  .hero-carousel-heading h2 {
+    margin: 0;
+    color: #f7eff1;
+    font-size: clamp(1.25rem, 2.7vw, 1.9rem);
+    font-weight: 680;
+    letter-spacing: -0.04em;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+
+  .carousel-heading-description {
+    max-width: 320px;
+    margin: 0;
+    color: #ad9ca1;
+    font-size: 0.78rem;
+    line-height: 1.75;
+  }
+
+  .hero-carousel {
+    position: relative;
+    width: 100%;
+    perspective: 1400px;
+  }
+
+  .hero-carousel-stage {
+    position: relative;
+    width: 100%;
+    min-height: 220px;
+    overflow: hidden;
+    perspective: 1300px;
+    perspective-origin: 50% 45%;
+    transform-style: preserve-3d;
+    touch-action: pan-y;
+  }
+
+  .hero-carousel-card {
+    --card-accent: #f05b82;
+    --card-tilt-x: 0deg;
+    --card-tilt-y: 0deg;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    min-height: 185px;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 19px;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--card-accent) 48%, #35242a);
+    border-radius: 12px;
+    background:
+      radial-gradient(ellipse at 100% 0%, color-mix(in srgb, var(--card-accent) 14%, transparent), transparent 48%),
+      linear-gradient(145deg, #191114, #100b0e 80%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 14px 34px rgba(0, 0, 0, 0.21);
+    transform-origin: center center;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    cursor: pointer;
+    user-select: none;
+    transition:
+      transform 680ms cubic-bezier(0.2, 0.68, 0.2, 1),
+      opacity 500ms ease,
+      border-color 260ms ease,
+      box-shadow 260ms ease;
+    will-change: transform;
+  }
+
+  .hero-carousel-card.is-active {
+    border-color: color-mix(in srgb, var(--card-accent) 82%, white);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.09),
+      0 20px 44px rgba(0, 0, 0, 0.28),
+      0 0 30px color-mix(in srgb, var(--card-accent) 17%, transparent);
+  }
+
+  .hero-carousel-card:hover,
+  .hero-carousel-card:focus-visible {
+    border-color: var(--card-accent);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 24px 48px rgba(0, 0, 0, 0.3),
+      0 0 30px color-mix(in srgb, var(--card-accent) 20%, transparent);
+  }
+
+  .hero-carousel-card:focus-visible {
+    outline: 2px solid var(--card-accent);
+    outline-offset: 4px;
+  }
+
+  .carousel-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .carousel-card-category {
+    color: #b9a6ac;
+    font-size: 0.64rem;
+    font-weight: 650;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+  }
+
+  .carousel-card-status {
+    width: 7px;
+    height: 7px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: var(--card-accent);
+    box-shadow: 0 0 11px color-mix(in srgb, var(--card-accent) 45%, transparent);
+  }
+
+  .carousel-card-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    min-width: 0;
+    margin-top: 17px;
+    transform: translateZ(12px);
+  }
+
+  .carousel-card-symbol {
+    display: grid;
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
+    place-items: center;
+    border: 1px solid color-mix(in srgb, var(--card-accent) 35%, #35242a);
+    border-radius: 9px;
+    color: var(--card-accent);
+    background: color-mix(in srgb, var(--card-accent) 7%, #130d10);
+  }
+
+  .carousel-card-symbol svg {
+    display: block;
+    width: 29px;
+    height: 29px;
+  }
+
+  .carousel-card-copy {
+    min-width: 0;
+  }
+
+  .carousel-card-copy h3 {
+    margin: 0;
+    color: #f7eff1;
+    font-size: clamp(0.9rem, 1.4vw, 1.08rem);
+    font-weight: 680;
+    letter-spacing: -0.025em;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+  .carousel-card-copy p {
+    margin: 7px 0 0;
+    color: #c0b0b4;
+    font-size: 0.73rem;
+    line-height: 1.75;
+    overflow-wrap: anywhere;
+  }
+
+  .carousel-card-visual {
+    position: absolute;
+    right: 18px;
+    bottom: 0;
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 38px;
+    opacity: 0.32;
+    pointer-events: none;
+    transform: translateZ(5px);
+  }
+
+  .mini-interface,
+  .mini-backend,
+  .mini-product {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    width: 72px;
+    height: 25px;
+    padding: 5px;
+    border: 1px solid var(--card-accent);
+    border-bottom: 0;
+    border-radius: 5px 5px 0 0;
+    background: color-mix(in srgb, var(--card-accent) 8%, #130d10);
+  }
+
+  .mini-interface > span,
+  .mini-backend > span,
+  .mini-product > span {
+    display: block;
+    width: 6px;
+    height: 6px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: var(--card-accent);
+  }
+
+  .mini-interface-content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .mini-interface-content i {
+    display: block;
+    height: 2px;
+    background: var(--card-accent);
+  }
+
+  .mini-interface-content i:last-child {
+    width: 63%;
+    opacity: 0.6;
+  }
+
+  .mini-backend {
+    height: 31px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mini-backend > span {
+    width: 25%;
+    height: 3px;
+    border-radius: 2px;
+  }
+
+  .mini-product {
+    height: 34px;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .mini-product > span {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px 3px 0 0;
+  }
+
+  .mini-product > span:nth-child(2) {
+    height: 21px;
+  }
+
+  .carousel-card-bottom {
+    position: absolute;
+    right: 18px;
+    bottom: 0;
+    left: 18px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--card-accent), transparent);
+    opacity: 0.65;
+  }
+
+  .hero-carousel-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 12px 3px 0;
+  }
+
+  .carousel-footer-label {
+    margin: 0;
+    color: #e6c3cb;
+    font-size: 0.74rem;
+    font-weight: 650;
+    line-height: 1.6;
+  }
+
+  .carousel-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .carousel-arrow {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 1px solid #493039;
+    border-radius: 6px;
+    color: #f5e7e8;
+    background: #160e11;
+    cursor: pointer;
+    transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+  }
+
+  .carousel-arrow svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .carousel-arrow:hover {
+    border-color: var(--hero-pink);
+    background: #261319;
+    transform: translateY(-1px);
+  }
+
+  .carousel-arrow:focus-visible,
+  .carousel-indicator:focus-visible {
+    outline: 2px solid var(--hero-pink);
+    outline-offset: 3px;
+  }
+
+  .carousel-indicators {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .carousel-indicator {
+    display: block;
+    width: 7px;
+    height: 7px;
+    padding: 0;
+    border: 1px solid #80515e;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    transition: width 220ms ease, border-color 220ms ease, background 220ms ease;
+  }
+
+  .carousel-indicator.is-active {
+    width: 21px;
+    border-color: var(--hero-pink);
+    border-radius: 4px;
+    background: var(--hero-pink);
+    box-shadow: 0 0 9px rgba(240, 91, 130, 0.22);
+  }
+
+  .hero-bottom-fade {
+    position: absolute;
+    z-index: -1;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 50px;
+    pointer-events: none;
+    background: linear-gradient(180deg, transparent, rgba(11, 8, 9, 0.45));
+  }
+
+  @keyframes hero-content-enter {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes hero-title-reveal {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes hero-visual-enter {
+    from { opacity: 0; transform: translateY(18px) scale(0.99); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @keyframes hero-atmosphere-breathe {
+    from { opacity: 0.55; transform: translateX(-50%) scale(0.95); }
+    to { opacity: 1; transform: translateX(-50%) scale(1.05); }
+  }
+
+  @keyframes hero-status-pulse {
+    0%, 100% { box-shadow: 0 0 7px rgba(240, 91, 130, 0.2); }
+    50% { box-shadow: 0 0 14px rgba(240, 91, 130, 0.5); }
+  }
+
+  @keyframes hero-aura-breathe {
+    from { opacity: 0.5; transform: translateX(-50%) scale(0.92); }
+    to { opacity: 0.9; transform: translateX(-50%) scale(1.05); }
+  }
+
+  @keyframes hero-orbit-rotate {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+
+  @keyframes hero-portrait-float {
+    0%, 100% { transform: translateY(9px); }
+    50% { transform: translateY(2px); }
+  }
+
+  @media (max-width: 1050px) {
+    .hero-container {
+      grid-template-columns: minmax(0, 1fr) minmax(300px, 0.85fr);
+      gap: 30px;
+    }
+
+    .hero-name {
+      font-size: clamp(3rem, 5.6vw, 4.5rem);
+    }
+
+    .hero-portrait-stage {
+      min-height: 350px;
+    }
+
+    .hero-portrait {
+      max-height: 380px;
+    }
+
+    .hero-carousel-wrap {
+      margin-top: 42px;
+    }
+  }
+
+  @media (max-width: 780px) {
+    .hero-section {
+      padding: 120px 22px 58px;
+    }
+
+    .hero-container {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 28px;
+      max-width: 650px;
+    }
+
+    .hero-content {
+      order: 1;
+    }
+
+    .hero-visual {
+      order: 2;
+      width: 100%;
+      max-width: 570px;
+      margin-inline: auto;
+    }
+
+    .hero-name {
+      font-size: clamp(3rem, 9.5vw, 4.8rem);
+    }
+
+    .hero-role {
+      font-size: clamp(1.2rem, 3.5vw, 1.6rem);
+    }
+
+    .hero-portrait-stage {
+      min-height: clamp(300px, 58vw, 420px);
+    }
+
+    .hero-portrait {
+      max-height: 420px;
+    }
+
+    .hero-carousel-wrap {
+      margin-top: 36px;
+    }
+
+    .hero-carousel-heading {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .carousel-heading-description {
+      max-width: 480px;
+    }
+
+    .hero-carousel-stage {
+      min-height: 205px;
+    }
+
+    .hero-carousel-card {
+      min-height: 180px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .hero-section {
+      padding: 108px 15px 45px;
+      scroll-margin-top: 76px;
+    }
+
+    .hero-container {
+      gap: 24px;
+    }
+
+    .hero-eyebrow {
+      margin-bottom: 19px;
+      font-size: 0.62rem;
+    }
+
+    .hero-name {
+      font-size: clamp(2.6rem, 10.8vw, 3.4rem);
+      letter-spacing: -0.06em;
+    }
+
+    .hero-role {
+      margin-top: 10px;
+      font-size: 1.2rem;
+    }
+
+    .hero-intro {
+      margin-top: 17px;
+      font-size: 0.9rem;
+      line-height: 1.8;
+    }
+
+    .hero-description {
+      font-size: 0.81rem;
+      line-height: 1.8;
+    }
+
+    .hero-actions {
+      gap: 8px;
+      margin-top: 21px;
+    }
+
+    .hero-button {
+      min-height: 43px;
+      padding: 10px 12px;
+      font-size: 0.74rem;
+    }
+
+    .hero-specialties {
+      gap: 6px;
+      margin-top: 18px;
+    }
+
+    .hero-specialties span {
+      font-size: 0.64rem;
+    }
+
+    .hero-portrait-stage {
+      min-height: 280px;
+      border-radius: 11px;
+    }
+
+    .hero-portrait {
+      width: min(100%, 340px);
+      max-height: 315px;
+    }
+
+    .portrait-caption {
+      right: 11px;
+      bottom: 11px;
+      font-size: 0.6rem;
+    }
+
+    .hero-carousel-wrap {
+      margin-top: 32px;
+    }
+
+    .hero-carousel-heading {
+      margin-bottom: 13px;
+    }
+
+    .hero-carousel-heading h2 {
+      font-size: 1.28rem;
+    }
+
+    .carousel-heading-description {
+      font-size: 0.74rem;
+    }
+
+    .hero-carousel-stage {
+      min-height: 207px;
+      perspective: 900px;
+    }
+
+    .hero-carousel-card {
+      min-height: 184px;
+      padding: 16px;
+      border-radius: 10px;
+    }
+
+    .carousel-card-content {
+      gap: 11px;
+      margin-top: 15px;
+    }
+
+    .carousel-card-symbol {
+      width: 39px;
+      height: 39px;
+      flex-basis: 39px;
+    }
+
+    .carousel-card-symbol svg {
+      width: 25px;
+      height: 25px;
+    }
+
+    .carousel-card-copy h3 {
+      font-size: 0.94rem;
+    }
+
+    .carousel-card-copy p {
+      font-size: 0.71rem;
+      line-height: 1.65;
+    }
+
+    .carousel-card-category {
+      font-size: 0.59rem;
+    }
+
+    .hero-carousel-footer {
+      gap: 9px;
+      padding-top: 10px;
+    }
+
+    .carousel-footer-label {
+      max-width: 55%;
+      font-size: 0.7rem;
+      overflow-wrap: anywhere;
+    }
+
+    .carousel-controls {
+      gap: 7px;
+    }
+
+    .carousel-arrow {
+      width: 32px;
+      height: 32px;
+    }
+
+    .carousel-indicators {
+      gap: 5px;
+    }
+  }
+
+  @media (max-width: 350px) {
+    .hero-section {
+      padding-inline: 12px;
+    }
+
+    .hero-name {
+      font-size: 2.45rem;
+    }
+
+    .hero-actions {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .hero-button {
+      width: 100%;
+    }
+
+    .hero-portrait-stage {
+      min-height: 250px;
+    }
+
+    .hero-carousel-stage {
+      min-height: 220px;
+    }
+
+    .hero-carousel-card {
+      padding: 14px;
+    }
+  }
+
+  @media (hover: none) {
+    .hero-carousel-card {
+      --card-tilt-x: 0deg;
+      --card-tilt-y: 0deg;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-section *,
+    .hero-section *::before,
+    .hero-section *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      transition-delay: 0ms !important;
+    }
+
+    .hero-content,
+    .hero-visual,
+    .hero-name,
+    .hero-role {
+      opacity: 1;
+      transform: none;
+    }
+
+    .hero-portrait,
+    .portrait-orbit {
+      animation: none;
+      transform: none;
+    }
+  }
+</style>

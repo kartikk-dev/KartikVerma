@@ -1,0 +1,1530 @@
+---
+---
+
+<section class="view serviq-customers" data-panel="customers">
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">RESOURCES / CUSTOMERS</span>
+      <h1>
+        Customer <em>relationships.</em>
+      </h1>
+      <p>Manage customer profiles, service history and lifetime value.</p>
+    </div>
+
+    <button class="primary-action" id="serviq-add-customer" type="button">
+      <span>+</span>
+      Add Customer
+    </button>
+  </div>
+
+  <div
+    class="serviq-customer-feedback"
+    id="serviq-customer-feedback"
+    role="status"
+    aria-live="polite"
+    hidden
+  ></div>
+
+  <section
+    class="serviq-customer-summary"
+    id="serviq-customer-summary"
+    aria-label="Customer summary"
+  ></section>
+
+  <section class="serviq-customer-toolbar" aria-label="Customer filters">
+    <label class="serviq-customer-search">
+      <span aria-hidden="true">⌕</span>
+      <input
+        id="serviq-customer-search"
+        type="search"
+        placeholder="Search customer, company, phone or location..."
+        autocomplete="off"
+        aria-label="Search customers"
+      />
+    </label>
+
+    <label class="serviq-customer-filter">
+      <span>Service activity</span>
+      <select id="serviq-customer-activity">
+        <option value="all">All customers</option>
+        <option value="active">Has open jobs</option>
+        <option value="inactive">No open jobs</option>
+      </select>
+    </label>
+
+    <label class="serviq-customer-filter">
+      <span>Sort by</span>
+      <select id="serviq-customer-sort">
+        <option value="name">Customer name</option>
+        <option value="jobs">Most open jobs</option>
+        <option value="value">Lifetime value</option>
+      </select>
+    </label>
+  </section>
+
+  <div class="serviq-customer-results-heading">
+    <div>
+      <span class="panel-label">CUSTOMER DIRECTORY</span>
+      <h2>Your customers</h2>
+    </div>
+
+    <span
+      class="serviq-customer-result-count"
+      id="serviq-customer-result-count"
+    >
+      Loading customers...
+    </span>
+  </div>
+
+  <section
+    class="customer-grid serviq-customer-grid"
+    id="serviq-customer-grid"
+    aria-label="Customer records"
+    aria-live="polite"
+  ></section>
+
+  <div class="serviq-customer-empty" id="serviq-customer-empty" hidden>
+    <span class="serviq-customer-empty-icon" aria-hidden="true">
+      ⌕
+    </span>
+    <h3>No customers found</h3>
+    <p>Try a different search or adjust your filters.</p>
+    <button class="secondary-action" id="serviq-customer-reset" type="button">
+      Clear filters
+    </button>
+  </div>
+</section>
+
+<div class="serviq-customer-modal" id="serviq-customer-modal" hidden>
+  <section
+    class="serviq-customer-modal-card"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="serviq-customer-modal-title"
+  >
+    <header class="serviq-customer-modal-header">
+      <div>
+        <span class="eyebrow">CUSTOMER MANAGEMENT</span>
+        <h2 id="serviq-customer-modal-title">Add customer</h2>
+        <p id="serviq-customer-modal-description">
+          Create a customer profile for your service operations.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="serviq-customer-modal-close"
+        id="serviq-customer-modal-close"
+        aria-label="Close customer form"
+      >
+        ×
+      </button>
+    </header>
+
+    <form id="serviq-customer-form">
+      <div class="serviq-customer-form-grid">
+        <label class="serviq-customer-field serviq-customer-field-wide">
+          <span>
+            Customer full name <b>*</b>
+          </span>
+          <input
+            name="name"
+            type="text"
+            maxlength="120"
+            placeholder="e.g. Arun Sharma"
+            autocomplete="name"
+            required
+          />
+        </label>
+
+        <label class="serviq-customer-field serviq-customer-field-wide">
+          <span>Company or account type</span>
+          <input
+            name="company"
+            type="text"
+            maxlength="120"
+            placeholder="e.g. Home or Singh Solar"
+          />
+        </label>
+
+        <label class="serviq-customer-field">
+          <span>Phone number</span>
+          <input
+            name="phone"
+            type="tel"
+            maxlength="40"
+            autocomplete="tel"
+            placeholder="+91 98765 43210"
+          />
+        </label>
+
+        <label class="serviq-customer-field">
+          <span>Service location</span>
+          <input
+            name="location"
+            type="text"
+            maxlength="160"
+            placeholder="e.g. Rajpur Road"
+          />
+        </label>
+
+        <label class="serviq-customer-field serviq-customer-field-wide">
+          <span>Lifetime customer value (₹)</span>
+          <input
+            name="lifetime"
+            type="number"
+            min="0"
+            max="100000000000"
+            step="1"
+            value="0"
+            required
+          />
+          <small>Enter the total historical customer value.</small>
+        </label>
+      </div>
+
+      <div class="serviq-customer-form-note">
+        <span aria-hidden="true">i</span>
+        Open job counts are calculated from work orders in the workspace.
+      </div>
+
+      <div class="serviq-customer-modal-actions">
+        <button
+          class="secondary-action"
+          type="button"
+          id="serviq-customer-cancel"
+        >
+          Cancel
+        </button>
+
+        <button class="primary-action" type="submit" id="serviq-customer-save">
+          Add customer
+        </button>
+      </div>
+    </form>
+  </section>
+</div>
+
+<script>
+  import {
+    createCustomer,
+    deleteCustomer,
+    getState,
+    subscribe,
+    updateCustomer,
+    updateInvoice,
+    updateWorkOrder,
+  } from "../../lib/serviq/store";
+
+  import type { Customer } from "../../data/serviq/customers";
+
+  const root = document.querySelector<HTMLElement>(".serviq-customers");
+
+  const grid = document.querySelector<HTMLElement>("#serviq-customer-grid");
+
+  const summary = document.querySelector<HTMLElement>(
+    "#serviq-customer-summary",
+  );
+
+  const searchInput = document.querySelector<HTMLInputElement>(
+    "#serviq-customer-search",
+  );
+
+  const activityFilter = document.querySelector<HTMLSelectElement>(
+    "#serviq-customer-activity",
+  );
+
+  const sortSelect = document.querySelector<HTMLSelectElement>(
+    "#serviq-customer-sort",
+  );
+
+  const resultCount = document.querySelector<HTMLElement>(
+    "#serviq-customer-result-count",
+  );
+
+  const emptyState = document.querySelector<HTMLElement>(
+    "#serviq-customer-empty",
+  );
+
+  const modal = document.querySelector<HTMLElement>("#serviq-customer-modal");
+
+  const form = document.querySelector<HTMLFormElement>("#serviq-customer-form");
+
+  const modalTitle = document.querySelector<HTMLElement>(
+    "#serviq-customer-modal-title",
+  );
+
+  const modalDescription = document.querySelector<HTMLElement>(
+    "#serviq-customer-modal-description",
+  );
+
+  const saveButton = document.querySelector<HTMLButtonElement>(
+    "#serviq-customer-save",
+  );
+
+  const feedback = document.querySelector<HTMLElement>(
+    "#serviq-customer-feedback",
+  );
+
+  if (
+    root &&
+    grid &&
+    summary &&
+    searchInput &&
+    activityFilter &&
+    sortSelect &&
+    resultCount &&
+    emptyState &&
+    modal &&
+    form &&
+    modalTitle &&
+    modalDescription &&
+    saveButton &&
+    feedback
+  ) {
+    let editingCustomerName: string | null = null;
+    let previousBodyOverflow = "";
+    let feedbackTimeout: ReturnType<typeof setTimeout> | undefined;
+
+    const escapeHtml = (value: unknown): string =>
+      String(value ?? "").replace(/[&<>"']/g, (character) => {
+        const entities: Record<string, string> = {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        };
+
+        return entities[character] ?? character;
+      });
+
+    const normaliseName = (value: string): string =>
+      value.trim().toLocaleLowerCase();
+
+    const parseCurrency = (value: string): number => {
+      const cleaned = value.replace(/[^\d.-]/g, "");
+      const parsed = Number(cleaned);
+
+      return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+    };
+
+    const formatCurrency = (value: number): string =>
+      new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 0,
+      }).format(Math.max(0, value));
+
+    const getInitials = (name: string): string =>
+      name
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part.charAt(0).toUpperCase())
+        .join("") || "CU";
+
+    const isClosedOrder = (status: string): boolean =>
+      [
+        "completed",
+        "complete",
+        "closed",
+        "cancelled",
+        "canceled",
+        "invoiced",
+        "paid",
+      ].includes(status.trim().toLowerCase());
+
+    const getOpenJobs = (customerName: string): number => {
+      const target = normaliseName(customerName);
+
+      return getState().workOrders.filter(
+        (order) =>
+          normaliseName(order.customer) === target &&
+          !isClosedOrder(order.status),
+      ).length;
+    };
+
+    const getRelatedRecordCounts = (customerName: string) => {
+      const target = normaliseName(customerName);
+      const state = getState();
+
+      const workOrders = state.workOrders.filter(
+        (order) => normaliseName(order.customer) === target,
+      );
+
+      const invoices = state.invoices.filter(
+        (invoice) => normaliseName(invoice.customer) === target,
+      );
+
+      return {
+        workOrders: workOrders.length,
+        invoices: invoices.length,
+      };
+    };
+
+    const showFeedback = (
+      message: string,
+      kind: "success" | "error" = "success",
+    ): void => {
+      if (!feedback) return;
+
+      if (feedbackTimeout) {
+        clearTimeout(feedbackTimeout);
+      }
+
+      feedback.textContent = message;
+      feedback.className = `serviq-customer-feedback ${kind}`;
+      feedback.hidden = false;
+
+      feedbackTimeout = setTimeout(() => {
+        if (feedback) feedback.hidden = true;
+      }, 4500);
+    };
+
+    const renderSummary = (customers: Customer[]): void => {
+      const activeCustomers = customers.filter(
+        (customer) => getOpenJobs(customer.name) > 0,
+      ).length;
+
+      const openJobs = customers.reduce(
+        (total, customer) => total + getOpenJobs(customer.name),
+        0,
+      );
+
+      const lifetimeValue = customers.reduce(
+        (total, customer) => total + parseCurrency(customer.lifetime),
+        0,
+      );
+
+      const metrics = [
+        {
+          label: "Total customers",
+          value: String(customers.length),
+          note: "Saved customer profiles",
+          accent: "gold",
+          icon: "◎",
+        },
+        {
+          label: "Active customers",
+          value: String(activeCustomers),
+          note: "Customers with open jobs",
+          accent: "green",
+          icon: "↗",
+        },
+        {
+          label: "Open work orders",
+          value: String(openJobs),
+          note: "Calculated from work orders",
+          accent: "blue",
+          icon: "▤",
+        },
+        {
+          label: "Lifetime value",
+          value: formatCurrency(lifetimeValue),
+          note: "Recorded value across customers",
+          accent: "purple",
+          icon: "₹",
+        },
+      ];
+
+      summary.innerHTML = metrics
+        .map(
+          (metric) => `
+            <article class="serviq-customer-metric ${metric.accent}">
+              <div class="serviq-customer-metric-top">
+                <span>${escapeHtml(metric.label)}</span>
+                <span class="serviq-customer-metric-icon" aria-hidden="true">${metric.icon}</span>
+              </div>
+              <strong>${escapeHtml(metric.value)}</strong>
+              <small>${escapeHtml(metric.note)}</small>
+            </article>
+          `,
+        )
+        .join("");
+    };
+
+    const renderCustomers = (): void => {
+      if (!grid || !summary || !resultCount || !emptyState) {
+        return;
+      }
+
+      const customers = getState().customers;
+      const query = searchInput.value.trim().toLowerCase();
+      const activity = activityFilter.value;
+      const sort = sortSelect.value;
+
+      renderSummary(customers);
+
+      const filtered = customers.filter((customer) => {
+        const matchesSearch = [
+          customer.name,
+          customer.company,
+          customer.phone,
+          customer.location,
+        ].some((value) =>
+          String(value ?? "")
+            .toLowerCase()
+            .includes(query),
+        );
+
+        const openJobs = getOpenJobs(customer.name);
+
+        const matchesActivity =
+          activity === "all" ||
+          (activity === "active" && openJobs > 0) ||
+          (activity === "inactive" && openJobs === 0);
+
+        return matchesSearch && matchesActivity;
+      });
+
+      filtered.sort((first, second) => {
+        if (sort === "jobs") {
+          return getOpenJobs(second.name) - getOpenJobs(first.name);
+        }
+
+        if (sort === "value") {
+          return parseCurrency(second.lifetime) - parseCurrency(first.lifetime);
+        }
+
+        return first.name.localeCompare(second.name);
+      });
+
+      resultCount.textContent = `${filtered.length} of ${customers.length} customer${customers.length === 1 ? "" : "s"}`;
+
+      emptyState.hidden = filtered.length > 0;
+      grid.hidden = filtered.length === 0;
+
+      grid.innerHTML = filtered
+        .map((customer) => {
+          const openJobs = getOpenJobs(customer.name);
+          const hasOpenJobs = openJobs > 0;
+          const related = getRelatedRecordCounts(customer.name);
+
+          const value = formatCurrency(parseCurrency(customer.lifetime));
+
+          return `
+            <article class="customer-card serviq-customer-card">
+              <div class="customer-card-header">
+                <span class="large-customer-avatar">
+                  ${escapeHtml(getInitials(customer.name))}
+                </span>
+
+                <span class="serviq-customer-status ${hasOpenJobs ? "active" : "quiet"}">
+                  <i></i>
+                  ${hasOpenJobs ? "Active" : "No open jobs"}
+                </span>
+              </div>
+
+              <h3>${escapeHtml(customer.name)}</h3>
+              <p class="serviq-customer-company">${escapeHtml(customer.company || "Individual customer")}</p>
+
+              <div class="serviq-customer-contact">
+                <div>
+                  <span aria-hidden="true">⌖</span>
+                  <span>${escapeHtml(customer.location || "Location not provided")}</span>
+                </div>
+                <div>
+                  <span aria-hidden="true">☎</span>
+                  <span>${escapeHtml(customer.phone || "Phone not provided")}</span>
+                </div>
+              </div>
+
+              <div class="serviq-customer-values">
+                <div>
+                  <span>OPEN JOBS</span>
+                  <strong>${openJobs}</strong>
+                </div>
+                <div>
+                  <span>LIFETIME VALUE</span>
+                  <strong title="${escapeHtml(value)}">${escapeHtml(value)}</strong>
+                </div>
+              </div>
+
+              <div class="serviq-customer-history">
+                <span>${related.workOrders} work order${related.workOrders === 1 ? "" : "s"} on record</span>
+                <span>${related.invoices} invoice${related.invoices === 1 ? "" : "s"}</span>
+              </div>
+
+              <div class="serviq-customer-card-actions">
+                <button
+                  type="button"
+                  class="secondary-action"
+                  data-action="edit"
+                  data-customer-name="${escapeHtml(customer.name)}"
+                >
+                  Edit customer
+                </button>
+
+                <button
+                  type="button"
+                  class="serviq-customer-delete"
+                  data-action="delete"
+                  data-customer-name="${escapeHtml(customer.name)}"
+                  aria-label="Remove ${escapeHtml(customer.name)}"
+                >
+                  Remove
+                </button>
+              </div>
+            </article>
+          `;
+        })
+        .join("");
+    };
+
+    const openModal = (customer?: Customer): void => {
+      if (!modal || !form || !modalTitle || !modalDescription || !saveButton) {
+        return;
+      }
+
+      editingCustomerName = customer?.name ?? null;
+
+      form.reset();
+
+      modalTitle.textContent = customer ? "Edit customer" : "Add customer";
+
+      modalDescription.textContent = customer
+        ? "Update this customer's contact details and recorded value."
+        : "Create a customer profile for your service operations.";
+
+      saveButton.textContent = customer ? "Save changes" : "Add customer";
+
+      const nameInput = form.elements.namedItem("name") as HTMLInputElement;
+
+      const companyInput = form.elements.namedItem(
+        "company",
+      ) as HTMLInputElement;
+
+      const phoneInput = form.elements.namedItem("phone") as HTMLInputElement;
+
+      const locationInput = form.elements.namedItem(
+        "location",
+      ) as HTMLInputElement;
+
+      const lifetimeInput = form.elements.namedItem(
+        "lifetime",
+      ) as HTMLInputElement;
+
+      if (customer) {
+        nameInput.value = customer.name;
+        companyInput.value = customer.company;
+        phoneInput.value = customer.phone;
+        locationInput.value = customer.location;
+        lifetimeInput.value = String(parseCurrency(customer.lifetime));
+      } else {
+        companyInput.value = "Home";
+        lifetimeInput.value = "0";
+      }
+
+      previousBodyOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      modal.hidden = false;
+
+      window.setTimeout(() => nameInput.focus(), 0);
+    };
+
+    const closeModal = (): void => {
+      if (!modal || !form) return;
+
+      modal.hidden = true;
+      document.body.style.overflow = previousBodyOverflow;
+      editingCustomerName = null;
+      form.reset();
+    };
+
+    const removeCustomer = (name: string): void => {
+      const customer = getState().customers.find((item) => item.name === name);
+
+      if (!customer) {
+        showFeedback("This customer could not be found.", "error");
+        return;
+      }
+
+      const related = getRelatedRecordCounts(name);
+
+      if (related.workOrders > 0 || related.invoices > 0) {
+        showFeedback(
+          `This customer has ${related.workOrders} work order(s) and ${related.invoices} invoice(s) on record. Keep the profile to preserve service history.`,
+          "error",
+        );
+        return;
+      }
+
+      if (
+        !window.confirm(`Remove ${customer.name} from your customer directory?`)
+      ) {
+        return;
+      }
+
+      try {
+        const deleted = deleteCustomer(customer.name);
+
+        if (!deleted) {
+          showFeedback("The customer could not be removed.", "error");
+          return;
+        }
+
+        showFeedback(`${customer.name} was removed from the directory.`);
+      } catch (error) {
+        showFeedback(
+          error instanceof Error
+            ? error.message
+            : "Unable to remove this customer.",
+          "error",
+        );
+      }
+    };
+
+    document
+      .querySelector<HTMLButtonElement>("#serviq-add-customer")
+      ?.addEventListener("click", () => openModal());
+
+    document
+      .querySelector<HTMLButtonElement>("#serviq-customer-modal-close")
+      ?.addEventListener("click", closeModal);
+
+    document
+      .querySelector<HTMLButtonElement>("#serviq-customer-cancel")
+      ?.addEventListener("click", closeModal);
+
+    document
+      .querySelector<HTMLButtonElement>("#serviq-customer-reset")
+      ?.addEventListener("click", () => {
+        searchInput.value = "";
+        activityFilter.value = "all";
+        sortSelect.value = "name";
+        renderCustomers();
+      });
+
+    searchInput.addEventListener("input", renderCustomers);
+    activityFilter.addEventListener("change", renderCustomers);
+    sortSelect.addEventListener("change", renderCustomers);
+
+    grid.addEventListener("click", (event) => {
+      const target = event.target;
+
+      if (!(target instanceof Element)) return;
+
+      const button = target.closest<HTMLButtonElement>("button[data-action]");
+
+      if (!button) return;
+
+      const action = button.dataset.action;
+      const name = button.dataset.customerName;
+
+      if (!name) return;
+
+      if (action === "edit") {
+        const customer = getState().customers.find(
+          (item) => item.name === name,
+        );
+
+        if (customer) openModal(customer);
+        return;
+      }
+
+      if (action === "delete") {
+        removeCustomer(name);
+      }
+    });
+
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) closeModal();
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !modal.hidden) {
+        closeModal();
+      }
+    });
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(form);
+
+      const name = String(formData.get("name") ?? "").trim();
+      const company = String(formData.get("company") ?? "").trim() || "Home";
+      const phone = String(formData.get("phone") ?? "").trim();
+      const location = String(formData.get("location") ?? "").trim();
+      const lifetimeAmount = Number(formData.get("lifetime"));
+
+      if (!name) {
+        showFeedback("Enter the customer's full name.", "error");
+        return;
+      }
+
+      if (
+        !Number.isFinite(lifetimeAmount) ||
+        lifetimeAmount < 0 ||
+        lifetimeAmount > 100000000000
+      ) {
+        showFeedback("Enter a valid non-negative lifetime value.", "error");
+        return;
+      }
+
+      const existingCustomer = editingCustomerName
+        ? getState().customers.find((item) => item.name === editingCustomerName)
+        : null;
+
+      const openJobs = existingCustomer
+        ? getOpenJobs(existingCustomer.name)
+        : 0;
+
+      const payload: Customer = {
+        name,
+        company,
+        phone,
+        location,
+        openJobs,
+        lifetime: formatCurrency(lifetimeAmount),
+      };
+
+      try {
+        if (editingCustomerName) {
+          const oldName = editingCustomerName;
+
+          const updated = updateCustomer(oldName, payload);
+
+          if (!updated) {
+            showFeedback("This customer could not be found.", "error");
+            return;
+          }
+
+          if (oldName !== name) {
+            const oldNameKey = normaliseName(oldName);
+
+            const linkedOrders = getState().workOrders.filter(
+              (order) => normaliseName(order.customer) === oldNameKey,
+            );
+
+            const linkedInvoices = getState().invoices.filter(
+              (invoice) => normaliseName(invoice.customer) === oldNameKey,
+            );
+
+            for (const order of linkedOrders) {
+              updateWorkOrder(order.id, {
+                customer: name,
+              });
+            }
+
+            for (const invoice of linkedInvoices) {
+              updateInvoice(invoice.id, {
+                customer: name,
+              });
+            }
+          }
+
+          closeModal();
+          showFeedback(`${name}'s customer profile was updated.`);
+        } else {
+          createCustomer(payload);
+          closeModal();
+          showFeedback(`${name} was added to your customer directory.`);
+        }
+      } catch (error) {
+        showFeedback(
+          error instanceof Error
+            ? error.message
+            : "Unable to save this customer.",
+          "error",
+        );
+      }
+    });
+
+    subscribe(() => {
+      renderCustomers();
+    });
+
+    renderCustomers();
+  }
+</script>
+
+<style is:global>
+  .serviq-customer-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin: 28px 0 24px;
+  }
+
+  .serviq-customer-metric {
+    min-width: 0;
+    padding: 21px 22px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.09));
+    border-radius: 18px;
+    background: var(--panel, #101814);
+  }
+
+  .serviq-customer-metric-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--muted, #97a59c);
+    font-size: 12px;
+    font-weight: 650;
+  }
+
+  .serviq-customer-metric-icon {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    place-items: center;
+    border: 1px solid currentColor;
+    border-radius: 11px;
+    font-size: 16px;
+  }
+
+  .serviq-customer-metric.gold .serviq-customer-metric-icon {
+    color: var(--gold, #d6b568);
+    background: rgba(214, 181, 104, 0.08);
+  }
+
+  .serviq-customer-metric.green .serviq-customer-metric-icon {
+    color: #79d9a3;
+    background: rgba(121, 217, 163, 0.08);
+  }
+
+  .serviq-customer-metric.blue .serviq-customer-metric-icon {
+    color: #85c7ee;
+    background: rgba(133, 199, 238, 0.08);
+  }
+
+  .serviq-customer-metric.purple .serviq-customer-metric-icon {
+    color: #c4a4f5;
+    background: rgba(196, 164, 245, 0.08);
+  }
+
+  .serviq-customer-metric > strong {
+    display: block;
+    margin: 12px 0 5px;
+    color: var(--text, #edf3ed);
+    font-size: clamp(23px, 2vw, 33px);
+    font-weight: 680;
+    line-height: 1.25;
+    letter-spacing: -0.045em;
+    overflow-wrap: anywhere;
+  }
+
+  .serviq-customer-metric > small {
+    color: var(--muted, #97a59c);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .serviq-customer-toolbar {
+    display: flex;
+    align-items: end;
+    gap: 14px;
+    margin-bottom: 32px;
+    padding: 17px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.09));
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.018);
+  }
+
+  .serviq-customer-search {
+    display: flex;
+    min-width: 180px;
+    min-height: 46px;
+    flex: 1;
+    align-items: center;
+    gap: 10px;
+    padding: 0 13px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+    border-radius: 11px;
+    background: var(--panel, #101814);
+    color: var(--muted, #97a59c);
+  }
+
+  .serviq-customer-search > span {
+    font-size: 22px;
+    line-height: 1;
+  }
+
+  .serviq-customer-search input {
+    width: 100%;
+    min-width: 0;
+    padding: 11px 0;
+    border: 0;
+    outline: none;
+    color: var(--text, #edf3ed);
+    background: transparent;
+    font: inherit;
+    font-size: 13px;
+  }
+
+  .serviq-customer-search input::placeholder {
+    color: var(--muted, #97a59c);
+    opacity: 0.8;
+  }
+
+  .serviq-customer-filter {
+    display: grid;
+    min-width: 155px;
+    gap: 7px;
+  }
+
+  .serviq-customer-filter > span {
+    color: var(--muted, #97a59c);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.045em;
+    text-transform: uppercase;
+  }
+
+  .serviq-customer-filter select {
+    width: 100%;
+    min-height: 46px;
+    padding: 0 31px 0 12px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+    border-radius: 11px;
+    color: var(--text, #edf3ed);
+    background-color: var(--panel, #101814);
+    font: inherit;
+    font-size: 12px;
+  }
+
+  .serviq-customer-results-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+  }
+
+  .serviq-customer-results-heading h2 {
+    margin: 7px 0 0;
+    color: var(--text, #edf3ed);
+    font-size: 21px;
+    font-weight: 620;
+    letter-spacing: -0.025em;
+  }
+
+  .serviq-customer-result-count {
+    padding-bottom: 3px;
+    color: var(--muted, #97a59c);
+    font-size: 12px;
+  }
+
+  .serviq-customer-grid {
+    align-items: stretch;
+  }
+
+  .serviq-customer-card {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    padding: 23px;
+    border-color: var(--line, rgba(255, 255, 255, 0.09));
+    background:
+      radial-gradient(
+        circle at 100% 0,
+        rgba(214, 181, 104, 0.045),
+        transparent 39%
+      ),
+      var(--panel, #101814);
+    transition:
+      border-color 180ms ease,
+      transform 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  .serviq-customer-card:hover {
+    border-color: rgba(214, 181, 104, 0.28);
+    box-shadow: 0 15px 36px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .serviq-customer-card .customer-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 17px;
+  }
+
+  .serviq-customer-card .large-customer-avatar {
+    display: grid;
+    width: 58px;
+    height: 58px;
+    flex: 0 0 58px;
+    place-items: center;
+    border: 1px solid rgba(214, 181, 104, 0.19);
+    border-radius: 17px;
+    color: var(--gold, #d6b568);
+    background: rgba(214, 181, 104, 0.075);
+    font-size: 17px;
+    font-weight: 750;
+  }
+
+  .serviq-customer-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    max-width: 100%;
+    padding: 7px 9px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.09));
+    border-radius: 9px;
+    color: var(--muted, #97a59c);
+    font-size: 10px;
+    line-height: 1.3;
+  }
+
+  .serviq-customer-status > i {
+    width: 7px;
+    height: 7px;
+    flex: 0 0 7px;
+    border-radius: 50%;
+    background: #89958d;
+  }
+
+  .serviq-customer-status.active > i {
+    background: #79d9a3;
+    box-shadow: 0 0 9px rgba(121, 217, 163, 0.35);
+  }
+
+  .serviq-customer-card h3 {
+    margin: 0;
+    color: var(--text, #edf3ed);
+    font-size: 19px;
+    font-weight: 680;
+    letter-spacing: -0.025em;
+    overflow-wrap: anywhere;
+  }
+
+  .serviq-customer-card .serviq-customer-company {
+    min-height: 20px;
+    margin: 7px 0 17px;
+    color: var(--muted, #97a59c);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .serviq-customer-contact {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .serviq-customer-contact > div {
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr);
+    align-items: start;
+    gap: 8px;
+    color: var(--muted, #97a59c);
+    font-size: 12px;
+    line-height: 1.55;
+  }
+
+  .serviq-customer-contact > div > span:first-child {
+    color: var(--gold, #d6b568);
+    font-size: 14px;
+  }
+
+  .serviq-customer-contact > div > span:last-child {
+    overflow-wrap: anywhere;
+  }
+
+  .serviq-customer-values {
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr;
+    gap: 13px;
+    padding: 16px 0;
+    border-top: 1px solid var(--line, rgba(255, 255, 255, 0.09));
+    border-bottom: 1px solid var(--line, rgba(255, 255, 255, 0.09));
+  }
+
+  .serviq-customer-values > div {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .serviq-customer-values span {
+    color: var(--muted, #97a59c);
+    font-size: 9px;
+    font-weight: 750;
+    letter-spacing: 0.05em;
+  }
+
+  .serviq-customer-values strong {
+    color: var(--text, #edf3ed);
+    font-size: 16px;
+    font-weight: 680;
+    overflow-wrap: anywhere;
+  }
+
+  .serviq-customer-history {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 14px 0 18px;
+    color: var(--muted, #97a59c);
+    font-size: 10px;
+  }
+
+  .serviq-customer-history > span {
+    padding: 6px 8px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.075));
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.018);
+  }
+
+  .serviq-customer-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: auto;
+  }
+
+  .serviq-customer-card-actions .secondary-action {
+    min-height: 40px;
+    flex: 1;
+    justify-content: center;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  .serviq-customer-delete {
+    min-height: 40px;
+    padding: 0 11px;
+    border: 1px solid rgba(237, 117, 117, 0.2);
+    border-radius: 10px;
+    color: #e99a9a;
+    background: rgba(237, 117, 117, 0.055);
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition:
+      border-color 150ms ease,
+      background 150ms ease;
+  }
+
+  .serviq-customer-delete:hover {
+    border-color: rgba(237, 117, 117, 0.5);
+    background: rgba(237, 117, 117, 0.1);
+  }
+
+  .serviq-customer-feedback {
+    margin: 18px 0 0;
+    padding: 12px 15px;
+    border: 1px solid rgba(121, 217, 163, 0.25);
+    border-radius: 11px;
+    color: #a1e8bb;
+    background: rgba(121, 217, 163, 0.055);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .serviq-customer-feedback.error {
+    border-color: rgba(237, 117, 117, 0.3);
+    color: #f0a5a5;
+    background: rgba(237, 117, 117, 0.06);
+  }
+
+  .serviq-customer-feedback[hidden],
+  .serviq-customer-grid[hidden],
+  .serviq-customer-modal[hidden],
+  .serviq-customer-empty[hidden] {
+    display: none !important;
+  }
+
+  .serviq-customer-empty {
+    padding: 56px 20px;
+    border: 1px dashed var(--line, rgba(255, 255, 255, 0.12));
+    border-radius: 18px;
+    text-align: center;
+  }
+
+  .serviq-customer-empty-icon {
+    display: inline-grid;
+    width: 46px;
+    height: 46px;
+    place-items: center;
+    border-radius: 14px;
+    color: var(--gold, #d6b568);
+    background: rgba(214, 181, 104, 0.08);
+    font-size: 24px;
+  }
+
+  .serviq-customer-empty h3 {
+    margin: 16px 0 7px;
+    color: var(--text, #edf3ed);
+    font-size: 18px;
+  }
+
+  .serviq-customer-empty p {
+    margin: 0 0 18px;
+    color: var(--muted, #97a59c);
+    font-size: 13px;
+  }
+
+  .serviq-customer-modal {
+    position: fixed;
+    z-index: 10000;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    overflow: auto;
+    padding: 24px;
+    background: rgba(2, 7, 5, 0.78);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .serviq-customer-modal-card {
+    width: min(100%, 650px);
+    max-height: min(90vh, 850px);
+    overflow: auto;
+    padding: 28px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.12));
+    border-radius: 20px;
+    background: var(--panel, #101814);
+    box-shadow: 0 28px 100px rgba(0, 0, 0, 0.5);
+  }
+
+  .serviq-customer-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 25px;
+  }
+
+  .serviq-customer-modal-header h2 {
+    margin: 9px 0 7px;
+    color: var(--text, #edf3ed);
+    font-size: 25px;
+    font-weight: 680;
+    letter-spacing: -0.035em;
+  }
+
+  .serviq-customer-modal-header p {
+    margin: 0;
+    color: var(--muted, #97a59c);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .serviq-customer-modal-close {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    place-items: center;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+    border-radius: 11px;
+    color: var(--text, #edf3ed);
+    background: rgba(255, 255, 255, 0.025);
+    font: inherit;
+    font-size: 25px;
+    cursor: pointer;
+  }
+
+  .serviq-customer-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 14px;
+  }
+
+  .serviq-customer-field {
+    display: grid;
+    min-width: 0;
+    gap: 8px;
+  }
+
+  .serviq-customer-field-wide {
+    grid-column: 1 / -1;
+  }
+
+  .serviq-customer-field > span {
+    color: var(--text, #edf3ed);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .serviq-customer-field > span b {
+    color: var(--gold, #d6b568);
+  }
+
+  .serviq-customer-field input {
+    width: 100%;
+    min-width: 0;
+    min-height: 45px;
+    padding: 11px 12px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.12));
+    border-radius: 10px;
+    outline-offset: 3px;
+    color: var(--text, #edf3ed);
+    background: rgba(255, 255, 255, 0.025);
+    font: inherit;
+    font-size: 13px;
+  }
+
+  .serviq-customer-field input:focus,
+  .serviq-customer-search:focus-within,
+  .serviq-customer-filter select:focus {
+    border-color: rgba(214, 181, 104, 0.55);
+  }
+
+  .serviq-customer-field input::placeholder {
+    color: var(--muted, #97a59c);
+    opacity: 0.75;
+  }
+
+  .serviq-customer-field > small {
+    color: var(--muted, #97a59c);
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  .serviq-customer-form-note {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 20px;
+    color: var(--muted, #97a59c);
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  .serviq-customer-form-note > span {
+    display: inline-grid;
+    width: 17px;
+    height: 17px;
+    flex: 0 0 17px;
+    place-items: center;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    font-size: 10px;
+  }
+
+  .serviq-customer-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 26px;
+    padding-top: 19px;
+    border-top: 1px solid var(--line, rgba(255, 255, 255, 0.09));
+  }
+
+  .serviq-customer-modal-actions button {
+    min-height: 43px;
+    justify-content: center;
+  }
+
+  @media (max-width: 1050px) {
+    .serviq-customer-summary {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .serviq-customer-toolbar {
+      flex-wrap: wrap;
+    }
+
+    .serviq-customer-search {
+      flex-basis: 100%;
+    }
+
+    .serviq-customer-filter {
+      flex: 1;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .serviq-customer-summary {
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .serviq-customer-metric {
+      padding: 15px;
+      border-radius: 14px;
+    }
+
+    .serviq-customer-metric-top {
+      align-items: flex-start;
+      font-size: 11px;
+    }
+
+    .serviq-customer-metric-icon {
+      width: 29px;
+      height: 29px;
+      flex-basis: 29px;
+    }
+
+    .serviq-customer-metric > strong {
+      margin-top: 13px;
+      font-size: 24px;
+    }
+
+    .serviq-customer-metric > small {
+      font-size: 11px;
+    }
+
+    .serviq-customer-toolbar {
+      align-items: stretch;
+      gap: 12px;
+      padding: 12px;
+    }
+
+    .serviq-customer-filter {
+      min-width: calc(50% - 6px);
+    }
+
+    .serviq-customer-filter select {
+      min-height: 43px;
+      padding-left: 9px;
+      font-size: 11px;
+    }
+
+    .serviq-customer-results-heading {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .serviq-customer-modal {
+      align-items: start;
+      padding: 12px;
+    }
+
+    .serviq-customer-modal-card {
+      max-height: none;
+      padding: 20px;
+      border-radius: 16px;
+    }
+
+    .serviq-customer-modal-header h2 {
+      font-size: 22px;
+    }
+
+    .serviq-customer-form-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .serviq-customer-field-wide {
+      grid-column: auto;
+    }
+
+    .serviq-customer-modal-actions {
+      flex-direction: column-reverse;
+    }
+
+    .serviq-customer-modal-actions button {
+      width: 100%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .serviq-customer-card,
+    .serviq-customer-delete {
+      transition: none;
+    }
+  }
+</style>

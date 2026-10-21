@@ -1,0 +1,53 @@
+---
+interface Props {
+  name: string;
+  company: string;
+  phone: string;
+  location: string;
+  openJobs: number;
+  lifetime: string;
+}
+
+const { name, company, phone, location, openJobs, lifetime } = Astro.props;
+
+const initials = name
+  .split(" ")
+  .map((word) => word[0])
+  .join("");
+---
+
+<article class="customer-card">
+  <div class="customer-card-header">
+    <span class="large-customer-avatar">{initials}</span>
+
+    <button type="button" aria-label={`More actions for ${name}`}>
+      •••
+    </button>
+  </div>
+
+  <h3>{name}</h3>
+
+  <small>{company}</small>
+
+  <div class="customer-meta">
+    <span>⌖ {location}</span>
+    <span>☎ {phone}</span>
+  </div>
+
+  <div class="customer-value">
+    <div>
+      <span>OPEN JOBS</span>
+      <strong>{openJobs}</strong>
+    </div>
+
+    <div>
+      <span>LIFETIME VALUE</span>
+      <strong>{lifetime}</strong>
+    </div>
+  </div>
+
+  <button type="button" class="profile-card-button">
+    Open customer
+    <span>↗</span>
+  </button>
+</article>

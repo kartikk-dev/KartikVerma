@@ -22,3 +22,42 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Build output and dependencies
+node_modules/
+dist/
+.astro/
+.vercel/
+
+# Local files and logs
+*.local
+npm-debug.log*
+.DS_Store
+
+# Local backups
+.backups/
+backups/
+*.backup
+*.backup.*
+*.bak
+*.before-*
+
+# Local diagnostic output
+astro-build-errors.txt
+astro-check-errors.txt
+astro-check-output.txt
+serviq-build-errors.log
+serviq-dev-errors.log
+serviq-current-script-backup.txt
+
+# Local archives and duplicate assets
+Portfolio-3D-Reviews-Supabase-Free.zip
+public/favicon copy.svg
+
+# Local notes and diagnostic output
+REPAIR-NOTES.md
+serviq-build-errors.txt

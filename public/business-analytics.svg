@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Metricline business analytics">
+  <rect x="2" y="2" width="60" height="60" rx="17" fill="#183B32"/>
+  <path d="M15 46V35M24 46V27M33 46V32M42 46V20" fill="none" stroke="#F5F8F5" stroke-width="5.2" stroke-linecap="round"/>
+  <path d="m12 25 12-8 10 3 17-11" fill="none" stroke="#F08A6B" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="51" cy="9" r="3.3" fill="#F08A6B" stroke="#183B32" stroke-width="1.2"/>
+</svg>

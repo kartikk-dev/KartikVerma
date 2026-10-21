@@ -1,0 +1,68 @@
+---
+interface Props {
+  id: string;
+  name: string;
+  initials: string;
+  role: string;
+  status: string;
+  zone: string;
+  jobs: number;
+  rating: number;
+  color: string;
+}
+
+const { id, name, initials, role, status, zone, jobs, rating, color } =
+  Astro.props;
+
+const statusClass =
+  status === "Available"
+    ? "available"
+    : status === "En Route"
+      ? "route"
+      : "working";
+---
+
+<article class="profile-card">
+  <div class="profile-card-top">
+    <span class={`tech-avatar large ${color}`}>{initials}</span>
+
+    <button
+      type="button"
+      class="card-more"
+      aria-label={`More actions for ${name}`}
+    >
+      •••
+    </button>
+  </div>
+
+  <h3>{name}</h3>
+
+  <p>{role}</p>
+
+  <div class="profile-status">
+    <i class={statusClass}></i>
+    {status}
+  </div>
+
+  <div class="profile-stats">
+    <div>
+      <span>JOBS</span>
+      <strong>{jobs}</strong>
+    </div>
+
+    <div>
+      <span>RATING</span>
+      <strong>{rating} ★</strong>
+    </div>
+
+    <div>
+      <span>ZONE</span>
+      <strong>{zone}</strong>
+    </div>
+  </div>
+
+  <button type="button" class="profile-card-button" data-tech={id}>
+    View technician
+    <span>↗</span>
+  </button>
+</article>

@@ -1,0 +1,21 @@
+---
+import BusinessAnalyticsLegalLayout from '../../../layouts/BusinessAnalyticsLegalLayout.astro';
+---
+<BusinessAnalyticsLegalLayout title="Reject optional cookies" description="Record a choice to reject optional browser storage in this demo." eyebrow="YOUR CHOICE">
+  <h2>Reject optional storage</h2><p>The current demo does not install optional analytics or advertising trackers. Selecting this choice records your preference in this browser so the banner can stay dismissed during later visits.</p>
+  <div class="legal-note" id="reject-status" role="status" aria-live="polite">Select the button below to save your choice.</div>
+  <div class="settings-buttons"><button type="button" class="primary" id="reject-optional">Reject optional storage</button><a href="/business-analytics/privacy-settings">Review privacy settings</a></div>
+  <h2>What happens next?</h2><p>Necessary interface storage may still be used to remember theme and display preferences. Rejecting optional storage does not block essential interface behavior. If optional services are added later, consent controls must be updated to govern their actual loading behavior.</p>
+  <script is:inline>
+    (() => {
+      const button = document.getElementById('reject-optional');
+      const status = document.getElementById('reject-status');
+      button?.addEventListener('click', () => {
+        try { localStorage.setItem('metricline-cookie-choice-v1', 'reject-optional'); } catch {}
+        if (status) status.textContent = 'Saved: optional storage rejected in this browser.';
+        button.textContent = 'Choice saved';
+        button.setAttribute('disabled', 'true');
+      });
+    })();
+  </script>
+</BusinessAnalyticsLegalLayout>

@@ -1,0 +1,193 @@
+---
+---
+
+<div
+  class="toast serviq-toast"
+  id="toast"
+  role="status"
+  aria-live="polite"
+  aria-atomic="true"
+  hidden
+>
+  <span class="serviq-toast-icon" id="serviq-toast-icon" aria-hidden="true">
+    ✓
+  </span>
+  <span class="serviq-toast-message" id="serviq-toast-message"></span>
+  <button
+    type="button"
+    class="serviq-toast-close"
+    id="serviq-toast-close"
+    aria-label="Dismiss notification"
+  >
+    ×
+  </button>
+</div>
+
+<script>
+  const toast = document.querySelector<HTMLElement>("#toast");
+  const toastIcon = document.querySelector<HTMLElement>("#serviq-toast-icon");
+  const toastMessage = document.querySelector<HTMLElement>(
+    "#serviq-toast-message",
+  );
+  const toastClose = document.querySelector<HTMLButtonElement>(
+    "#serviq-toast-close",
+  );
+
+  if (toast && toastIcon && toastMessage && toastClose) {
+    let dismissTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const dismiss = (): void => {
+      if (dismissTimer) clearTimeout(dismissTimer);
+
+      toast.classList.remove("show");
+
+      window.setTimeout(() => {
+        toast.hidden = true;
+      }, 180);
+    };
+
+    const show = (
+      message: string,
+      kind: "success" | "error" | "info" = "success",
+    ): void => {
+      if (dismissTimer) clearTimeout(dismissTimer);
+
+      toastMessage.textContent = message;
+      toast.dataset.kind = kind;
+      toastIcon.textContent =
+        kind === "error" ? "!" : kind === "info" ? "i" : "✓";
+
+      toast.hidden = false;
+
+      window.requestAnimationFrame(() => {
+        toast.classList.add("show");
+      });
+
+      dismissTimer = setTimeout(dismiss, 3400);
+    };
+
+    document.addEventListener("serviq:toast", (event: Event) => {
+      const detail = (
+        event as CustomEvent<{
+          message?: unknown;
+          kind?: unknown;
+        }>
+      ).detail;
+
+      if (!detail || typeof detail.message !== "string") return;
+
+      const kind =
+        detail.kind === "error" || detail.kind === "info"
+          ? detail.kind
+          : "success";
+
+      show(detail.message, kind);
+    });
+
+    toastClose.addEventListener("click", dismiss);
+  }
+</script>
+
+<style is:global>
+  .serviq-toast[hidden] {
+    display: none !important;
+  }
+
+  .serviq-toast {
+    position: fixed;
+    z-index: 20000;
+    right: 24px;
+    bottom: 24px;
+    display: flex;
+    width: min(440px, calc(100vw - 32px));
+    align-items: center;
+    gap: 12px;
+    padding: 14px 15px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.12));
+    border-radius: 14px;
+    color: var(--text, #edf3ed);
+    background: var(--panel, #101814);
+    box-shadow: 0 18px 55px rgba(0, 0, 0, 0.36);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(10px);
+    transition:
+      opacity 180ms ease,
+      transform 180ms ease;
+  }
+
+  .serviq-toast.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .serviq-toast-icon {
+    display: grid;
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    place-items: center;
+    border: 1px solid rgba(121, 217, 163, 0.25);
+    border-radius: 10px;
+    color: #79d9a3;
+    background: rgba(121, 217, 163, 0.07);
+    font-size: 14px;
+    font-weight: 800;
+  }
+
+  .serviq-toast[data-kind="error"] .serviq-toast-icon {
+    border-color: rgba(240, 154, 154, 0.25);
+    color: #f09a9a;
+    background: rgba(240, 154, 154, 0.07);
+  }
+
+  .serviq-toast[data-kind="info"] .serviq-toast-icon {
+    border-color: rgba(133, 199, 238, 0.25);
+    color: #85c7ee;
+    background: rgba(133, 199, 238, 0.07);
+  }
+
+  .serviq-toast-message {
+    min-width: 0;
+    flex: 1;
+    font-size: 12px;
+    font-weight: 550;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+  }
+
+  .serviq-toast-close {
+    display: grid;
+    width: 29px;
+    height: 29px;
+    flex: 0 0 29px;
+    place-items: center;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.09));
+    border-radius: 8px;
+    color: var(--muted, #97a59c);
+    background: transparent;
+    font: inherit;
+    font-size: 19px;
+    cursor: pointer;
+  }
+
+  .serviq-toast-close:hover {
+    color: var(--text, #edf3ed);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  @media (max-width: 600px) {
+    .serviq-toast {
+      right: 16px;
+      bottom: 16px;
+      width: calc(100vw - 32px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .serviq-toast {
+      transition: none;
+    }
+  }
+</style>

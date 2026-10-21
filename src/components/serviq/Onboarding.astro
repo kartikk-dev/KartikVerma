@@ -1,0 +1,1028 @@
+---
+---
+
+<div class="onboarding-root" id="serviq-onboarding" hidden aria-hidden="true">
+  <div class="onboarding-backdrop"></div>
+
+  <section
+    class="onboarding-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="onboarding-title"
+  >
+    <div class="onboarding-glow onboarding-glow-one"></div>
+    <div class="onboarding-glow onboarding-glow-two"></div>
+
+    <div class="onboarding-brand">
+      <span class="onboarding-brand-mark">
+        <i></i>
+        <i></i>
+        <i></i>
+      </span>
+
+      <span>
+        <strong>SERVIQ</strong>
+        <small>Workspace setup</small>
+      </span>
+    </div>
+
+    <div class="onboarding-copy">
+      <span class="onboarding-eyebrow">FIRST-TIME SETUP</span>
+
+      <h1 id="onboarding-title">
+        Let's build your
+        <em>workspace.</em>
+      </h1>
+
+      <p>
+        Tell SERVIQ who you are and upload your operational data. Your dashboard
+        will adapt to the information you provide.
+      </p>
+    </div>
+
+    <form id="onboarding-form" class="onboarding-form">
+      <label class="onboarding-field">
+        <span>Your name</span>
+
+        <input
+          id="onboarding-name"
+          name="name"
+          type="text"
+          placeholder="Enter your name"
+          autocomplete="name"
+          maxlength="80"
+          required
+        />
+      </label>
+
+      <div class="upload-field">
+        <div class="upload-label-row">
+          <span>Import your data</span>
+          <small>PDF, XLS or XLSX</small>
+        </div>
+
+        <label
+          class="upload-zone"
+          id="onboarding-dropzone"
+          for="onboarding-file"
+        >
+          <input
+            id="onboarding-file"
+            name="file"
+            type="file"
+            accept=".pdf,.xls,.xlsx,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          />
+
+          <span class="upload-icon">↑</span>
+
+          <strong id="upload-title">Upload your data file</strong>
+
+          <small id="upload-description">
+            Drop a PDF or Excel file here, or click to browse.
+          </small>
+        </label>
+
+        <div class="selected-file" id="selected-file" hidden>
+          <span class="selected-file-icon">▤</span>
+
+          <span class="selected-file-copy">
+            <strong id="selected-file-name">—</strong>
+
+            <small id="selected-file-size">—</small>
+          </span>
+
+          <button
+            type="button"
+            id="remove-selected-file"
+            aria-label="Remove selected file"
+          >
+            ×
+          </button>
+        </div>
+      </div>
+
+      <div
+        class="onboarding-feedback"
+        id="onboarding-feedback"
+        hidden
+        role="status"
+        aria-live="polite"
+      ></div>
+
+      <button type="submit" class="onboarding-submit" id="onboarding-submit">
+        <span>Continue to workspace</span>
+        <b>→</b>
+      </button>
+    </form>
+
+    <div class="onboarding-note">
+      <span>◈</span>
+
+      <p>
+        Your uploaded file stays inside this browser during this prototype
+        setup. SERVIQ will use its structure to determine which insights and
+        metrics are relevant.
+      </p>
+    </div>
+  </section>
+</div>
+
+<script>
+  const root = document.querySelector<HTMLDivElement>("#serviq-onboarding");
+  const form = document.querySelector<HTMLFormElement>("#onboarding-form");
+  const nameInput = document.querySelector<HTMLInputElement>("#onboarding-name");
+  const fileInput = document.querySelector<HTMLInputElement>("#onboarding-file");
+  const dropzone = document.querySelector<HTMLDivElement>("#onboarding-dropzone");
+
+  const selectedFile = document.querySelector<HTMLDivElement>("#selected-file");
+  const selectedFileName = document.querySelector<HTMLElement>("#selected-file-name");
+  const selectedFileSize = document.querySelector<HTMLElement>("#selected-file-size");
+
+  const uploadTitle = document.querySelector<HTMLElement>("#upload-title");
+
+  const uploadDescription = document.querySelector<HTMLElement>("#upload-description");
+
+  const removeFileButton = document.querySelector<HTMLButtonElement>("#remove-selected-file");
+
+  const feedback = document.querySelector<HTMLDivElement>("#onboarding-feedback");
+
+  const submitButton = document.querySelector<HTMLButtonElement>("#onboarding-submit");
+
+  const STORAGE_KEY = "serviq_workspace_setup";
+
+  const MAX_FILE_SIZE = 25 * 1024 * 1024;
+
+  const allowedExtensions = ["pdf", "xls", "xlsx"];
+
+  const formatFileSize = (bytes: number): string => {
+    if (!bytes) {
+      return "0 KB";
+    }
+
+    if (bytes < 1024 * 1024) {
+      return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+    }
+
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const getFileExtension = (fileName: string): string => {
+    const parts = fileName.split(".");
+    return parts.length > 1 ? parts.pop()?.toLowerCase() || "" : "";
+  };
+
+  const showFeedback = (message: string): void => {
+    if (!feedback) return;
+
+    feedback.hidden = false;
+    feedback.textContent = message;
+  };
+
+  const clearFeedback = () => {
+    if (!feedback) return;
+
+    feedback.hidden = true;
+    feedback.textContent = "";
+  };
+
+  const setFile = (file: File): void => {
+    if (!file) return;
+
+    clearFeedback();
+
+    const extension = getFileExtension(file.name);
+
+    if (!allowedExtensions.includes(extension)) {
+      showFeedback("Please upload a PDF, XLS or XLSX file.");
+
+      return;
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      showFeedback("Please choose a file smaller than 25 MB.");
+
+      return;
+    }
+
+    if (selectedFileName) {
+      selectedFileName.textContent = file.name;
+    }
+
+    if (selectedFileSize) {
+      selectedFileSize.textContent = `${formatFileSize(file.size)} · ${extension.toUpperCase()}`;
+    }
+
+    if (uploadTitle) {
+      uploadTitle.textContent = "Data file selected";
+    }
+
+    if (uploadDescription) {
+      uploadDescription.textContent =
+        "SERVIQ will inspect this file during the import step.";
+    }
+
+    selectedFile?.removeAttribute("hidden");
+
+    dropzone?.classList.add("has-file");
+
+    const dataTransfer = new DataTransfer();
+
+    dataTransfer.items.add(file);
+
+    if (fileInput) {
+      fileInput.files = dataTransfer.files;
+    }
+  };
+
+  const clearFile = () => {
+    if (fileInput) {
+      fileInput.value = "";
+    }
+
+    selectedFile?.setAttribute("hidden", "");
+
+    dropzone?.classList.remove("has-file");
+
+    if (uploadTitle) {
+      uploadTitle.textContent = "Upload your data file";
+    }
+
+    if (uploadDescription) {
+      uploadDescription.textContent =
+        "Drop a PDF or Excel file here, or click to browse.";
+    }
+
+    clearFeedback();
+  };
+
+  const openOnboarding = () => {
+    if (!root) return;
+
+    root.hidden = false;
+    root.setAttribute("aria-hidden", "false");
+
+    document.body.classList.add("serviq-onboarding-open");
+
+    window.setTimeout(() => {
+      nameInput?.focus();
+    }, 50);
+  };
+
+  const closeOnboarding = () => {
+    if (!root) return;
+
+    root.hidden = true;
+
+    root.setAttribute("aria-hidden", "true");
+
+    document.body.classList.remove("serviq-onboarding-open");
+  };
+
+  const getStoredSetup = () => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const saveSetup = (setup: unknown): void => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(setup));
+  };
+
+  fileInput?.addEventListener("change", () => {
+    const file = fileInput.files?.[0];
+
+    if (file) {
+      setFile(file);
+    }
+  });
+
+  removeFileButton?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    clearFile();
+  });
+
+  ["dragenter", "dragover"].forEach((eventName) => {
+    dropzone?.addEventListener(eventName, (event) => {
+      event.preventDefault();
+
+      dropzone.classList.add("is-dragging");
+    });
+  });
+
+  ["dragleave", "drop"].forEach((eventName) => {
+    dropzone?.addEventListener(eventName, (event) => {
+      event.preventDefault();
+
+      dropzone.classList.remove("is-dragging");
+    });
+  });
+
+  dropzone?.addEventListener("drop", (event) => {
+    const dragEvent = event instanceof DragEvent ? event : null;
+
+    const file = dragEvent?.dataTransfer?.files?.[0];
+
+    if (file) {
+      setFile(file);
+    }
+  });
+
+  form?.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    clearFeedback();
+
+    const name = nameInput?.value.trim().replace(/\s+/g, " ");
+
+    if (!name) {
+      showFeedback("Please enter your name before continuing.");
+
+      nameInput?.focus();
+
+      return;
+    }
+
+    const file = fileInput?.files?.[0];
+
+    const setup = {
+      name,
+      file: file
+        ? {
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            extension: getFileExtension(file.name),
+          }
+        : null,
+      createdAt: new Date().toISOString(),
+    };
+
+    saveSetup(setup);
+
+    if (submitButton) {
+      submitButton.disabled = true;
+
+      submitButton.innerHTML = "<span>Preparing workspace...</span><b>✓</b>";
+    }
+
+    window.setTimeout(() => {
+      closeOnboarding();
+
+      window.dispatchEvent(
+        new CustomEvent("serviq-workspace-ready", {
+          detail: setup,
+        }),
+      );
+    }, 450);
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && root && !root.hidden) {
+      event.preventDefault();
+    }
+  });
+
+  const existingSetup = getStoredSetup();
+
+  if (!existingSetup) {
+    openOnboarding();
+  }
+
+  window.addEventListener("serviq-reset-workspace", () => {
+    localStorage.removeItem(STORAGE_KEY);
+
+    clearFile();
+
+    if (nameInput) {
+      nameInput.value = "";
+    }
+
+    if (submitButton) {
+      submitButton.disabled = false;
+
+      submitButton.innerHTML = "<span>Continue to workspace</span><b>→</b>";
+    }
+
+    openOnboarding();
+  });
+</script>
+
+<style>
+  .onboarding-root {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+
+    display: grid;
+    place-items: center;
+
+    padding: 1.25rem;
+
+    opacity: 1;
+    visibility: visible;
+
+    transition:
+      opacity 0.25s ease,
+      visibility 0.25s ease;
+  }
+
+  .onboarding-root[hidden] {
+    display: none;
+  }
+
+  .onboarding-backdrop {
+    position: absolute;
+    inset: 0;
+
+    background:
+      radial-gradient(
+        circle at 50% 20%,
+        rgba(128, 184, 151, 0.08),
+        transparent 34%
+      ),
+      rgba(3, 8, 6, 0.84);
+
+    backdrop-filter: blur(20px);
+  }
+
+  .onboarding-panel {
+    position: relative;
+
+    width: min(100%, 620px);
+
+    max-height: min(92vh, 820px);
+
+    overflow: auto;
+
+    padding: 2.1rem 2.1rem 1.7rem;
+
+    border: 1px solid rgba(231, 239, 231, 0.1);
+
+    border-radius: 1.45rem;
+
+    background: linear-gradient(
+      145deg,
+      rgba(18, 31, 25, 0.98),
+      rgba(8, 17, 13, 0.98)
+    );
+
+    box-shadow:
+      0 40px 120px rgba(0, 0, 0, 0.52),
+      inset 0 1px 0 rgba(255, 255, 255, 0.035);
+
+    isolation: isolate;
+  }
+
+  .onboarding-glow {
+    position: absolute;
+
+    border-radius: 50%;
+
+    filter: blur(24px);
+
+    pointer-events: none;
+
+    opacity: 0.6;
+
+    z-index: -1;
+  }
+
+  .onboarding-glow-one {
+    width: 180px;
+    height: 180px;
+
+    top: -90px;
+    right: -60px;
+
+    background: rgba(217, 199, 139, 0.12);
+  }
+
+  .onboarding-glow-two {
+    width: 160px;
+    height: 160px;
+
+    bottom: -80px;
+    left: -60px;
+
+    background: rgba(128, 184, 151, 0.1);
+  }
+
+  .onboarding-brand {
+    display: flex;
+    align-items: center;
+
+    gap: 0.7rem;
+  }
+
+  .onboarding-brand-mark {
+    position: relative;
+
+    width: 32px;
+    height: 32px;
+
+    display: grid;
+    place-items: center;
+
+    border: 1px solid rgba(217, 199, 139, 0.2);
+
+    border-radius: 0.65rem;
+
+    background: rgba(217, 199, 139, 0.045);
+  }
+
+  .onboarding-brand-mark i {
+    position: absolute;
+
+    width: 11px;
+    height: 2px;
+
+    border-radius: 999px;
+
+    background: var(--gold-bright, #e8d9a4);
+
+    transform-origin: center;
+  }
+
+  .onboarding-brand-mark i:nth-child(1) {
+    transform: translateY(-3px) rotate(90deg);
+  }
+
+  .onboarding-brand-mark i:nth-child(2) {
+    transform: translateX(-4px) rotate(45deg);
+  }
+
+  .onboarding-brand-mark i:nth-child(3) {
+    transform: translateX(4px) rotate(-45deg);
+  }
+
+  .onboarding-brand > span:last-child {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .onboarding-brand strong {
+    color: #edf0eb;
+
+    font-size: 0.72rem;
+
+    letter-spacing: 0.14em;
+
+    font-weight: 800;
+  }
+
+  .onboarding-brand small {
+    margin-top: 0.14rem;
+
+    color: #617067;
+
+    font-size: 0.44rem;
+
+    letter-spacing: 0.09em;
+
+    text-transform: uppercase;
+  }
+
+  .onboarding-copy {
+    margin-top: 2.25rem;
+  }
+
+  .onboarding-eyebrow {
+    display: inline-block;
+
+    color: var(--gold, #d9c78b);
+
+    font-size: 0.46rem;
+
+    letter-spacing: 0.17em;
+
+    font-weight: 800;
+  }
+
+  .onboarding-copy h1 {
+    margin: 0.45rem 0 0;
+
+    color: #eef1ed;
+
+    font:
+      500 clamp(2.2rem, 6vw, 3.7rem) / 0.98 "Playfair Display",
+      Georgia,
+      serif;
+
+    letter-spacing: -0.045em;
+  }
+
+  .onboarding-copy h1 em {
+    color: var(--gold-bright, #e8d9a4);
+
+    font-style: italic;
+  }
+
+  .onboarding-copy p {
+    max-width: 520px;
+
+    margin: 0.8rem 0 0;
+
+    color: #86938b;
+
+    font-size: 0.68rem;
+
+    line-height: 1.75;
+  }
+
+  .onboarding-form {
+    margin-top: 1.7rem;
+  }
+
+  .onboarding-field,
+  .upload-field {
+    display: block;
+  }
+
+  .onboarding-field > span,
+  .upload-label-row > span {
+    display: block;
+
+    color: #aab4ad;
+
+    font-size: 0.52rem;
+
+    font-weight: 800;
+
+    letter-spacing: 0.08em;
+
+    text-transform: uppercase;
+  }
+
+  .onboarding-field input {
+    width: 100%;
+
+    height: 52px;
+
+    margin-top: 0.5rem;
+
+    padding: 0 0.9rem;
+
+    border: 1px solid rgba(231, 239, 231, 0.09);
+
+    border-radius: 0.72rem;
+
+    outline: none;
+
+    background: rgba(255, 255, 255, 0.025);
+
+    color: #edf1ed;
+
+    font: inherit;
+
+    font-size: 0.72rem;
+
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      background 0.2s ease;
+  }
+
+  .onboarding-field input::placeholder {
+    color: #536158;
+  }
+
+  .onboarding-field input:focus {
+    border-color: rgba(217, 199, 139, 0.34);
+
+    background: rgba(255, 255, 255, 0.035);
+
+    box-shadow: 0 0 0 4px rgba(217, 199, 139, 0.045);
+  }
+
+  .upload-field {
+    margin-top: 1rem;
+  }
+
+  .upload-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 0.8rem;
+  }
+
+  .upload-label-row small {
+    color: #59665e;
+
+    font-size: 0.48rem;
+  }
+
+  .upload-zone {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 150px;
+
+    margin-top: 0.5rem;
+
+    padding: 1.1rem;
+
+    border: 1px dashed rgba(231, 239, 231, 0.1);
+
+    border-radius: 0.9rem;
+
+    background: rgba(255, 255, 255, 0.018);
+
+    cursor: pointer;
+
+    text-align: center;
+
+    transition:
+      border-color 0.2s ease,
+      background 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .upload-zone:hover,
+  .upload-zone.is-dragging,
+  .upload-zone.has-file {
+    border-color: rgba(217, 199, 139, 0.28);
+
+    background: rgba(217, 199, 139, 0.035);
+  }
+
+  .upload-zone.is-dragging {
+    transform: translateY(-2px);
+  }
+
+  .upload-zone input {
+    position: absolute;
+
+    width: 1px;
+    height: 1px;
+
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .upload-icon {
+    width: 42px;
+    height: 42px;
+
+    display: grid;
+    place-items: center;
+
+    border: 1px solid rgba(217, 199, 139, 0.16);
+
+    border-radius: 0.8rem;
+
+    background: rgba(217, 199, 139, 0.045);
+
+    color: var(--gold-bright, #e8d9a4);
+
+    font-size: 0.82rem;
+  }
+
+  .upload-zone strong {
+    margin-top: 0.7rem;
+
+    color: #cbd3cd;
+
+    font-size: 0.62rem;
+  }
+
+  .upload-zone > small {
+    margin-top: 0.3rem;
+
+    color: #647169;
+
+    font-size: 0.49rem;
+  }
+
+  .selected-file {
+    display: flex;
+    align-items: center;
+
+    gap: 0.7rem;
+
+    margin-top: 0.55rem;
+
+    padding: 0.65rem 0.7rem;
+
+    border: 1px solid rgba(128, 184, 151, 0.13);
+
+    border-radius: 0.72rem;
+
+    background: rgba(128, 184, 151, 0.035);
+  }
+
+  .selected-file[hidden] {
+    display: none;
+  }
+
+  .selected-file-icon {
+    width: 32px;
+    height: 32px;
+
+    display: grid;
+    place-items: center;
+
+    flex: 0 0 auto;
+
+    border-radius: 0.55rem;
+
+    background: rgba(128, 184, 151, 0.075);
+
+    color: #9bc8aa;
+
+    font-size: 0.66rem;
+  }
+
+  .selected-file-copy {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    flex: 1;
+  }
+
+  .selected-file-copy strong {
+    overflow: hidden;
+
+    color: #cbd4cd;
+
+    font-size: 0.55rem;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+  }
+
+  .selected-file-copy small {
+    margin-top: 0.16rem;
+
+    color: #637068;
+
+    font-size: 0.46rem;
+  }
+
+  .selected-file button {
+    width: 30px;
+    height: 30px;
+
+    border: 1px solid rgba(231, 239, 231, 0.07);
+
+    border-radius: 0.55rem;
+
+    background: transparent;
+
+    color: #738078;
+
+    cursor: pointer;
+
+    font-size: 0.8rem;
+  }
+
+  .onboarding-feedback {
+    margin-top: 0.7rem;
+
+    padding: 0.65rem 0.75rem;
+
+    border: 1px solid rgba(217, 128, 128, 0.15);
+
+    border-radius: 0.65rem;
+
+    background: rgba(217, 128, 128, 0.045);
+
+    color: #c99797;
+
+    font-size: 0.5rem;
+
+    line-height: 1.5;
+  }
+
+  .onboarding-feedback[hidden] {
+    display: none;
+  }
+
+  .onboarding-submit {
+    width: 100%;
+
+    min-height: 49px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 0.65rem;
+
+    margin-top: 0.9rem;
+
+    border: 1px solid rgba(217, 199, 139, 0.27);
+
+    border-radius: 0.72rem;
+
+    background: linear-gradient(
+      135deg,
+      rgba(217, 199, 139, 0.14),
+      rgba(255, 255, 255, 0.025)
+    );
+
+    color: #eeeade;
+
+    cursor: pointer;
+
+    font-size: 0.57rem;
+
+    font-weight: 800;
+
+    transition:
+      transform 0.2s ease,
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      opacity 0.2s ease;
+  }
+
+  .onboarding-submit:hover:not(:disabled) {
+    transform: translateY(-2px);
+
+    border-color: rgba(217, 199, 139, 0.45);
+
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  }
+
+  .onboarding-submit:disabled {
+    opacity: 0.62;
+
+    cursor: wait;
+  }
+
+  .onboarding-submit b {
+    font-size: 0.75rem;
+  }
+
+  .onboarding-note {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 0.55rem;
+
+    margin-top: 1rem;
+
+    padding-top: 1rem;
+
+    border-top: 1px solid rgba(231, 239, 231, 0.055);
+  }
+
+  .onboarding-note > span {
+    flex: 0 0 auto;
+
+    color: var(--gold, #d9c78b);
+
+    font-size: 0.55rem;
+  }
+
+  .onboarding-note p {
+    margin: 0;
+
+    color: #58655d;
+
+    font-size: 0.45rem;
+
+    line-height: 1.65;
+  }
+
+  body.serviq-onboarding-open {
+    overflow: hidden;
+  }
+
+  @media (max-width: 640px) {
+    .onboarding-root {
+      padding: 0.75rem;
+    }
+
+    .onboarding-panel {
+      padding: 1.4rem 1.2rem 1.25rem;
+
+      border-radius: 1.15rem;
+    }
+
+    .onboarding-copy {
+      margin-top: 1.7rem;
+    }
+
+    .onboarding-copy h1 {
+      font-size: 2.25rem;
+    }
+
+    .upload-zone {
+      min-height: 135px;
+    }
+  }
+</style>

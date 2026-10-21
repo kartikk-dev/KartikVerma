@@ -1,0 +1,726 @@
+<!-- Cinematic portfolio intro -->
+<section class="cinematic-intro" aria-label="Portfolio introduction">
+  <div class="cinematic-grid"></div>
+  <div class="cinematic-vignette"></div>
+
+  <!-- Ambient cinematic lighting -->
+  <div class="ambient-light ambient-light-one"></div>
+  <div class="ambient-light ambient-light-two"></div>
+
+  <!-- Floating particles -->
+  <span class="particle particle-one"></span>
+  <span class="particle particle-two"></span>
+  <span class="particle particle-three"></span>
+  <span class="particle particle-four"></span>
+  <span class="particle particle-five"></span>
+  <span class="particle particle-six"></span>
+
+  <!-- Cinematic framing -->
+  <div class="intro-frame">
+    <span class="frame-corner top-left"></span>
+    <span class="frame-corner top-right"></span>
+    <span class="frame-corner bottom-left"></span>
+    <span class="frame-corner bottom-right"></span>
+  </div>
+
+  <div class="intro-content">
+    <!-- Memoji stage -->
+    <div class="avatar-stage">
+      <span class="avatar-halo"></span>
+
+      <span class="orbit orbit-one"></span>
+      <span class="orbit orbit-two"></span>
+      <span class="orbit orbit-three"></span>
+
+      <span class="orbit-dot orbit-dot-one"></span>
+      <span class="orbit-dot orbit-dot-two"></span>
+
+      <div class="avatar-shell">
+        <img class="intro-avatar" src="/memoji/kartik.png" alt="Kartik Verma" />
+      </div>
+
+      <span class="light-sweep"></span>
+    </div>
+
+    <!-- Intro typography -->
+    <div class="intro-copy">
+      <span class="intro-line"></span>
+
+      <h1>Kartik Verma</h1>
+
+      <p>Full Stack Engineer</p>
+
+      <span class="intro-line intro-line-bottom"></span>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Main cinematic layer */
+  .cinematic-intro {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    isolation: isolate;
+    background:
+      radial-gradient(
+        circle at 50% 42%,
+        rgba(255, 255, 255, 0.12),
+        transparent 14%
+      ),
+      radial-gradient(
+        circle at 50% 48%,
+        rgba(255, 255, 255, 0.05),
+        transparent 34%
+      ),
+      linear-gradient(180deg, #0a0a0a 0%, #030303 60%, #000 100%);
+    animation: introExit 1.4s ease 6.1s forwards;
+  }
+
+  /* Technical background grid */
+  .cinematic-grid {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    opacity: 0.32;
+    background:
+      linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+    background-size: 72px 72px;
+    mask-image: radial-gradient(circle at center, #000 0%, transparent 78%);
+  }
+
+  /* Cinematic edge darkening */
+  .cinematic-vignette {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    background: radial-gradient(
+      circle,
+      transparent 38%,
+      rgba(0, 0, 0, 0.28) 68%,
+      rgba(0, 0, 0, 0.84) 100%
+    );
+  }
+
+  /* Ambient light */
+  .ambient-light {
+    position: absolute;
+    width: 42vw;
+    height: 42vw;
+    max-width: 620px;
+    max-height: 620px;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(100px);
+    opacity: 0.13;
+  }
+
+  .ambient-light-one {
+    top: 10%;
+    left: 28%;
+    background: rgba(255, 255, 255, 0.18);
+    animation: ambientMove 7s ease-in-out infinite;
+  }
+
+  .ambient-light-two {
+    right: 10%;
+    bottom: 5%;
+    background: rgba(255, 255, 255, 0.08);
+    animation: ambientMove 8s ease-in-out 1s infinite reverse;
+  }
+
+  /* Main intro content */
+  .intro-content {
+    position: relative;
+    z-index: 5;
+    display: grid;
+    justify-items: center;
+    gap: 18px;
+    width: min(92vw, 1000px);
+    opacity: 0;
+    filter: blur(18px);
+    transform: translateY(25px);
+    animation: introContentReveal 1s ease 0.15s forwards;
+  }
+
+  /* Memoji composition */
+  .avatar-stage {
+    position: relative;
+    width: clamp(180px, 25vw, 290px);
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    perspective: 1100px;
+  }
+
+  .avatar-halo {
+    position: absolute;
+    inset: 12%;
+    z-index: 0;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.2) 0%,
+      rgba(255, 255, 255, 0.08) 28%,
+      rgba(255, 255, 255, 0.025) 52%,
+      transparent 74%
+    );
+    filter: blur(20px);
+    animation: haloPulse 3.2s ease-in-out 1.2s infinite;
+  }
+
+  .avatar-shell {
+    position: relative;
+    z-index: 4;
+    width: 73%;
+    display: grid;
+    place-items: center;
+    opacity: 0;
+    filter: blur(14px);
+    transform: translateZ(-100px) scale(0.68);
+    animation:
+      avatarPop 1.45s cubic-bezier(0.16, 1, 0.3, 1) 0.35s forwards,
+      avatarFloat 3.2s ease-in-out 2s infinite;
+  }
+
+  .intro-avatar {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.16))
+      drop-shadow(0 0 40px rgba(255, 255, 255, 0.2));
+  }
+
+  /* 3D orbital rings */
+  .orbit {
+    position: absolute;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 50%;
+    pointer-events: none;
+    transform-style: preserve-3d;
+  }
+
+  .orbit-one {
+    inset: 7%;
+    transform: rotateX(67deg);
+    box-shadow:
+      0 0 12px rgba(255, 255, 255, 0.05),
+      inset 0 0 12px rgba(255, 255, 255, 0.04);
+    animation: orbitOne 7s linear infinite;
+  }
+
+  .orbit-two {
+    inset: 2%;
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: rotateY(68deg) rotateZ(18deg);
+    animation: orbitTwo 9s linear infinite reverse;
+  }
+
+  .orbit-three {
+    inset: 16%;
+    border-color: rgba(255, 255, 255, 0.08);
+    transform: rotateX(46deg) rotateY(54deg);
+    animation: orbitThree 5.5s linear infinite;
+  }
+
+  /* Orbiting highlights */
+  .orbit-dot {
+    position: absolute;
+    z-index: 5;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow:
+      0 0 8px rgba(255, 255, 255, 0.8),
+      0 0 20px rgba(255, 255, 255, 0.3);
+  }
+
+  .orbit-dot-one {
+    top: 13%;
+    right: 18%;
+    animation: dotFloatOne 4s ease-in-out infinite;
+  }
+
+  .orbit-dot-two {
+    left: 15%;
+    bottom: 15%;
+    width: 5px;
+    height: 5px;
+    opacity: 0.72;
+    animation: dotFloatTwo 5s ease-in-out infinite;
+  }
+
+  /* Moving cinematic light sweep */
+  .light-sweep {
+    position: absolute;
+    z-index: 6;
+    width: 150%;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.8),
+      transparent
+    );
+    transform: rotate(-22deg) translateX(-100%);
+    filter: blur(0.4px);
+    opacity: 0;
+    animation: lightSweep 2.8s ease-in-out 1.5s infinite;
+  }
+
+  /* Intro typography */
+  .intro-copy {
+    position: relative;
+    text-align: center;
+  }
+
+  .intro-copy h1 {
+    margin: 0;
+    color: #f5f5f5;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(3rem, 7.6vw, 6.7rem);
+    line-height: 0.9;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    text-shadow:
+      0 2px 20px rgba(255, 255, 255, 0.08),
+      0 0 45px rgba(255, 255, 255, 0.06);
+    opacity: 0;
+    transform: translateY(75px);
+    filter: blur(14px);
+    animation: nameReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.95s forwards;
+  }
+
+  .intro-copy p {
+    margin: 16px 0 0;
+    color: rgba(255, 255, 255, 0.62);
+    font-family: Inter, Arial, sans-serif;
+    font-size: clamp(0.72rem, 1.2vw, 1rem);
+    font-weight: 500;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    opacity: 0;
+    transform: translateY(28px);
+    filter: blur(8px);
+    animation: designationReveal 1s cubic-bezier(0.16, 1, 0.3, 1) 2.1s forwards;
+  }
+
+  .intro-line {
+    display: block;
+    width: min(160px, 24vw);
+    height: 1px;
+    margin: 0 auto 18px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.75),
+      transparent
+    );
+    box-shadow: 0 0 14px rgba(255, 255, 255, 0.16);
+    transform: scaleX(0);
+    transform-origin: center;
+    animation: lineReveal 1.2s ease 1.35s forwards;
+  }
+
+  .intro-line-bottom {
+    margin-top: 20px;
+    margin-bottom: 0;
+    opacity: 0.45;
+    animation-delay: 2.65s;
+  }
+
+  /* Cinematic frame */
+  .intro-frame {
+    position: absolute;
+    inset: 5%;
+    z-index: 3;
+    pointer-events: none;
+    opacity: 0;
+    animation: frameReveal 1.5s ease 0.9s forwards;
+  }
+
+  .frame-corner {
+    position: absolute;
+    width: 46px;
+    height: 46px;
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .top-left {
+    top: 0;
+    left: 0;
+    border-top: 1px solid;
+    border-left: 1px solid;
+  }
+
+  .top-right {
+    top: 0;
+    right: 0;
+    border-top: 1px solid;
+    border-right: 1px solid;
+  }
+
+  .bottom-left {
+    bottom: 0;
+    left: 0;
+    border-bottom: 1px solid;
+    border-left: 1px solid;
+  }
+
+  .bottom-right {
+    right: 0;
+    bottom: 0;
+    border-right: 1px solid;
+    border-bottom: 1px solid;
+  }
+
+  /* Floating particles */
+  .particle {
+    position: absolute;
+    z-index: 3;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow:
+      0 0 8px rgba(255, 255, 255, 0.8),
+      0 0 18px rgba(255, 255, 255, 0.2);
+    opacity: 0;
+  }
+
+  .particle-one {
+    top: 27%;
+    left: 25%;
+    animation: particleOne 4.5s ease-in-out 1.2s infinite;
+  }
+
+  .particle-two {
+    top: 22%;
+    right: 29%;
+    animation: particleTwo 5s ease-in-out 1.5s infinite;
+  }
+
+  .particle-three {
+    left: 19%;
+    top: 61%;
+    animation: particleThree 5.4s ease-in-out 1.7s infinite;
+  }
+
+  .particle-four {
+    right: 19%;
+    bottom: 26%;
+    animation: particleFour 4.8s ease-in-out 1.4s infinite;
+  }
+
+  .particle-five {
+    top: 42%;
+    right: 15%;
+    width: 2px;
+    height: 2px;
+    opacity: 0.55;
+    animation: particleFive 4.2s ease-in-out 1.8s infinite;
+  }
+
+  .particle-six {
+    bottom: 31%;
+    left: 29%;
+    width: 2px;
+    height: 2px;
+    opacity: 0.5;
+    animation: particleSix 5.8s ease-in-out 1.6s infinite;
+  }
+
+  /* Intro content reveal */
+  @keyframes introContentReveal {
+    from {
+      opacity: 0;
+      filter: blur(18px);
+      transform: translateY(25px);
+    }
+
+    to {
+      opacity: 1;
+      filter: blur(0);
+      transform: translateY(0);
+    }
+  }
+
+  /* Memoji pop */
+  @keyframes avatarPop {
+    from {
+      opacity: 0;
+      filter: blur(14px);
+      transform: translateZ(-100px) scale(0.68);
+    }
+
+    to {
+      opacity: 1;
+      filter: blur(0);
+      transform: translateZ(70px) scale(1);
+    }
+  }
+
+  /* Memoji floating */
+  @keyframes avatarFloat {
+    50% {
+      transform: translateY(-7px) translateZ(95px);
+    }
+  }
+
+  /* Name reveal */
+  @keyframes nameReveal {
+    from {
+      opacity: 0;
+      filter: blur(14px);
+      transform: translateY(75px) scale(0.96);
+    }
+
+    to {
+      opacity: 1;
+      filter: blur(0);
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* Designation reveal */
+  @keyframes designationReveal {
+    from {
+      opacity: 0;
+      filter: blur(8px);
+      transform: translateY(28px);
+    }
+
+    to {
+      opacity: 1;
+      filter: blur(0);
+      transform: translateY(0);
+    }
+  }
+
+  /* Halo pulse */
+  @keyframes haloPulse {
+    50% {
+      transform: scale(1.12);
+      opacity: 0.72;
+    }
+  }
+
+  /* Orbital rotation */
+  @keyframes orbitOne {
+    to {
+      transform: rotateX(67deg) rotateZ(360deg);
+    }
+  }
+
+  @keyframes orbitTwo {
+    to {
+      transform: rotateY(68deg) rotateZ(-342deg);
+    }
+  }
+
+  @keyframes orbitThree {
+    to {
+      transform: rotateX(46deg) rotateY(54deg) rotateZ(360deg);
+    }
+  }
+
+  /* Light sweep */
+  @keyframes lightSweep {
+    0%,
+    20% {
+      opacity: 0;
+      transform: rotate(-22deg) translateX(-100%);
+    }
+
+    38% {
+      opacity: 0.85;
+    }
+
+    65%,
+    100% {
+      opacity: 0;
+      transform: rotate(-22deg) translateX(100%);
+    }
+  }
+
+  /* Title sheen */
+  @keyframes titleShine {
+    0%,
+    45% {
+      background-position: 180% center;
+    }
+
+    68%,
+    100% {
+      background-position: -20% center;
+    }
+  }
+
+  /* Line reveal */
+  @keyframes lineReveal {
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  /* Frame reveal */
+  @keyframes frameReveal {
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* Ambient movement */
+  @keyframes ambientMove {
+    50% {
+      transform: scale(1.15) translate(2%, -2%);
+      opacity: 0.2;
+    }
+  }
+
+  /* Orbit dots */
+  @keyframes dotFloatOne {
+    50% {
+      transform: translate(9px, -12px) scale(1.25);
+    }
+  }
+
+  @keyframes dotFloatTwo {
+    50% {
+      transform: translate(-10px, 10px);
+    }
+  }
+
+  /* Particle motion */
+  @keyframes particleOne {
+    50% {
+      opacity: 0.8;
+      transform: translate(20px, -18px) scale(1.2);
+    }
+  }
+
+  @keyframes particleTwo {
+    50% {
+      opacity: 0.7;
+      transform: translate(-18px, 16px);
+    }
+  }
+
+  @keyframes particleThree {
+    50% {
+      opacity: 0.8;
+      transform: translate(14px, 22px) scale(1.25);
+    }
+  }
+
+  @keyframes particleFour {
+    50% {
+      opacity: 0.65;
+      transform: translate(-16px, -14px);
+    }
+  }
+
+  @keyframes particleFive {
+    50% {
+      opacity: 0.7;
+      transform: translate(10px, 18px);
+    }
+  }
+
+  @keyframes particleSix {
+    50% {
+      opacity: 0.65;
+      transform: translate(-12px, -16px);
+    }
+  }
+
+  /* Intro exit */
+  @keyframes introExit {
+    0% {
+      opacity: 1;
+      filter: blur(0);
+    }
+
+    100% {
+      opacity: 0;
+      visibility: hidden;
+      filter: blur(22px);
+      pointer-events: none;
+    }
+  }
+
+  /* Mobile composition */
+  @media (max-width: 600px) {
+    .intro-content {
+      width: 92vw;
+      gap: 16px;
+    }
+
+    .avatar-stage {
+      width: clamp(155px, 48vw, 220px);
+    }
+
+    .intro-copy h1 {
+      font-size: clamp(2.25rem, 11vw, 3.9rem);
+      letter-spacing: -0.025em;
+    }
+
+    .intro-copy p {
+      font-size: 0.68rem;
+      letter-spacing: 0.17em;
+    }
+
+    .intro-frame {
+      inset: 8%;
+    }
+
+    .frame-corner {
+      width: 28px;
+      height: 28px;
+    }
+
+    .ambient-light {
+      width: 80vw;
+      height: 80vw;
+    }
+
+    .particle-three,
+    .particle-four,
+    .particle-five,
+    .particle-six {
+      display: none;
+    }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .cinematic-intro,
+    .intro-content,
+    .avatar-shell,
+    .intro-avatar,
+    .orbit,
+    .orbit-dot,
+    .avatar-halo,
+    .light-sweep,
+    .intro-line,
+    .intro-frame,
+    .particle,
+    .ambient-light,
+    .intro-copy h1,
+    .intro-copy p {
+      animation: none;
+    }
+
+    .cinematic-intro {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+  }
+</style>

@@ -1,0 +1,24 @@
+---
+import BusinessAnalyticsLegalLayout from '../../layouts/BusinessAnalyticsLegalLayout.astro';
+---
+<BusinessAnalyticsLegalLayout title="Privacy policy" description="How Metricline handles uploaded business CSV data and browser preferences in this preview." eyebrow="PRIVACY">
+  <div class="legal-note"><strong>Project status:</strong> Metricline is a browser-based portfolio preview. Workspaces are created by the user and imported CSV rows are stored locally in this browser; no business backend or account service is connected.</div>
+  <h2>1. Scope</h2>
+  <p>This policy describes the current Metricline preview. It is not yet a production data-processing service and must be reviewed before use with real employee, customer, or commercially sensitive information.</p>
+  <h2>2. Information processed</h2>
+  <p>When you create a workspace, the interface processes your business name, an internal business reference, selected reporting currency, CSV headers, and rows in the browser. Metrics are calculated from the fields in the file you choose; the preview does not add fabricated data.</p>
+  <ul><li><strong>Workspace details:</strong> business name, internal business reference, reporting currency, source filename, headers and imported rows.</li><li><strong>Local preferences:</strong> light or dark theme, compact tables, reduced motion and privacy choice.</li><li><strong>Search input:</strong> used in the browser to filter rows from the current imported dataset.</li></ul>
+  <h2>3. Browser storage</h2>
+  <p>Workspace details and imported rows are stored in IndexedDB on the current browser/device. Theme and display preferences use local storage. The selected CSV is parsed in the browser and is not uploaded to a server by this preview. Clearing site data removes the stored workspace. No analytics or advertising tracker is installed.</p>
+  <h2>4. Server connections and integrations</h2>
+  <p>This preview does not connect to a data warehouse, CRM, payment processor, or identity provider. Workspace records stay on the current device unless the user exports them. If server storage, team access, or external integrations are added, this policy must be updated to identify the services, fields, purpose, retention and access controls.</p>
+  <h2>5. Sharing and selling</h2>
+  <p>The current interface does not include a feature that sells personal information. Do not import confidential, regulated, payment-card, health, government-ID, or identifiable customer data into this prototype. Use an internal reference rather than a password or government identifier in the Business ID field.</p>
+  <h2>6. Retention and security</h2>
+  <p>Imported rows remain in IndexedDB on this browser until a workspace is removed or site data is cleared. This preview has no server-side authentication, role-based permissions, central backup, formal audit logging, or production security commitments.</p>
+  <h2>7. Your choices</h2>
+  <p>You can change local preferences from <a href="/business-analytics/privacy-settings">Privacy settings</a>, clear site data in your browser, or use the cookie choices described in the <a href="/business-analytics/cookies">Cookie policy</a>.</p>
+  <h2>8. Contact and updates</h2>
+  <p>Before public production use, replace this section with the responsible legal entity's contact details, the applicable jurisdiction, a process for privacy requests and the date of the latest update.</p>
+  <div class="legal-note">This page is a product-development draft, not legal advice or a guarantee of compliance with any particular privacy law.</div>
+</BusinessAnalyticsLegalLayout>

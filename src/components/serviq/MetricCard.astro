@@ -1,0 +1,153 @@
+---
+interface Props {
+  label: string;
+  value: string | number;
+  change?: string;
+  changeType?: "up" | "down" | "neutral";
+  icon?: string;
+  footerLeft?: string;
+  footerRight?: string;
+  accent?: "gold" | "green" | "violet" | "blue" | "red";
+}
+
+const {
+  label,
+  value,
+  change = "",
+  changeType = "neutral",
+  icon = "◈",
+  footerLeft = "",
+  footerRight = "",
+  accent = "gold",
+} = Astro.props;
+---
+
+<article class={`metric-card accent-${accent}`}>
+  <div class="metric-head">
+    <span>{label}</span>
+    <span class="metric-icon" aria-hidden="true">
+      {icon}
+    </span>
+  </div>
+
+  <div class="metric-main">
+    <strong>{value}</strong>
+
+    {change && <span class={`metric-${changeType}`}>{change}</span>}
+  </div>
+
+  {(footerLeft || footerRight) && (
+    <div class="metric-foot">
+      <span>{footerLeft}</span>
+      <span>{footerRight}</span>
+    </div>
+  )}
+</article>
+
+<style>
+  .metric-card {
+    min-width: 0;
+  }
+
+  .metric-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .metric-head > span:first-child {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .metric-icon {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    place-items: center;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+    border-radius: 10px;
+    color: var(--gold, #d6b568);
+    font-size: 16px;
+  }
+
+  .metric-main {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 16px 0;
+  }
+
+  .metric-main > strong {
+    min-width: 0;
+    color: var(--text, #edf3ed);
+    font-size: clamp(25px, 2vw, 34px);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.04em;
+    overflow-wrap: anywhere;
+  }
+
+  .metric-up,
+  .metric-down,
+  .metric-neutral {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: 5px 7px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+    border-radius: 7px;
+    font-size: 10px;
+    font-weight: 650;
+  }
+
+  .metric-up {
+    border-color: rgba(121, 217, 163, 0.18);
+    color: #79d9a3;
+    background: rgba(121, 217, 163, 0.045);
+  }
+
+  .metric-down {
+    border-color: rgba(240, 154, 154, 0.18);
+    color: #f09a9a;
+    background: rgba(240, 154, 154, 0.045);
+  }
+
+  .metric-neutral {
+    color: var(--muted, #97a59c);
+  }
+
+  .metric-foot {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 7px 12px;
+    color: var(--muted, #97a59c);
+    font-size: 10px;
+    line-height: 1.5;
+  }
+
+  .metric-foot > span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 600px) {
+    .metric-main {
+      gap: 7px;
+    }
+
+    .metric-main > strong {
+      font-size: 25px;
+    }
+
+    .metric-foot {
+      font-size: 9px;
+    }
+  }
+</style>

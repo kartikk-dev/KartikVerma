@@ -1,11 +1,64 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import "../styles/global.css";
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import CinematicIntro from "../components/CinematicIntro.astro";
+import Navbar from "../components/Navbar.astro";
+import Hero from "../components/Hero.astro";
+import About from "../components/About.astro";
+import EngineeringCore from "../components/EngineeringCore.astro";
+import Technologies from "../components/Technologies.astro";
+import Projects from "../components/Projects.astro";
+import PortfolioReviews from "../components/PortfolioReviews.astro";
+import Blog from "../components/Blog.astro";
+import Contact from "../components/Contact.astro";
+
+const pageTitle = "Kartik Verma | Full Stack Engineer";
+
+const pageDescription =
+  "Explore Kartik Verma's portfolio, including projects, technical skills, engineering interests, articles, and contact information.";
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+
+    <meta name="title" content={pageTitle} />
+    <meta name="description" content={pageDescription} />
+    <meta name="theme-color" content="#090b0a" />
+    <meta name="color-scheme" content="dark" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={pageDescription} />
+
+    <link rel="icon" type="image/png" href="/memoji/kartik.png" />
+    <link rel="apple-touch-icon" href="/memoji/kartik.png" />
+
+    <title>{pageTitle}</title>
+  </head>
+
+  <body>
+    <CinematicIntro />
+    <Navbar />
+
+    <main id="main-content">
+      <Hero />
+      <About />
+      <EngineeringCore />
+      <Technologies />
+      <Projects />
+      <PortfolioReviews />
+      <Blog />
+      <Contact />
+    </main>
+  </body>
+</html>

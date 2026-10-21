@@ -1,46 +1,30 @@
-# Astro Starter Kit: Basics
+# MovieFlex Pro UI refresh
 
-```sh
-npm create astro@latest -- --template basics
-```
+This patch refreshes the MovieFlex UI while keeping the current Astro project structure and local API approach.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Included
 
-## 🚀 Project Structure
+- `src/pages/projects/movieflex.astro` — centered hero hierarchy, persistent light/dark toggle, lightly animated layered feature cards, improved 3D movie cards, accessible focus styling, and animated Back to top control.
+- `src/pages/api/movieflex.ts` — Astro API route for TMDB search/discovery, genres, regions, details, provider availability, and reviews.
+- `src/layouts/MovieFlexLegalLayout.astro` — matching dark-mode toggle, centered legal-page titles, matching focus states, and Back to top control.
+- `src/pages/privacy.astro`, `terms.astro`, `cookies.astro`, `privacy-settings.astro`, `copyright.astro`, `sources.astro` — existing policy/attribution pages using the shared layout.
+- `public/movieflex-icon.svg` — custom lightweight SVG favicon.
 
-Inside of your Astro project, you'll see the following folders and files:
+## Install
 
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
-```
+1. Make a backup of your current `src/pages/projects/movieflex.astro` and other included pages.
+2. Merge this bundle's `src` and `public` folders into the existing Astro project root. Allow folder merging, and replace only the files included in this bundle.
+3. Keep your existing `astro.config.mjs`, `package.json`, and `.env` unchanged.
+4. Ensure the root `.env` contains `TMDB_READ_ACCESS_TOKEN=...` with your actual TMDB Read Access Token. Never commit `.env` or expose the token using a `PUBLIC_` or `VITE_` variable.
+5. Restart the dev server: `npm run dev`.
+6. Open `http://localhost:4321/projects/movieflex/`.
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+## Theme and motion
 
-## 🧞 Commands
+The light/dark choice is saved in browser localStorage under `movieflex-theme`. The feature cards have low-amplitude independent motion and depth on hover/focus. `prefers-reduced-motion` disables the nonessential animations.
 
-All commands are run from the root of the project, from a terminal:
+## Verification notes
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+Inline JavaScript blocks were checked with Node's syntax checker. A full Astro build was not run against your local project, so run `npm run build` after merging. The TMDB API requires a valid server-side token and network connectivity.
 
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+The legal content is a project-specific starter draft, not jurisdiction-specific legal advice. Review it for the actual operator, jurisdiction, retention practices, and deployment behavior before publishing.

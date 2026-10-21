@@ -1,0 +1,190 @@
+---
+---
+
+<section
+  class="activity-strip serviq-activity-strip"
+  aria-label="Workspace activity"
+>
+  <span class="activity-live">
+    <i></i>
+    RECENT ACTIVITY
+  </span>
+
+  <div
+    class="activity-marquee"
+    id="activity-marquee"
+    aria-live="polite"
+    aria-atomic="true"
+  >
+    <span>Loading workspace activity...</span>
+  </div>
+</section>
+
+<script>
+  import { getState, subscribe } from "../../lib/serviq/store";
+
+  const marquee = document.querySelector<HTMLElement>("#activity-marquee");
+
+  if (marquee) {
+    const escapeHtml = (value: unknown): string =>
+      String(value ?? "").replace(/[&<>"']/g, (character) => {
+        const entities: Record<string, string> = {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        };
+
+        return entities[character] ?? character;
+      });
+
+    const formatTime = (value: string): string => {
+      const date = new Date(value);
+
+      if (Number.isNaN(date.getTime())) return "";
+
+      return new Intl.DateTimeFormat("en-IN", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }).format(date);
+    };
+
+    const render = (): void => {
+      const state = getState();
+
+      const activities = state.activities.slice(0, 8);
+
+      if (activities.length > 0) {
+        marquee.innerHTML = activities
+          .map(
+            (activity) => `
+            <span class="serviq-activity-item">
+              <span class="serviq-activity-message">${escapeHtml(activity.message)}</span>
+              <small>${escapeHtml(formatTime(activity.createdAt))}</small>
+            </span>
+          `,
+          )
+          .join(
+            '<i class="serviq-activity-separator" aria-hidden="true">·</i>',
+          );
+
+        return;
+      }
+
+      const snapshots = [
+        `${state.workOrders.length} work orders in the workspace`,
+        `${state.technicians.length} technicians in the directory`,
+        `${state.inventory.length} inventory items tracked`,
+        `${state.invoices.length} invoice records available`,
+      ];
+
+      marquee.innerHTML = snapshots
+        .map(
+          (message) => `
+          <span class="serviq-activity-item">
+            <span class="serviq-activity-message">${escapeHtml(message)}</span>
+          </span>
+        `,
+        )
+        .join('<i class="serviq-activity-separator" aria-hidden="true">·</i>');
+    };
+
+    subscribe(render);
+    render();
+  }
+</script>
+
+<style is:global>
+  .serviq-activity-strip {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+    min-height: 47px;
+    margin-top: 18px;
+    padding: 10px 15px;
+    overflow: hidden;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.09));
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.018);
+  }
+
+  .serviq-activity-strip .activity-live {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 8px;
+    color: #79d9a3;
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: 0.055em;
+    white-space: nowrap;
+  }
+
+  .serviq-activity-strip .activity-live i {
+    display: block;
+    width: 7px;
+    height: 7px;
+    flex: 0 0 7px;
+    border-radius: 50%;
+    background: #79d9a3;
+    box-shadow: 0 0 10px rgba(121, 217, 163, 0.35);
+  }
+
+  .serviq-activity-strip .activity-marquee {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    align-items: center;
+    gap: 14px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    color: var(--muted, #97a59c);
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .serviq-activity-strip .activity-marquee::-webkit-scrollbar {
+    display: none;
+  }
+
+  .serviq-activity-item {
+    display: inline-flex;
+    min-width: 0;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .serviq-activity-message {
+    color: var(--text, #edf3ed);
+    font-size: 11px;
+  }
+
+  .serviq-activity-item small {
+    color: var(--muted, #97a59c);
+    font-size: 9px;
+  }
+
+  .serviq-activity-separator {
+    flex: 0 0 auto;
+    color: var(--gold, #d6b568);
+    font-size: 15px;
+    font-style: normal;
+  }
+
+  @media (max-width: 640px) {
+    .serviq-activity-strip {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 11px;
+      padding: 13px;
+    }
+
+    .serviq-activity-strip .activity-marquee {
+      width: 100%;
+      flex: auto;
+    }
+  }
+</style>

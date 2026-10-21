@@ -1,0 +1,119 @@
+<a href="/" class="back-to-portfolio" aria-label="Back to portfolio">
+  <span class="back-icon" aria-hidden="true">
+    ←
+  </span>
+  <span class="back-label">Back to Portfolio</span>
+</a>
+
+<style>
+  .back-to-portfolio {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    min-height: 38px;
+    padding: 0.55rem 0.82rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.075),
+      rgba(255, 255, 255, 0.025)
+    );
+    color: rgba(255, 255, 255, 0.82);
+    text-decoration: none;
+    font-family: inherit;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 8px 24px rgba(0, 0, 0, 0.18);
+    transition:
+      transform 0.28s ease,
+      border-color 0.28s ease,
+      background 0.28s ease,
+      color 0.28s ease,
+      box-shadow 0.28s ease;
+  }
+
+  .back-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    font-size: 1rem;
+    line-height: 1;
+    transition:
+      transform 0.28s ease,
+      color 0.28s ease;
+  }
+
+  .back-to-portfolio:hover {
+    transform: translateY(-2px);
+    border-color: rgba(213, 177, 91, 0.34);
+    background: linear-gradient(
+      135deg,
+      rgba(213, 177, 91, 0.12),
+      rgba(255, 255, 255, 0.035)
+    );
+    color: #f3d98d;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 12px 30px rgba(0, 0, 0, 0.24),
+      0 0 24px rgba(213, 177, 91, 0.08);
+  }
+
+  .back-to-portfolio:hover .back-icon {
+    transform: translateX(-3px);
+    color: #f3d98d;
+  }
+
+  .back-to-portfolio:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  .back-to-portfolio:focus-visible {
+    outline: 2px solid rgba(213, 177, 91, 0.5);
+    outline-offset: 3px;
+  }
+
+  @media (max-width: 700px) {
+    .back-to-portfolio {
+      min-height: 36px;
+      padding: 0.48rem 0.72rem;
+      font-size: 0.6rem;
+      letter-spacing: 0.06em;
+    }
+
+    .back-icon {
+      width: 18px;
+      height: 18px;
+      font-size: 0.92rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .back-to-portfolio {
+      width: 38px;
+      min-width: 38px;
+      padding: 0;
+    }
+
+    .back-label {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .back-to-portfolio,
+    .back-icon {
+      transition: none;
+    }
+  }
+</style>

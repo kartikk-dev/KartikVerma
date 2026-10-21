@@ -1,0 +1,51 @@
+---
+import MovieFlexLegalLayout from "../layouts/MovieFlexLegalLayout.astro";
+---
+
+<MovieFlexLegalLayout
+  title="Cookie policy"
+  description="How MovieFlex uses browser storage and third-party requests."
+  eyebrow="BROWSER STORAGE"
+>
+  <h2>Cookies used by MovieFlex</h2>
+  <p>
+    The current MovieFlex interface does not intentionally set browser cookies
+    for analytics or advertising. It uses browser <code>localStorage</code> for
+    its watchlist and to remember your essential-only privacy choice.
+  </p>
+  <h2>Essential local storage</h2>
+  <ul>
+    <li>
+      <code>movieflex-watchlist-v2</code> stores the movie entries you save on
+      this device.
+    </li>
+    <li>
+      <code>movieflex-storage-choice-v1</code> records your essential-only
+      storage choice.
+    </li>
+  </ul>
+  <p>
+    These entries are stored in this browser, not in a MovieFlex user account.
+    Clearing the browser's site data removes them. If browser storage is
+    blocked, the watchlist may last only for the current visit.
+  </p>
+  <h2>Third-party content</h2>
+  <p>
+    Poster and logo assets may be requested from TMDB's image service. Opening
+    TMDB, JustWatch, or a streaming provider takes you to a third-party site
+    that may use cookies, local storage, or similar technologies under its own
+    policy.
+  </p>
+  <h2>Managing storage</h2>
+  <p>
+    You can clear site data from your browser settings. You can also clear your
+    saved MovieFlex watchlist from the app's watchlist panel or the{" "}
+    <a href="/privacy-settings">Privacy settings</a> page.
+  </p>
+  <h2>Policy changes</h2>
+  <p>
+    If analytics, advertising, or additional storage technologies are added,
+    this policy and the available controls should be updated before they are
+    used.
+  </p>
+</MovieFlexLegalLayout>

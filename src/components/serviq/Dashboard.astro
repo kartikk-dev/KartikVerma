@@ -1,0 +1,866 @@
+---
+import ActivityStrip from "./ActivityStrip.astro";
+---
+
+<section class="view view-overview active" data-panel="overview">
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow" id="dashboard-date">
+        OPERATIONS OVERVIEW
+      </span>
+      <h1>
+        Good afternoon, <em id="dashboard-greeting-name">Kartik.</em>
+      </h1>
+      <p>Here is what is happening across your field operations.</p>
+    </div>
+
+    <div class="heading-actions">
+      <button class="secondary-action" id="export-button" type="button">
+        <span>↓</span>
+        Export CSV
+      </button>
+
+      <button class="primary-action" id="new-work-order" type="button">
+        <span>+</span>
+        New Work Order
+      </button>
+    </div>
+  </div>
+
+  <section
+    class="metric-grid"
+    id="dashboard-metric-grid"
+    aria-label="Operational metrics"
+  ></section>
+
+  <section class="dashboard-grid">
+    <article class="panel operations-panel">
+      <div class="panel-heading">
+        <div>
+          <span class="panel-label">LIVE OPERATIONS</span>
+          <h2>Work order activity</h2>
+        </div>
+
+        <div class="panel-actions">
+          <button
+            type="button"
+            class="filter-pill active"
+            data-filter-status="all"
+          >
+            All
+          </button>
+          <button type="button" class="filter-pill" data-filter-status="active">
+            Active
+          </button>
+          <button
+            type="button"
+            class="filter-pill"
+            data-filter-status="completed"
+          >
+            Completed
+          </button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="operations-table">
+          <thead>
+            <tr>
+              <th>WORK ORDER</th>
+              <th>CUSTOMER</th>
+              <th>SERVICE</th>
+              <th>TECHNICIAN</th>
+              <th>STATUS</th>
+              <th>AMOUNT</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="operations-body"></tbody>
+        </table>
+      </div>
+      <p class="dashboard-footnote" id="dashboard-order-count"></p>
+    </article>
+
+    <article class="panel team-load-panel">
+      <div class="panel-heading">
+        <div>
+          <span class="panel-label">FIELD TEAM</span>
+          <h2>Team availability</h2>
+        </div>
+        <button type="button" class="panel-link" data-view="technicians">
+          Manage team ↗
+        </button>
+      </div>
+
+      <div class="dashboard-team-summary" id="dashboard-team-summary"></div>
+      <div class="technician-list" id="dashboard-technician-list"></div>
+    </article>
+  </section>
+
+  <section class="dashboard-grid dashboard-secondary-grid">
+    <article class="panel revenue-panel">
+      <div class="panel-heading">
+        <div>
+          <span class="panel-label">REVENUE</span>
+          <h2>Recent collection trend</h2>
+        </div>
+        <span class="chart-value" id="dashboard-collected-total">
+          ₹0
+        </span>
+      </div>
+
+      <p class="dashboard-chart-note" id="dashboard-chart-note">
+        Based on paid invoice records.
+      </p>
+
+      <div class="chart" id="dashboard-revenue-chart"></div>
+    </article>
+
+    <article class="panel attention-panel">
+      <div class="panel-heading">
+        <div>
+          <span class="panel-label">NEEDS ATTENTION</span>
+          <h2>Operational signals</h2>
+        </div>
+      </div>
+      <div class="dashboard-alert-list" id="dashboard-alert-list"></div>
+    </article>
+  </section>
+
+  <ActivityStrip />
+</section>
+
+<script>
+  import { getState, subscribe } from "../../lib/serviq/store";
+
+  const metricGrid = document.querySelector<HTMLElement>(
+    "#dashboard-metric-grid",
+  );
+  const operationsBody =
+    document.querySelector<HTMLElement>("#operations-body");
+  const orderCount = document.querySelector<HTMLElement>(
+    "#dashboard-order-count",
+  );
+  const technicianList = document.querySelector<HTMLElement>(
+    "#dashboard-technician-list",
+  );
+  const teamSummary = document.querySelector<HTMLElement>(
+    "#dashboard-team-summary",
+  );
+  const collectedTotal = document.querySelector<HTMLElement>(
+    "#dashboard-collected-total",
+  );
+  const chartNote = document.querySelector<HTMLElement>(
+    "#dashboard-chart-note",
+  );
+  const revenueChart = document.querySelector<HTMLElement>(
+    "#dashboard-revenue-chart",
+  );
+  const alertList = document.querySelector<HTMLElement>(
+    "#dashboard-alert-list",
+  );
+  const greetingName = document.querySelector<HTMLElement>(
+    "#dashboard-greeting-name",
+  );
+  const dateLabel = document.querySelector<HTMLElement>("#dashboard-date");
+  const globalSearch =
+    document.querySelector<HTMLInputElement>("#global-search");
+
+  if (
+    metricGrid &&
+    operationsBody &&
+    orderCount &&
+    technicianList &&
+    teamSummary &&
+    collectedTotal &&
+    chartNote &&
+    revenueChart &&
+    alertList
+  ) {
+    let activeStatusFilter = "all";
+    let searchTerm = globalSearch?.value.trim().toLowerCase() ?? "";
+
+    const escapeHtml = (value: unknown): string =>
+      String(value ?? "").replace(/[&<>"']/g, (character) => {
+        const entities: Record<string, string> = {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        };
+
+        return entities[character] ?? character;
+      });
+
+    const formatCurrency = (amount: number): string =>
+      new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 0,
+      }).format(amount);
+
+    const isClosed = (status: string): boolean =>
+      [
+        "completed",
+        "complete",
+        "closed",
+        "cancelled",
+        "canceled",
+        "invoiced",
+        "paid",
+      ].includes(status.trim().toLowerCase());
+
+    const statusClass = (status: string): string =>
+      status.trim().toLowerCase().replace(/\s+/g, "-");
+
+    const greeting = (): string => {
+      const hour = new Date().getHours();
+
+      if (hour < 12) return "Good morning,";
+      if (hour < 17) return "Good afternoon,";
+      return "Good evening,";
+    };
+
+    const dateKey = (date: Date): string => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+
+    const parseDate = (value: string): Date | null => {
+      if (!value) return null;
+
+      const iso = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+      const parsed = iso
+        ? new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]))
+        : new Date(value);
+
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    };
+
+    const showDate = (): void => {
+      if (dateLabel) {
+        dateLabel.textContent = new Intl.DateTimeFormat("en-IN", {
+          weekday: "long",
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+        })
+          .format(new Date())
+          .toUpperCase();
+      }
+
+      const mainHeading = document.querySelector<HTMLElement>(
+        ".view-overview .page-heading h1",
+      );
+
+      if (mainHeading) {
+        const greetingText = mainHeading.firstChild;
+
+        if (greetingText && greetingText.nodeType === Node.TEXT_NODE) {
+          greetingText.textContent = `${greeting()} `;
+        }
+      }
+
+      try {
+        const raw = localStorage.getItem("serviq_workspace_setup");
+
+        if (!raw || !greetingName) return;
+
+        const setup = JSON.parse(raw) as Record<string, unknown>;
+        const profile =
+          typeof setup.profile === "object" && setup.profile
+            ? (setup.profile as Record<string, unknown>)
+            : {};
+
+        const name = [
+          setup.name,
+          setup.userName,
+          setup.fullName,
+          setup.ownerName,
+          profile.name,
+        ].find((value) => typeof value === "string" && value.trim());
+
+        if (typeof name === "string") {
+          greetingName.textContent = `${name.trim().split(/\s+/)[0]}.`;
+        }
+      } catch {
+        // Keep the default greeting if workspace data cannot be read.
+      }
+    };
+
+    const renderMetrics = (): void => {
+      const state = getState();
+      const openOrders = state.workOrders.filter(
+        (order) => !isClosed(order.status),
+      );
+      const activeTechnicians = state.technicians.filter((tech) =>
+        ["Working", "En Route", "Assigned"].includes(tech.status),
+      );
+      const availableTechnicians = state.technicians.filter(
+        (tech) => tech.status === "Available",
+      );
+      const stockAlerts = state.inventory.filter(
+        (item) => item.state !== "Healthy",
+      );
+      const outstanding = state.invoices
+        .filter((invoice) => invoice.status !== "Paid")
+        .reduce((sum, invoice) => sum + invoice.amount, 0);
+
+      const metrics = [
+        {
+          label: "OPEN WORK ORDERS",
+          value: openOrders.length,
+          icon: "▣",
+          footerLeft: "Currently open",
+          footerRight: `${state.workOrders.length} total records`,
+          accent: "gold",
+        },
+        {
+          label: "ACTIVE FIELD TEAM",
+          value: activeTechnicians.length,
+          icon: "◎",
+          footerLeft: `${availableTechnicians.length} available`,
+          footerRight: `${state.technicians.length} team members`,
+          accent: "green",
+        },
+        {
+          label: "STOCK ALERTS",
+          value: stockAlerts.length,
+          icon: "▤",
+          footerLeft: `${stockAlerts.filter((item) => item.state === "Critical").length} critical`,
+          footerRight: "Review inventory",
+          accent: "violet",
+        },
+        {
+          label: "OUTSTANDING INVOICES",
+          value: formatCurrency(outstanding),
+          icon: "₹",
+          footerLeft: "Draft and overdue",
+          footerRight: `${state.invoices.filter((item) => item.status !== "Paid").length} unpaid records`,
+          accent: "blue",
+        },
+      ];
+
+      metricGrid.innerHTML = metrics
+        .map(
+          (metric) => `
+          <article class="metric-card accent-${metric.accent}">
+            <div class="metric-head">
+              <span>${escapeHtml(metric.label)}</span>
+              <span class="metric-icon">${metric.icon}</span>
+            </div>
+            <div class="metric-main">
+              <strong>${escapeHtml(metric.value)}</strong>
+            </div>
+            <div class="metric-foot">
+              <span>${escapeHtml(metric.footerLeft)}</span>
+              <span>${escapeHtml(metric.footerRight)}</span>
+            </div>
+          </article>
+        `,
+        )
+        .join("");
+    };
+
+    const renderOperations = (): void => {
+      const state = getState();
+
+      const matching = state.workOrders.filter((order) => {
+        const text = [
+          order.id,
+          order.customer,
+          order.service,
+          order.technician,
+          order.location,
+          order.status,
+        ]
+          .join(" ")
+          .toLowerCase();
+
+        const matchesSearch = text.includes(searchTerm);
+        const completed = isClosed(order.status);
+
+        const matchesStatus =
+          activeStatusFilter === "all" ||
+          (activeStatusFilter === "active" && !completed) ||
+          (activeStatusFilter === "completed" && completed);
+
+        return matchesSearch && matchesStatus;
+      });
+
+      const visibleOrders = matching.slice(0, 8);
+
+      operationsBody.innerHTML = visibleOrders.length
+        ? visibleOrders
+            .map((order) => {
+              const initials = order.customer
+                .split(/\s+/)
+                .filter(Boolean)
+                .slice(0, 2)
+                .map((part) => part[0].toUpperCase())
+                .join("");
+
+              const searchable = [
+                order.id,
+                order.customer,
+                order.service,
+                order.technician,
+                order.status,
+              ].join(" ");
+
+              return `
+              <tr
+                data-status="${escapeHtml(order.status)}"
+                data-search="${escapeHtml(searchable)}"
+              >
+                <td>
+                  <button type="button" class="work-order-trigger dashboard-order-link" data-work-order="${escapeHtml(order.id)}">
+                    ${escapeHtml(order.id)}
+                  </button>
+                </td>
+                <td>
+                  <span class="customer-cell">
+                    <span class="customer-avatar">${escapeHtml(initials)}</span>
+                    <span>${escapeHtml(order.customer)}</span>
+                  </span>
+                </td>
+                <td>${escapeHtml(order.service)}</td>
+                <td>${escapeHtml(order.technician || "Unassigned")}</td>
+                <td>
+                  <span class="status-badge ${statusClass(order.status)}">
+                    <i></i>${escapeHtml(order.status)}
+                  </span>
+                </td>
+                <td>${escapeHtml(formatCurrency(order.amount))}</td>
+                <td><span class="dashboard-row-arrow">↗</span></td>
+              </tr>
+            `;
+            })
+            .join("")
+        : `<tr><td class="dashboard-no-rows" colspan="7">No work orders match your current filters.</td></tr>`;
+
+      orderCount.textContent = `Showing ${visibleOrders.length} of ${matching.length} matching work orders`;
+    };
+
+    const renderTeam = (): void => {
+      const state = getState();
+      const working = state.technicians.filter((tech) =>
+        ["Working", "En Route", "Assigned"].includes(tech.status),
+      ).length;
+      const available = state.technicians.filter(
+        (tech) => tech.status === "Available",
+      ).length;
+      const offDuty = state.technicians.filter(
+        (tech) => tech.status === "Off Duty",
+      ).length;
+
+      teamSummary.innerHTML = `
+        <div><strong>${working}</strong><span>In field</span></div>
+        <div><strong>${available}</strong><span>Available</span></div>
+        <div><strong>${offDuty}</strong><span>Off duty</span></div>
+      `;
+
+      technicianList.innerHTML = state.technicians.length
+        ? state.technicians
+            .slice(0, 6)
+            .map((tech) => {
+              const assigned = state.workOrders.filter(
+                (order) =>
+                  order.technicianId === tech.id && !isClosed(order.status),
+              ).length;
+              const tone =
+                tech.status === "Available"
+                  ? "available"
+                  : tech.status === "En Route"
+                    ? "route"
+                    : tech.status === "Off Duty"
+                      ? "off-duty"
+                      : "working";
+
+              return `
+              <button type="button" class="dispatch-row" data-tech="${escapeHtml(tech.id)}" data-view="technicians">
+                <span class="tech-avatar ${escapeHtml(tech.color)}">${escapeHtml(tech.initials)}</span>
+                <span>
+                  <strong>${escapeHtml(tech.name)}</strong>
+                  <small>${escapeHtml(tech.zone)} · ${assigned} open jobs</small>
+                </span>
+                <span class="field-state"><i class="${tone}"></i>${escapeHtml(tech.status)}</span>
+              </button>
+            `;
+            })
+            .join("")
+        : `<p class="dashboard-empty-copy">No technicians have been added yet.</p>`;
+    };
+
+    const getRevenueSeries = () => {
+      const state = getState();
+      const today = new Date();
+      const dates = Array.from({ length: 7 }, (_, index) => {
+        const date = new Date(today);
+        date.setDate(today.getDate() - (6 - index));
+
+        return {
+          date,
+          key: dateKey(date),
+          day: new Intl.DateTimeFormat("en-IN", { weekday: "short" }).format(
+            date,
+          ),
+          value: 0,
+        };
+      });
+
+      const dateMap = new Map(dates.map((item) => [item.key, item]));
+      let matchedInvoices = 0;
+
+      for (const invoice of state.invoices) {
+        if (invoice.status !== "Paid") continue;
+        const date = parseDate(invoice.date);
+        if (!date) continue;
+
+        const point = dateMap.get(dateKey(date));
+        if (!point) continue;
+
+        point.value += invoice.amount;
+        matchedInvoices += 1;
+      }
+
+      if (matchedInvoices > 0) {
+        return {
+          points: dates,
+          note: "Paid invoices recorded over the last seven days.",
+          total: dates.reduce((sum, point) => sum + point.value, 0),
+        };
+      }
+
+      const baseline = state.revenueData;
+
+      return {
+        points: baseline.map((point) => ({
+          date: null,
+          key: point.day,
+          day: point.day,
+          value: point.value,
+        })),
+        note: "No paid invoices dated in the last seven days; showing the workspace's seeded weekly series.",
+        total: baseline.reduce((sum, point) => sum + point.value, 0),
+      };
+    };
+
+    const renderRevenue = (): void => {
+      const series = getRevenueSeries();
+      const maximum = Math.max(...series.points.map((point) => point.value), 1);
+
+      collectedTotal.textContent = formatCurrency(series.total);
+      chartNote.textContent = series.note;
+
+      revenueChart.innerHTML = `
+        <div class="chart-grid">
+          <span>${escapeHtml(formatCurrency(maximum))}</span>
+          <span>${escapeHtml(formatCurrency(maximum * 0.75))}</span>
+          <span>${escapeHtml(formatCurrency(maximum * 0.5))}</span>
+          <span>${escapeHtml(formatCurrency(maximum * 0.25))}</span>
+          <span>₹0</span>
+        </div>
+        <div class="chart-bars">
+          ${series.points
+            .map((point) => {
+              const height = Math.round((point.value / maximum) * 92);
+              return `
+              <div class="bar-item">
+                <div class="bar" style="height:${height}%">
+                  <span>${escapeHtml(formatCurrency(point.value))}</span>
+                </div>
+                <small>${escapeHtml(point.day)}</small>
+              </div>
+            `;
+            })
+            .join("")}
+        </div>
+      `;
+    };
+
+    const renderAlerts = (): void => {
+      const state = getState();
+      const criticalItems = state.inventory.filter(
+        (item) => item.state === "Critical",
+      );
+      const lowItems = state.inventory.filter((item) => item.state === "Low");
+      const overdue = state.invoices.filter(
+        (invoice) => invoice.status === "Overdue",
+      );
+      const unassigned = state.workOrders.filter(
+        (order) =>
+          !isClosed(order.status) &&
+          (!order.technicianId || order.technicianId === "unassigned"),
+      );
+
+      const alerts = [
+        {
+          title: "Critical stock",
+          detail: criticalItems.length
+            ? `${criticalItems.length} item(s) need urgent replenishment.`
+            : "No critical stock alerts.",
+          count: criticalItems.length,
+          view: "inventory",
+          tone: criticalItems.length ? "critical" : "clear",
+        },
+        {
+          title: "Low stock",
+          detail: lowItems.length
+            ? `${lowItems.length} item(s) are at or below the reorder threshold.`
+            : "No low-stock items to review.",
+          count: lowItems.length,
+          view: "inventory",
+          tone: lowItems.length ? "warning" : "clear",
+        },
+        {
+          title: "Overdue invoices",
+          detail: overdue.length
+            ? `${overdue.length} invoice(s) are marked overdue.`
+            : "No invoices marked overdue.",
+          count: overdue.length,
+          view: "invoices",
+          tone: overdue.length ? "critical" : "clear",
+        },
+        {
+          title: "Unassigned orders",
+          detail: unassigned.length
+            ? `${unassigned.length} open work order(s) have no technician.`
+            : "All open orders have a technician assigned.",
+          count: unassigned.length,
+          view: "dispatch",
+          tone: unassigned.length ? "warning" : "clear",
+        },
+      ];
+
+      alertList.innerHTML = alerts
+        .map(
+          (alert) => `
+        <button type="button" class="dashboard-alert ${alert.tone}" data-view="${alert.view}">
+          <span class="dashboard-alert-icon">${alert.count ? "!" : "✓"}</span>
+          <span class="dashboard-alert-copy">
+            <strong>${escapeHtml(alert.title)}</strong>
+            <small>${escapeHtml(alert.detail)}</small>
+          </span>
+          <span class="dashboard-alert-arrow">↗</span>
+        </button>
+      `,
+        )
+        .join("");
+    };
+
+    const render = (): void => {
+      showDate();
+      renderMetrics();
+      renderOperations();
+      renderTeam();
+      renderRevenue();
+      renderAlerts();
+    };
+
+    document
+      .querySelectorAll<HTMLButtonElement>("[data-filter-status]")
+      .forEach((button) => {
+        button.addEventListener("click", () => {
+          activeStatusFilter = button.dataset.filterStatus ?? "all";
+
+          document.querySelectorAll("[data-filter-status]").forEach((item) => {
+            item.classList.toggle("active", item === button);
+          });
+
+          renderOperations();
+        });
+      });
+
+    globalSearch?.addEventListener("input", () => {
+      searchTerm = globalSearch.value.trim().toLowerCase();
+      renderOperations();
+    });
+
+    document
+      .querySelector<HTMLButtonElement>("#export-button")
+      ?.addEventListener("click", () => {
+        const state = getState();
+        const header = [
+          "ID",
+          "Customer",
+          "Service",
+          "Technician",
+          "Status",
+          "Priority",
+          "Amount",
+        ];
+        const csvRows = state.workOrders.map((order) => [
+          order.id,
+          order.customer,
+          order.service,
+          order.technician,
+          order.status,
+          order.priority,
+          order.amount,
+        ]);
+
+        const csvValue = (value: unknown) =>
+          `"${String(value ?? "").replace(/"/g, '""')}"`;
+
+        const csv = [header, ...csvRows]
+          .map((row) => row.map(csvValue).join(","))
+          .join("\r\n");
+
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = `serviq-work-orders-${dateKey(new Date())}.csv`;
+        document.body.append(anchor);
+        anchor.click();
+        anchor.remove();
+        URL.revokeObjectURL(url);
+      });
+
+    subscribe(render);
+    render();
+  }
+</script>
+
+<style is:global>
+  .dashboard-footnote,
+  .dashboard-chart-note,
+  .dashboard-empty-copy {
+    margin: 13px 0 0;
+    color: var(--muted, #97a59c);
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  .dashboard-secondary-grid {
+    margin-top: 18px;
+  }
+
+  .dashboard-team-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 13px;
+  }
+
+  .dashboard-team-summary > div {
+    display: grid;
+    gap: 5px;
+    padding: 12px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.018);
+  }
+
+  .dashboard-team-summary strong {
+    color: var(--text, #edf3ed);
+    font-size: 20px;
+  }
+
+  .dashboard-team-summary span {
+    color: var(--muted, #97a59c);
+    font-size: 10px;
+  }
+
+  .dashboard-order-link {
+    padding: 0;
+    border: 0;
+    color: var(--gold, #d6b568);
+    background: transparent;
+    font: inherit;
+    font-weight: 650;
+    cursor: pointer;
+  }
+
+  .dashboard-row-arrow {
+    color: var(--muted, #97a59c);
+  }
+
+  .dashboard-no-rows {
+    padding: 26px 15px !important;
+    color: var(--muted, #97a59c);
+    text-align: center;
+  }
+
+  .dashboard-alert-list {
+    display: grid;
+    gap: 8px;
+  }
+
+  .dashboard-alert {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 12px;
+    padding: 13px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+    border-radius: 12px;
+    color: var(--text, #edf3ed);
+    background: rgba(255, 255, 255, 0.018);
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .dashboard-alert:hover {
+    border-color: rgba(214, 181, 104, 0.25);
+  }
+
+  .dashboard-alert-icon {
+    display: grid;
+    width: 31px;
+    height: 31px;
+    flex: 0 0 31px;
+    place-items: center;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+    border-radius: 10px;
+    color: var(--muted, #97a59c);
+    font-size: 13px;
+  }
+
+  .dashboard-alert.critical .dashboard-alert-icon {
+    border-color: rgba(240, 154, 154, 0.25);
+    color: #f09a9a;
+  }
+
+  .dashboard-alert.warning .dashboard-alert-icon {
+    border-color: rgba(230, 192, 120, 0.25);
+    color: #e6c078;
+  }
+
+  .dashboard-alert-copy {
+    display: grid;
+    min-width: 0;
+    flex: 1;
+    gap: 4px;
+  }
+
+  .dashboard-alert-copy strong {
+    font-size: 12px;
+    font-weight: 650;
+  }
+
+  .dashboard-alert-copy small {
+    color: var(--muted, #97a59c);
+    font-size: 10px;
+    line-height: 1.5;
+  }
+
+  .dashboard-alert-arrow {
+    color: var(--muted, #97a59c);
+  }
+
+  @media (max-width: 650px) {
+    .dashboard-team-summary > div {
+      padding: 9px;
+    }
+
+    .dashboard-team-summary strong {
+      font-size: 17px;
+    }
+  }
+</style>

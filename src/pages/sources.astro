@@ -1,0 +1,80 @@
+---
+import MovieFlexLegalLayout from "../layouts/MovieFlexLegalLayout.astro";
+---
+
+<MovieFlexLegalLayout
+  title="Data sources and provider settings"
+  description="Official information for MovieFlex's catalogue and streaming availability sources."
+  eyebrow="DATA SOURCES"
+>
+  <h2>Movie catalogue — TMDB</h2>
+  <p>
+    MovieFlex uses TMDB for movie metadata, search results, ratings, genres,
+    details, and poster images. The API Read Access Token is configured by the
+    site operator on the server; it should never be entered into a public field
+    or shared in the browser.
+  </p>
+  <div class="link-grid">
+    <a
+      class="link-card"
+      href="https://www.themoviedb.org/settings/api"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <strong>TMDB API settings ↗</strong>
+      <span>Manage your API credentials in your TMDB account.</span>
+    </a>
+    <a
+      class="link-card"
+      href="https://developer.themoviedb.org/docs/authentication-application"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <strong>TMDB authentication docs ↗</strong>
+      <span>Read the official Bearer-token setup guide.</span>
+    </a>
+  </div>
+  <h2>Streaming availability — JustWatch</h2>
+  <p>
+    Provider listings are delivered through TMDB's watch-provider endpoints,
+    with availability data powered by JustWatch. The information indicates
+    reported services for a selected country; it does not guarantee a title is
+    still available or show the final price for every plan.
+  </p>
+  <div class="link-grid">
+    <a
+      class="link-card"
+      href="https://www.justwatch.com/"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <strong>JustWatch ↗</strong>
+      <span>Check supported titles and services on the official website.</span>
+    </a>
+    <a
+      class="link-card"
+      href="https://developer.themoviedb.org/reference/movie-watch-providers"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <strong>TMDB movie-provider API ↗</strong>
+      <span>Review the endpoint used for movie availability data.</span>
+    </a>
+  </div>
+  <h2>Region preferences</h2>
+  <p>
+    Choose a country in a movie's details panel to check the providers reported
+    for that region. This changes MovieFlex's query only; it does not alter your
+    TMDB or JustWatch account settings.
+  </p>
+  <h2>Required attribution</h2>
+  <div class="legal-note">
+    This product uses TMDB and the TMDB APIs but is not endorsed, certified, or
+    otherwise approved by TMDB. Streaming availability data is powered by
+    JustWatch.
+  </div>
+  <p>
+    Review <a href="/copyright">Copyright and attribution</a>,{" "}
+    <a href="/privacy">Privacy</a>, and <a href="/terms">Terms of use</a>.
+  </p>
+</MovieFlexLegalLayout>

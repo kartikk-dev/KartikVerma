@@ -1,0 +1,534 @@
+---
+---
+
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <a href="/" class="brand-mark" aria-label="Back to portfolio">
+      <span class="brand-symbol" aria-hidden="true">
+        <i></i>
+        <i></i>
+        <i></i>
+      </span>
+      <span>
+        <strong>SERVIQ</strong>
+        <small>FIELD OPERATIONS</small>
+      </span>
+    </a>
+
+    <button
+      type="button"
+      class="sidebar-close"
+      id="sidebar-close"
+      aria-label="Close navigation"
+    >
+      ×
+    </button>
+  </div>
+
+  <div class="workspace-switcher">
+    <span class="workspace-avatar" id="serviq-workspace-avatar">
+      KV
+    </span>
+    <div>
+      <strong id="serviq-workspace-name">Operations Workspace</strong>
+      <small>Local workspace</small>
+    </div>
+    <span class="workspace-arrow" aria-hidden="true">
+      ⌄
+    </span>
+  </div>
+
+  <nav class="side-nav" aria-label="SERVIQ navigation">
+    <div class="nav-group">
+      <span class="nav-label">OPERATIONS</span>
+
+      <button
+        type="button"
+        class="nav-item active"
+        data-view="overview"
+        aria-current="page"
+      >
+        <span class="nav-icon" aria-hidden="true">
+          ◈
+        </span>
+        <span>Overview</span>
+        <b>⌘1</b>
+      </button>
+
+      <button type="button" class="nav-item" data-view="work-orders">
+        <span class="nav-icon" aria-hidden="true">
+          ▣
+        </span>
+        <span>Work Orders</span>
+        <em id="serviq-nav-open-orders" hidden>
+          0
+        </em>
+      </button>
+
+      <button type="button" class="nav-item" data-view="dispatch">
+        <span class="nav-icon" aria-hidden="true">
+          ⌁
+        </span>
+        <span>Dispatch</span>
+        <em id="serviq-nav-dispatch" hidden>
+          0
+        </em>
+      </button>
+    </div>
+
+    <div class="nav-group">
+      <span class="nav-label">RESOURCES</span>
+
+      <button type="button" class="nav-item" data-view="technicians">
+        <span class="nav-icon" aria-hidden="true">
+          ◎
+        </span>
+        <span>Technicians</span>
+      </button>
+
+      <button type="button" class="nav-item" data-view="customers">
+        <span class="nav-icon" aria-hidden="true">
+          ◌
+        </span>
+        <span>Customers</span>
+      </button>
+
+      <button type="button" class="nav-item" data-view="inventory">
+        <span class="nav-icon" aria-hidden="true">
+          □
+        </span>
+        <span>Inventory</span>
+        <em id="serviq-nav-stock-alerts" hidden>
+          0
+        </em>
+      </button>
+    </div>
+
+    <div class="nav-group">
+      <span class="nav-label">FINANCE & INSIGHTS</span>
+
+      <button type="button" class="nav-item" data-view="invoices">
+        <span class="nav-icon" aria-hidden="true">
+          ₹
+        </span>
+        <span>Invoices</span>
+        <em id="serviq-nav-unpaid-invoices" hidden>
+          0
+        </em>
+      </button>
+
+      <button type="button" class="nav-item" data-view="analytics">
+        <span class="nav-icon" aria-hidden="true">
+          ⌁
+        </span>
+        <span>Analytics</span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <button class="sidebar-support" type="button" id="support-button">
+      <span aria-hidden="true">?</span>
+      <span>
+        <strong>Help & support</strong>
+        <small>Workspace assistance</small>
+      </span>
+      <span class="sidebar-support-arrow" aria-hidden="true">
+        ↗
+      </span>
+    </button>
+
+    <div class="sidebar-user">
+      <span class="user-avatar" id="serviq-sidebar-user-avatar">
+        KV
+      </span>
+      <div>
+        <strong id="serviq-sidebar-user-name">Workspace Owner</strong>
+        <small>Workspace administrator</small>
+      </div>
+      <button
+        type="button"
+        id="serviq-account-menu-trigger"
+        aria-label="Account menu"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >
+        •••
+      </button>
+    </div>
+  </div>
+</aside>
+
+<script>
+  import { getState, subscribe } from "../../lib/serviq/store";
+
+  const sidebar = document.querySelector<HTMLElement>("#sidebar");
+
+  if (sidebar) {
+    const initials = (name: string): string =>
+      name
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part.charAt(0).toUpperCase())
+        .join("") || "OW";
+
+    const readWorkspaceName = (): string | null => {
+      try {
+        const raw = localStorage.getItem("serviq_workspace_setup");
+        if (!raw) return null;
+
+        const setup: unknown = JSON.parse(raw);
+
+        if (!setup || typeof setup !== "object" || Array.isArray(setup)) {
+          return null;
+        }
+
+        const record = setup as Record<string, unknown>;
+        const nested =
+          record.profile &&
+          typeof record.profile === "object" &&
+          !Array.isArray(record.profile)
+            ? (record.profile as Record<string, unknown>)
+            : {};
+
+        const candidate = [
+          record.name,
+          record.userName,
+          record.fullName,
+          record.ownerName,
+          nested.name,
+        ].find(
+          (value): value is string =>
+            typeof value === "string" && value.trim().length > 0,
+        );
+
+        return candidate?.trim() ?? null;
+      } catch {
+        return null;
+      }
+    };
+
+    const setCount = (id: string, value: number): void => {
+      const element = document.getElementById(id);
+      if (!element) return;
+
+      element.textContent = String(value);
+      element.hidden = value <= 0;
+    };
+
+    const updateWorkspaceIdentity = (): void => {
+      const name = readWorkspaceName() ?? "Operations Workspace";
+      const userName = readWorkspaceName() ?? "Workspace Owner";
+      const avatar = initials(userName);
+
+      const workspaceName = document.querySelector<HTMLElement>(
+        "#serviq-workspace-name",
+      );
+
+      const workspaceAvatar = document.querySelector<HTMLElement>(
+        "#serviq-workspace-avatar",
+      );
+
+      const sidebarName = document.querySelector<HTMLElement>(
+        "#serviq-sidebar-user-name",
+      );
+
+      const sidebarAvatar = document.querySelector<HTMLElement>(
+        "#serviq-sidebar-user-avatar",
+      );
+
+      if (workspaceName) workspaceName.textContent = name;
+      if (workspaceAvatar) workspaceAvatar.textContent = avatar;
+      if (sidebarName) sidebarName.textContent = userName;
+      if (sidebarAvatar) sidebarAvatar.textContent = avatar;
+    };
+
+    const renderCounts = (): void => {
+      const state = getState();
+
+      const isClosed = (status: string): boolean =>
+        [
+          "completed",
+          "complete",
+          "closed",
+          "cancelled",
+          "canceled",
+          "invoiced",
+          "paid",
+        ].includes(status.trim().toLowerCase());
+
+      const openOrders = state.workOrders.filter(
+        (order) => !isClosed(order.status),
+      );
+
+      const dispatchQueue = openOrders.filter(
+        (order) =>
+          !order.technicianId ||
+          order.technicianId === "unassigned" ||
+          ["New", "Assigned"].includes(order.status),
+      );
+
+      const stockAlerts = state.inventory.filter(
+        (item) => item.state !== "Healthy",
+      );
+
+      const unpaidInvoices = state.invoices.filter(
+        (invoice) => invoice.status !== "Paid",
+      );
+
+      setCount("serviq-nav-open-orders", openOrders.length);
+      setCount("serviq-nav-dispatch", dispatchQueue.length);
+      setCount("serviq-nav-stock-alerts", stockAlerts.length);
+      setCount("serviq-nav-unpaid-invoices", unpaidInvoices.length);
+    };
+
+    subscribe(renderCounts);
+    window.addEventListener("storage", updateWorkspaceIdentity);
+
+    updateWorkspaceIdentity();
+    renderCounts();
+  }
+</script>
+
+<style is:global>
+  .sidebar .brand-mark {
+    color: var(--text, #edf3ed);
+  }
+
+  .sidebar .brand-mark strong {
+    font-size: 15px;
+    letter-spacing: 0.17em;
+  }
+
+  .sidebar .brand-mark small {
+    margin-top: 3px;
+    font-size: 9px;
+    letter-spacing: 0.09em;
+  }
+
+  .sidebar .workspace-switcher {
+    margin-bottom: 20px;
+  }
+
+  .sidebar .workspace-switcher strong,
+  .sidebar .sidebar-user strong {
+    display: block;
+    overflow: hidden;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sidebar .workspace-switcher small,
+  .sidebar .sidebar-user small {
+    display: block;
+    margin-top: 4px;
+    color: var(--dim, #69776f);
+    font-size: 10px;
+  }
+
+  .sidebar .side-nav {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 20px;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 2px 0 18px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+  }
+
+  .sidebar .nav-group {
+    display: grid;
+    gap: 5px;
+  }
+
+  .sidebar .nav-label {
+    display: block;
+    margin: 0 10px 7px;
+    color: var(--dim, #69776f);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.105em;
+  }
+
+  .sidebar .nav-item {
+    display: grid;
+    grid-template-columns: 26px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 43px;
+    padding: 0 11px;
+    border: 1px solid transparent;
+    border-radius: 11px;
+    color: var(--muted, #97a59c);
+    background: transparent;
+    text-align: left;
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition:
+      color 150ms ease,
+      background 150ms ease,
+      border-color 150ms ease;
+  }
+
+  .sidebar .nav-item:hover {
+    color: var(--text, #edf3ed);
+    background: rgba(255, 255, 255, 0.035);
+  }
+
+  .sidebar .nav-item.active {
+    border-color: rgba(214, 181, 104, 0.16);
+    color: var(--text, #edf3ed);
+    background: linear-gradient(
+      100deg,
+      rgba(214, 181, 104, 0.105),
+      rgba(214, 181, 104, 0.025)
+    );
+  }
+
+  .sidebar .nav-icon {
+    display: grid;
+    width: 26px;
+    height: 26px;
+    place-items: center;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: currentColor;
+    font-size: 15px;
+  }
+
+  .sidebar .nav-item.active .nav-icon {
+    border-color: rgba(214, 181, 104, 0.16);
+    color: var(--gold-bright, #f0df9f);
+    background: rgba(214, 181, 104, 0.055);
+  }
+
+  .sidebar .nav-item b {
+    color: var(--dim, #69776f);
+    font-size: 9px;
+    font-weight: 600;
+  }
+
+  .sidebar .nav-item em {
+    display: grid;
+    min-width: 22px;
+    height: 21px;
+    padding: 0 5px;
+    place-items: center;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+    border-radius: 7px;
+    color: var(--muted, #97a59c);
+    font-size: 10px;
+    font-style: normal;
+  }
+
+  .sidebar .nav-item em[hidden] {
+    display: none !important;
+  }
+
+  .sidebar .nav-item em.pulse-count {
+    color: var(--gold, #d6b568);
+  }
+
+  .sidebar .sidebar-bottom {
+    flex: 0 0 auto;
+    padding-top: 12px;
+    border-top: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+  }
+
+  .sidebar .sidebar-support {
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 8px;
+    border: 1px solid transparent;
+    border-radius: 11px;
+    color: var(--text, #edf3ed);
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .sidebar .sidebar-support:hover {
+    border-color: var(--line, rgba(255, 255, 255, 0.08));
+    background: rgba(255, 255, 255, 0.025);
+  }
+
+  .sidebar .sidebar-support > span:first-child {
+    display: grid;
+    width: 29px;
+    height: 29px;
+    place-items: center;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+    border-radius: 9px;
+    color: var(--gold, #d6b568);
+    font-size: 13px;
+  }
+
+  .sidebar .sidebar-support strong {
+    display: block;
+    font-size: 11px;
+    font-weight: 650;
+  }
+
+  .sidebar .sidebar-support small {
+    display: block;
+    margin-top: 4px;
+    color: var(--muted, #97a59c);
+    font-size: 9px;
+  }
+
+  .sidebar .sidebar-support-arrow {
+    color: var(--dim, #69776f);
+    font-size: 12px;
+  }
+
+  .sidebar .sidebar-user {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr) 30px;
+    align-items: center;
+    gap: 10px;
+    margin-top: 9px;
+    padding: 12px 6px 4px;
+    border-top: 1px solid var(--line, rgba(255, 255, 255, 0.07));
+  }
+
+  .sidebar .sidebar-user .user-avatar {
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgba(214, 181, 104, 0.23);
+    font-size: 11px;
+  }
+
+  .sidebar .sidebar-user button {
+    display: grid;
+    width: 30px;
+    height: 30px;
+    place-items: center;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: var(--muted, #97a59c);
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .sidebar .sidebar-user button:hover,
+  .sidebar .sidebar-user button[aria-expanded="true"] {
+    border-color: var(--line, rgba(255, 255, 255, 0.1));
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sidebar .nav-item {
+      transition: none;
+    }
+  }
+</style>

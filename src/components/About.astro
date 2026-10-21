@@ -1,0 +1,1026 @@
+
+---
+const focusAreas = [
+  "Frontend engineering",
+  "Backend systems",
+  "API integration",
+  "Databases",
+  "Responsive interfaces",
+  "Performance and maintainability",
+];
+
+---
+
+<section
+  id="about"
+  class="about-section"
+  aria-labelledby="about-heading"
+>
+  <div class="about-atmosphere" aria-hidden="true"></div>
+
+  <div class="about-container">
+    <header class="about-header">
+      <span class="about-heading-rule" aria-hidden="true"></span>
+      <h2 id="about-heading">About Me</h2>
+      <p>
+        The engineer behind the interfaces, systems and experiences.
+      </p>
+    </header>
+
+    <div class="about-layout">
+      <article class="about-copy-card" data-about-card>
+        <div class="about-card-edge" aria-hidden="true"></div>
+
+        <div class="about-copy-inner">
+          <p class="about-card-label">
+            <span class="about-status-dot" aria-hidden="true"></span>
+            PROFILE
+          </p>
+
+          <div class="about-copy-body" aria-label="About Kartik Verma">
+            <p
+              class="about-typed-copy"
+              aria-label="I am Kartik Verma, a Full Stack Engineer focused on building reliable, accessible and maintainable digital products."
+            >
+              <span data-typing-text></span><span
+                class="typing-cursor"
+                data-typing-cursor
+                aria-hidden="true"
+              ></span>
+            </p>
+          </div>
+
+          <div class="about-focus">
+            <p class="about-focus-label">AREAS OF FOCUS</p>
+            <div class="about-focus-list">
+              {focusAreas.map((area) => (
+                <span class="about-focus-tag">{area}</span>
+              ))}
+            </div>
+          </div>
+
+          <div class="about-actions">
+            <a class="about-button about-button-primary" href="#projects">
+              Explore my work
+            </a>
+            <a class="about-button about-button-secondary" href="#contact">
+              Get in touch
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <article class="about-portrait-card" data-about-card>
+        <div class="portrait-orbit portrait-orbit-one" aria-hidden="true"></div>
+        <div class="portrait-orbit portrait-orbit-two" aria-hidden="true"></div>
+        <div class="portrait-glow" aria-hidden="true"></div>
+        <div class="portrait-grid" aria-hidden="true"></div>
+
+        <div class="portrait-topline" aria-hidden="true">
+          <span></span>
+          <span></span>
+        </div>
+
+        <button
+          class="portrait-trigger"
+          type="button"
+          data-portrait-trigger
+          aria-label="Show a greeting"
+          aria-describedby="portrait-greeting"
+        >
+          <img
+            class="portrait-image"
+            src="/memoji/kartik.png"
+            alt="Kartik Verma"
+            width="500"
+            height="500"
+            fetchpriority="high"
+          />
+          <span class="portrait-ground-glow" aria-hidden="true"></span>
+        </button>
+
+        <div
+          id="portrait-greeting"
+          class="portrait-greeting"
+          data-portrait-greeting
+          role="status"
+          aria-live="polite"
+          hidden
+        ></div>
+
+        <span class="portrait-bottom-glow" aria-hidden="true"></span>
+      </article>
+    </div>
+  </div>
+</section>
+
+<script>
+  const greetingMessages: readonly string[] = [
+    "Hello, how are you?", "Hey there, welcome to my portfolio.",
+    "Nice to see you here.", "Looking for something interesting?",
+    "Thanks for stopping by.", "Hope you are having a great day.",
+    "Curious about how I build things?", "Let's make something useful.",
+    "Always glad to meet another curious mind.", "Take your time and explore.",
+    "Welcome. Have a look around.", "Something caught your eye?",
+    "Good ideas start with good conversations.", "Enjoying the portfolio so far?",
+    "Thanks for visiting my little corner of the web.", "Have a project in mind?",
+    "Let's turn an idea into something real.", "Curiosity is always welcome here.",
+    "Hope you find something inspiring.", "Ready to explore the projects?",
+    "Hey, glad you made it.", "Every detail has a purpose.",
+    "Building, learning, and improving every day.", "A little engineering goes a long way.",
+    "Feel free to explore my work.", "The best ideas start with a question.",
+    "Thanks for being here.", "Let's build something meaningful.",
+    "Have a great rest of your day.", "See you around. Keep creating.",
+  ];
+  const aboutSections = document.querySelectorAll<HTMLElement>(".about-section");
+
+  aboutSections.forEach((section) => {
+    if (section.dataset.aboutInitialized === "true") return;
+    section.dataset.aboutInitialized = "true";
+
+    const typingTarget = section.querySelector("[data-typing-text]");
+    const typingCursor = section.querySelector("[data-typing-cursor]");
+    const portraitTrigger = section.querySelector("[data-portrait-trigger]");
+    const portraitGreeting = section.querySelector("[data-portrait-greeting]");
+    const cards = Array.from(section.querySelectorAll<HTMLElement>("[data-about-card]"));
+
+    if (
+      !(typingTarget instanceof HTMLElement) ||
+      !(typingCursor instanceof HTMLElement) ||
+      !(portraitTrigger instanceof HTMLButtonElement) ||
+      !(portraitGreeting instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    const aboutText = [
+      "I am Kartik Verma, a Full Stack Engineer focused on building reliable, accessible and maintainable digital products. I work across frontend interfaces, backend services, APIs and data layers, translating product requirements into clear user experiences and practical technical solutions.",
+      "My approach combines interface design with strong engineering fundamentals. I care about component architecture, responsive behaviour, data flow, validation, error handling, performance and security. I aim to write readable code and make technical decisions that fit the actual problem, so applications remain understandable as they grow.",
+      "From shaping the first interface to integrating services and working with databases, I enjoy understanding how every layer fits together. I value deliberate problem-solving, continuous learning and the small details that make software intuitive, dependable and easier to use and maintain.",
+    ].join("\n\n");
+
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    );
+
+    let typingTimer: number | null = null;
+    let greetingTimer: number | null = null;
+    let lastGreetingIndex = -1;
+
+    const startTyping = () => {
+      if (typingTimer !== null) {
+        window.clearTimeout(typingTimer);
+        typingTimer = null;
+      }
+
+      // Restart from an empty line on every page load.
+      typingTarget.textContent = "";
+
+      if (reducedMotion.matches) {
+        typingTarget.textContent = aboutText;
+        typingCursor.hidden = true;
+        return;
+      }
+
+      typingCursor.hidden = false;
+
+      const characters = Array.from(aboutText);
+      let index = 0;
+
+      const typeNextCharacter = () => {
+        if (index >= characters.length) {
+          typingCursor.classList.add("typing-complete");
+          typingTimer = null;
+          return;
+        }
+
+        typingTarget.textContent += characters[index];
+        index += 1;
+
+        // Faster, consistent typing with a brief pause at paragraph breaks.
+        const isParagraphBreak =
+          characters[index] === "\n" && characters[index - 1] === "\n";
+
+        typingTimer = window.setTimeout(
+          typeNextCharacter,
+          isParagraphBreak ? 105 : 13,
+        );
+      };
+
+      typingCursor.classList.remove("typing-complete");
+      typeNextCharacter();
+    };
+
+    const hideGreeting = () => {
+      if (greetingTimer !== null) {
+        window.clearTimeout(greetingTimer);
+        greetingTimer = null;
+      }
+
+      portraitGreeting.classList.remove("is-visible");
+      portraitTrigger.setAttribute("aria-expanded", "false");
+
+      // Allow the short exit transition, then remove the message.
+      window.setTimeout(() => {
+        if (!portraitGreeting.classList.contains("is-visible")) {
+          portraitGreeting.hidden = true;
+          portraitGreeting.textContent = "";
+        }
+      }, 180);
+    };
+
+    const showGreeting = () => {
+      if (greetingTimer !== null) {
+        window.clearTimeout(greetingTimer);
+        greetingTimer = null;
+      }
+
+      if (greetingMessages.length === 0) return;
+
+      let index = Math.floor(Math.random() * greetingMessages.length);
+
+      if (greetingMessages.length > 1 && index === lastGreetingIndex) {
+        index = (index + 1) % greetingMessages.length;
+      }
+
+      lastGreetingIndex = index;
+      portraitGreeting.textContent = greetingMessages[index];
+      portraitGreeting.hidden = false;
+
+      // Restart the entrance animation after updating the content.
+      portraitGreeting.classList.remove("is-visible");
+      void portraitGreeting.offsetWidth;
+      portraitGreeting.classList.add("is-visible");
+
+      portraitTrigger.setAttribute("aria-expanded", "true");
+    };
+
+    const hasHover = window.matchMedia("(hover: hover) and (pointer: fine)");
+
+    portraitTrigger.addEventListener("pointerenter", (event) => {
+      if (event.pointerType === "touch") return;
+      showGreeting();
+    });
+
+    portraitTrigger.addEventListener("pointerleave", (event) => {
+      if (event.pointerType === "touch") return;
+      hideGreeting();
+    });
+
+    // Keyboard users receive the same callout while the portrait is focused.
+    portraitTrigger.addEventListener("focus", () => {
+      showGreeting();
+    });
+
+    portraitTrigger.addEventListener("blur", () => {
+      hideGreeting();
+    });
+
+    // Mobile has no reliable hover. A tap shows a greeting briefly.
+    portraitTrigger.addEventListener("click", () => {
+      if (hasHover.matches) return;
+
+      showGreeting();
+
+      greetingTimer = window.setTimeout(() => {
+        hideGreeting();
+        greetingTimer = null;
+      }, 2800);
+    });
+
+    // A gentle 3D tilt on pointer-capable devices.
+    if (hasHover.matches && !reducedMotion.matches) {
+      cards.forEach((card) => {
+        card.addEventListener("pointermove", (event) => {
+          if (!(event instanceof PointerEvent)) return;
+
+          const bounds = card.getBoundingClientRect();
+          if (!bounds.width || !bounds.height) return;
+
+          const x = (event.clientX - bounds.left) / bounds.width;
+          const y = (event.clientY - bounds.top) / bounds.height;
+
+          const tiltX = (0.5 - y) * 3.5;
+          const tiltY = (x - 0.5) * 4.5;
+
+          card.style.setProperty("--about-tilt-x", `${tiltX}deg`);
+          card.style.setProperty("--about-tilt-y", `${tiltY}deg`);
+        });
+
+        card.addEventListener("pointerleave", () => {
+          card.style.setProperty("--about-tilt-x", "0deg");
+          card.style.setProperty("--about-tilt-y", "0deg");
+        });
+      });
+    }
+
+    reducedMotion.addEventListener("change", () => {
+      if (reducedMotion.matches) {
+        if (typingTimer !== null) {
+          window.clearTimeout(typingTimer);
+          typingTimer = null;
+        }
+
+        typingTarget.textContent = aboutText;
+        typingCursor.hidden = true;
+
+        cards.forEach((card) => {
+          card.style.setProperty("--about-tilt-x", "0deg");
+          card.style.setProperty("--about-tilt-y", "0deg");
+        });
+      }
+    });
+
+    // The animation begins when the page is loaded or refreshed.
+    startTyping();
+  });
+</script>
+
+<style>
+  .about-section {
+    --about-background: #0b0809;
+    --about-surface: #130d10;
+    --about-border: #402329;
+    --about-text: #f5e7e8;
+    --about-muted: #b7a7aa;
+    --about-accent: #e44752;
+
+    position: relative;
+    isolation: isolate;
+    width: 100%;
+    padding: clamp(75px, 8.2vw, 115px) clamp(20px, 6vw, 88px);
+    overflow: clip;
+    color: var(--about-text);
+    background: transparent;
+    scroll-margin-top: 95px;
+  }
+
+  .about-section *,
+  .about-section *::before,
+  .about-section *::after {
+    box-sizing: border-box;
+  }
+
+  .about-atmosphere {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse at 18% 34%, rgba(228, 71, 82, 0.06), transparent 38%),
+      radial-gradient(ellipse at 90% 68%, rgba(115, 34, 55, 0.06), transparent 35%);
+  }
+
+  .about-container {
+    width: 100%;
+    max-width: 1200px;
+    margin-inline: auto;
+  }
+
+  .about-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 auto clamp(30px, 4vw, 47px);
+    text-align: center;
+  }
+
+  .about-heading-rule {
+    display: block;
+    width: 32px;
+    height: 3px;
+    margin-bottom: 16px;
+    background: var(--about-accent);
+    box-shadow: 0 0 17px rgba(228, 71, 82, 0.3);
+  }
+
+  .about-header h2 {
+    margin: 0;
+    color: var(--about-text);
+    font-size: clamp(2.7rem, 5.4vw, 4.4rem);
+    font-weight: 680;
+    line-height: 1.08;
+    letter-spacing: -0.055em;
+  }
+
+  .about-header > p {
+    max-width: 540px;
+    margin: 15px 0 0;
+    color: var(--about-muted);
+    font-size: 0.92rem;
+    line-height: 1.8;
+  }
+
+  .about-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+    grid-template-areas: "copy portrait";
+    align-items: stretch;
+    gap: clamp(22px, 3.2vw, 40px);
+    perspective: 1500px;
+  }
+
+  .about-copy-card,
+  .about-portrait-card {
+    --about-tilt-x: 0deg;
+    --about-tilt-y: 0deg;
+
+    position: relative;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--about-border);
+    border-radius: 17px;
+    background:
+      linear-gradient(145deg, rgba(228, 71, 82, 0.035), transparent 58%),
+      var(--about-surface);
+    transform: perspective(1250px) rotateX(var(--about-tilt-x)) rotateY(var(--about-tilt-y));
+    transform-style: preserve-3d;
+    transition:
+      transform 280ms ease,
+      border-color 250ms ease,
+      box-shadow 250ms ease;
+  }
+
+  .about-copy-card {
+    grid-area: copy;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(23px, 3.2vw, 36px);
+  }
+
+  .about-copy-card:hover,
+  .about-portrait-card:hover {
+    border-color: #67323b;
+    box-shadow:
+      0 22px 55px rgba(0, 0, 0, 0.2),
+      0 0 26px rgba(228, 71, 82, 0.06);
+  }
+
+  .about-card-edge {
+    position: absolute;
+    top: 0;
+    right: 17%;
+    left: 17%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #e44752, transparent);
+    opacity: 0.6;
+  }
+
+  .about-copy-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .about-card-label {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 19px;
+    color: #d6b4b9;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    line-height: 1.6;
+  }
+
+  .about-status-dot {
+    width: 6px;
+    height: 6px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: var(--about-accent);
+    box-shadow: 0 0 11px rgba(228, 71, 82, 0.3);
+  }
+
+  .about-copy-body {
+    min-width: 0;
+  }
+
+  .about-typed-copy {
+    min-height: 295px;
+    margin: 0;
+    color: #d5c6c9;
+    font-size: clamp(0.88rem, 1.12vw, 0.96rem);
+    font-weight: 400;
+    line-height: 1.92;
+    letter-spacing: 0.003em;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .typing-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    margin-left: 3px;
+    transform: translateY(2px);
+    background: var(--about-accent);
+    animation: about-cursor-blink 780ms steps(2, start) infinite;
+  }
+
+  .typing-cursor.typing-complete {
+    opacity: 0;
+    animation: none;
+  }
+
+  .typing-cursor[hidden] {
+    display: none;
+  }
+
+  .about-focus {
+    margin-top: 23px;
+    padding-top: 21px;
+    border-top: 1px solid #382329;
+  }
+
+  .about-focus-label {
+    margin: 0 0 12px;
+    color: #ab9298;
+    font-size: 0.64rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+  }
+
+  .about-focus-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .about-focus-tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 29px;
+    padding: 6px 9px;
+    border: 1px solid #43282f;
+    border-radius: 5px;
+    color: #d4c2c6;
+    background: #171013;
+    font-size: 0.68rem;
+    line-height: 1.4;
+  }
+
+  .about-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  .about-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 43px;
+    padding: 10px 15px;
+    border: 1px solid #75404a;
+    border-radius: 5px;
+    color: #f5e7e8;
+    background: #160f11;
+    font: inherit;
+    font-size: 0.79rem;
+    font-weight: 650;
+    line-height: 1.4;
+    text-align: center;
+    text-decoration: none;
+    transition:
+      color 180ms ease,
+      background-color 180ms ease,
+      border-color 180ms ease;
+  }
+
+  .about-button-primary {
+    border-color: var(--about-accent);
+    color: #fff;
+    background: var(--about-accent);
+  }
+
+  .about-button-primary:hover {
+    border-color: #f16a75;
+    background: #f16a75;
+  }
+
+  .about-button-secondary:hover {
+    border-color: var(--about-accent);
+    background: #211115;
+  }
+
+  .about-button:focus-visible {
+    outline: 2px solid #ff9299;
+    outline-offset: 4px;
+  }
+
+  /* The portrait floats inside the card without a separate square frame. */
+
+  .about-portrait-card {
+    grid-area: portrait;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 530px;
+    padding: 16px;
+    isolation: isolate;
+    border-color: #46242d;
+    background:
+      radial-gradient(ellipse at 50% 48%, rgba(228, 71, 82, 0.16), transparent 41%),
+      radial-gradient(ellipse at 50% 78%, rgba(140, 37, 61, 0.1), transparent 37%),
+      linear-gradient(160deg, #160e11, #0e0a0c 76%);
+  }
+
+  .portrait-grid {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.15;
+    background-image:
+      linear-gradient(rgba(228, 71, 82, 0.12) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(228, 71, 82, 0.12) 1px, transparent 1px);
+    background-size: 34px 34px;
+    mask-image: radial-gradient(ellipse at center, #000 0%, transparent 75%);
+  }
+
+  .portrait-glow {
+    position: absolute;
+    z-index: -1;
+    top: 21%;
+    left: 50%;
+    width: min(74%, 320px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: rgba(228, 71, 82, 0.16);
+    filter: blur(53px);
+    transform: translateX(-50%);
+    pointer-events: none;
+    animation: portrait-glow-breathe 5.5s ease-in-out infinite alternate;
+  }
+
+  .portrait-orbit {
+    position: absolute;
+    z-index: -1;
+    top: 50%;
+    left: 50%;
+    aspect-ratio: 1;
+    border: 1px solid rgba(228, 71, 82, 0.19);
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+  }
+
+  .portrait-orbit-one {
+    width: min(83%, 365px);
+  }
+
+  .portrait-orbit-two {
+    width: min(97%, 440px);
+    border-color: rgba(228, 71, 82, 0.09);
+    transform: translate(-50%, -50%) rotateX(65deg) rotate(-18deg);
+  }
+
+  .portrait-topline {
+    position: absolute;
+    top: 22px;
+    right: 22px;
+    left: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+
+  .portrait-topline span:first-child {
+    width: 21px;
+    height: 2px;
+    background: var(--about-accent);
+  }
+
+  .portrait-topline span:last-child {
+    width: 6px;
+    height: 6px;
+    border: 1px solid #e66a73;
+    border-radius: 50%;
+    box-shadow: 0 0 12px rgba(228, 71, 82, 0.38);
+  }
+
+  .portrait-trigger {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    width: 100%;
+    height: 100%;
+    min-height: 470px;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    cursor: pointer;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .portrait-image {
+    position: relative;
+    z-index: 2;
+    display: block;
+    width: min(100%, 405px);
+    max-height: 490px;
+    object-fit: contain;
+    filter:
+      drop-shadow(0 22px 36px rgba(0, 0, 0, 0.3))
+      drop-shadow(0 0 24px rgba(228, 71, 82, 0.1));
+    transform: translateY(5px) translateZ(16px);
+    transition:
+      transform 320ms ease,
+      filter 320ms ease;
+    pointer-events: none;
+  }
+
+  .portrait-trigger:hover .portrait-image,
+  .portrait-trigger:focus-visible .portrait-image {
+    transform: translateY(-4px) translateZ(22px) scale(1.025);
+    filter:
+      drop-shadow(0 26px 40px rgba(0, 0, 0, 0.36))
+      drop-shadow(0 0 31px rgba(228, 71, 82, 0.2));
+  }
+
+  .portrait-trigger:focus-visible {
+    outline: 2px solid #e66a73;
+    outline-offset: -4px;
+  }
+
+  .portrait-ground-glow {
+    position: absolute;
+    right: 12%;
+    bottom: 11%;
+    left: 12%;
+    height: 14%;
+    border-radius: 50%;
+    background: rgba(228, 71, 82, 0.12);
+    filter: blur(29px);
+    pointer-events: none;
+  }
+
+  .portrait-greeting {
+    position: absolute;
+    z-index: 5;
+    top: 14%;
+    right: 20px;
+    max-width: min(245px, calc(100% - 40px));
+    padding: 12px 15px;
+    border: 1px solid rgba(228, 71, 82, 0.68);
+    border-radius: 10px 10px 3px 10px;
+    color: #f9e9eb;
+    background: rgba(23, 13, 16, 0.94);
+    box-shadow:
+      0 10px 28px rgba(0, 0, 0, 0.29),
+      0 0 25px rgba(228, 71, 82, 0.13);
+    font-size: 0.82rem;
+    font-weight: 550;
+    line-height: 1.65;
+    opacity: 0;
+    transform: translateY(7px) scale(0.97);
+    pointer-events: none;
+    transition:
+      opacity 180ms ease,
+      transform 180ms ease;
+  }
+
+  .portrait-greeting::after {
+    position: absolute;
+    right: 12px;
+    bottom: -5px;
+    width: 8px;
+    height: 8px;
+    border-right: 1px solid rgba(228, 71, 82, 0.68);
+    border-bottom: 1px solid rgba(228, 71, 82, 0.68);
+    background: #170d10;
+    content: "";
+    transform: rotate(45deg);
+  }
+
+  .portrait-greeting.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  .portrait-greeting[hidden] {
+    display: none;
+  }
+
+  .portrait-bottom-glow {
+    position: absolute;
+    right: 18%;
+    bottom: 0;
+    left: 18%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #e44752, transparent);
+    opacity: 0.48;
+    pointer-events: none;
+  }
+
+  @keyframes about-cursor-blink {
+    0%, 45% { opacity: 1; }
+    46%, 100% { opacity: 0; }
+  }
+
+  @keyframes portrait-glow-breathe {
+    from { opacity: 0.55; transform: translateX(-50%) scale(0.94); }
+    to { opacity: 0.95; transform: translateX(-50%) scale(1.05); }
+  }
+
+  @media (max-width: 940px) {
+    .about-section {
+      padding-inline: 26px;
+    }
+
+    .about-layout {
+      grid-template-columns: minmax(0, 1.05fr) minmax(255px, 0.8fr);
+      gap: 20px;
+    }
+
+    .about-copy-card {
+      padding: 24px;
+    }
+
+    .about-typed-copy {
+      min-height: 330px;
+      font-size: 0.88rem;
+      line-height: 1.85;
+    }
+
+    .about-portrait-card {
+      min-height: 490px;
+      padding: 12px;
+    }
+
+    .portrait-trigger {
+      min-height: 420px;
+    }
+  }
+
+  @media (max-width: 680px) {
+    .about-section {
+      padding: 66px 17px;
+      scroll-margin-top: 82px;
+    }
+
+    .about-header {
+      margin-bottom: 27px;
+    }
+
+    .about-header h2 {
+      font-size: clamp(2.5rem, 10vw, 3.35rem);
+    }
+
+    .about-header > p {
+      max-width: 360px;
+      margin-top: 12px;
+      font-size: 0.85rem;
+    }
+
+    .about-layout {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas:
+        "portrait"
+        "copy";
+      gap: 19px;
+      perspective: none;
+    }
+
+    .about-portrait-card {
+      min-height: 340px;
+      width: min(100%, 390px);
+      justify-self: center;
+      padding: 10px;
+      border-radius: 15px;
+      transform: none;
+    }
+
+    .portrait-trigger {
+      min-height: 320px;
+    }
+
+    .portrait-image {
+      width: min(100%, 310px);
+      max-height: 335px;
+    }
+
+    .portrait-orbit-one {
+      width: min(75%, 285px);
+    }
+
+    .portrait-orbit-two {
+      width: min(91%, 340px);
+    }
+
+    .portrait-glow {
+      top: 20%;
+      width: min(72%, 250px);
+      filter: blur(40px);
+    }
+
+    .portrait-greeting {
+      top: 13%;
+      right: 13px;
+      max-width: min(225px, calc(100% - 26px));
+      font-size: 0.78rem;
+    }
+
+    .about-copy-card {
+      padding: 22px;
+      border-radius: 15px;
+      transform: none;
+    }
+
+    .about-card-label {
+      margin-bottom: 15px;
+    }
+
+    .about-typed-copy {
+      min-height: 350px;
+      font-size: 0.87rem;
+      line-height: 1.85;
+    }
+
+    .about-focus {
+      margin-top: 20px;
+      padding-top: 17px;
+    }
+
+    .about-actions {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 9px;
+      margin-top: 21px;
+    }
+
+    .about-button {
+      min-height: 44px;
+      padding-inline: 10px;
+      font-size: 0.75rem;
+    }
+  }
+
+  @media (max-width: 390px) {
+    .about-section {
+      padding-inline: 13px;
+    }
+
+    .about-header h2 {
+      font-size: 2.35rem;
+    }
+
+    .about-portrait-card {
+      min-height: 300px;
+    }
+
+    .portrait-trigger {
+      min-height: 280px;
+    }
+
+    .portrait-image {
+      max-height: 290px;
+    }
+
+    .about-copy-card {
+      padding: 19px;
+    }
+
+    .about-typed-copy {
+      min-height: 390px;
+      font-size: 0.84rem;
+      line-height: 1.82;
+    }
+
+    .about-focus-tag {
+      font-size: 0.65rem;
+    }
+  }
+
+  @media (hover: none) {
+    .about-copy-card:hover,
+    .about-portrait-card:hover {
+      box-shadow: none;
+    }
+
+    .portrait-trigger:hover .portrait-image {
+      transform: translateY(5px) translateZ(16px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .about-section *,
+    .about-section *::before,
+    .about-section *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      transition-delay: 0ms !important;
+    }
+  }
+</style>

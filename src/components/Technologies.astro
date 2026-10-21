@@ -1,0 +1,1305 @@
+
+---
+type Technology = {
+  name: string;
+  category: string;
+  group: string;
+  logo: string | null;
+  icon: string | null;
+  color: string;
+  description: string;
+  syntax: string;
+};
+
+const technologies: Technology[] = [
+  {
+    name: "HTML5",
+    category: "Frontend",
+    group: "frontend",
+    logo: "html5",
+    icon: null,
+    color: "#E34F26",
+    description: "Structures web pages with headings, sections, forms and semantic elements.",
+    syntax: '<section>\n  <h1>Hello world</h1>\n</section>',
+  },
+  {
+    name: "CSS3",
+    category: "Frontend",
+    group: "frontend",
+    logo: "css3",
+    icon: null,
+    color: "#1572B6",
+    description: "Controls layout, typography, colours, transitions and responsive styling.",
+    syntax: '.card {\n  display: grid;\n  gap: 1rem;\n}',
+  },
+  {
+    name: "JavaScript",
+    category: "Language",
+    group: "languages",
+    logo: "javascript",
+    icon: null,
+    color: "#F7DF1E",
+    description: "Adds application logic, interactivity, event handling and dynamic behaviour.",
+    syntax: 'const greet = (name) =>\n  `Hello, ${name}`;',
+  },
+  {
+    name: "TypeScript",
+    category: "Language",
+    group: "languages",
+    logo: "typescript",
+    icon: null,
+    color: "#3178C6",
+    description: "Adds static types to JavaScript for clearer APIs and safer refactoring.",
+    syntax: 'const greet =\n  (name: string): string =>\n    `Hello, ${name}`;',
+  },
+  {
+    name: "React",
+    category: "Frontend",
+    group: "frontend",
+    logo: "react",
+    icon: null,
+    color: "#61DAFB",
+    description: "Builds reusable UI components from declarative, state-driven interfaces.",
+    syntax: 'function Welcome() {\n  return <h1>Hello</h1>;\n}',
+  },
+  {
+    name: "Next.js",
+    category: "Framework",
+    group: "frameworks",
+    logo: "nextdotjs",
+    icon: null,
+    color: "#F5E7E8",
+    description: "Builds React applications with routing, server rendering and backend capabilities.",
+    syntax: 'export default function Page() {\n  return <main>Welcome</main>;\n}',
+  },
+  {
+    name: "Tailwind CSS",
+    category: "Frontend",
+    group: "frontend",
+    logo: "tailwindcss",
+    icon: null,
+    color: "#06B6D4",
+    description: "Styles interfaces directly in markup using composable utility classes.",
+    syntax: '<button class="rounded-md bg-red-500 px-4 py-2">\n  Explore\n</button>',
+  },
+  {
+    name: "Astro",
+    category: "Framework",
+    group: "frameworks",
+    logo: "astro",
+    icon: null,
+    color: "#FF5D01",
+    description: "Builds fast content-focused websites with component islands and lightweight output.",
+    syntax: '---\nconst title = "Portfolio";\n---\n<h1>{title}</h1>',
+  },
+  {
+    name: "Node.js",
+    category: "Backend",
+    group: "frameworks",
+    logo: "nodedotjs",
+    icon: null,
+    color: "#5FA04E",
+    description: "Runs JavaScript outside the browser for servers, scripts and backend services.",
+    syntax: 'import { createServer } from "node:http";',
+  },
+  {
+    name: "PHP",
+    category: "Backend",
+    group: "languages",
+    logo: "php",
+    icon: null,
+    color: "#777BB4",
+    description: "Powers server-side pages, API endpoints and data-driven web applications.",
+    syntax: '<?php\n$name = "Kartik";\necho $name;\n?>',
+  },
+  {
+    name: "Python",
+    category: "Language",
+    group: "languages",
+    logo: "python",
+    icon: null,
+    color: "#3776AB",
+    description: "Supports scripting, backend development, data processing and AI workflows.",
+    syntax: 'def greet(name: str):\n    return f"Hello, {name}"',
+  },
+  {
+    name: "C",
+    category: "Language",
+    group: "languages",
+    logo: "c",
+    icon: null,
+    color: "#A8B9CC",
+    description: "Provides low-level control over memory, data structures and system resources.",
+    syntax: 'int add(int a, int b) {\n  return a + b;\n}',
+  },
+  {
+    name: "C++",
+    category: "Language",
+    group: "languages",
+    logo: "cplusplus",
+    icon: null,
+    color: "#00599C",
+    description: "Supports performant software using procedural and object-oriented programming.",
+    syntax: 'int main() {\n  return 0;\n}',
+  },
+  {
+    name: "MongoDB",
+    category: "Database",
+    group: "data-apis",
+    logo: "mongodb",
+    icon: null,
+    color: "#47A248",
+    description: "Stores flexible document-oriented data for applications and APIs.",
+    syntax: 'db.users.find({ active: true })',
+  },
+  {
+    name: "MySQL",
+    category: "Database",
+    group: "data-apis",
+    logo: "mysql",
+    icon: null,
+    color: "#4479A1",
+    description: "Manages relational data through tables, constraints and SQL queries.",
+    syntax: 'SELECT name\nFROM users\nWHERE active = 1;',
+  },
+  {
+    name: "SQL",
+    category: "Database",
+    group: "data-apis",
+    logo: null,
+    icon: "database",
+    color: "#94A3B8",
+    description: "Queries and transforms structured data stored in relational databases.",
+    syntax: 'SELECT category, COUNT(*)\nFROM products\nGROUP BY category;',
+  },
+  {
+    name: "DBMS",
+    category: "Database",
+    group: "data-apis",
+    logo: null,
+    icon: "database",
+    color: "#A78BFA",
+    description: "Organises stored data, access permissions, relationships and transactions.",
+    syntax: 'CREATE TABLE users (\n  id INT PRIMARY KEY\n);',
+  },
+  {
+    name: "REST API",
+    category: "Integration",
+    group: "data-apis",
+    logo: null,
+    icon: "waypoints",
+    color: "#F59E0B",
+    description: "Exposes resources through HTTP endpoints and predictable request methods.",
+    syntax: 'GET /api/products\nPOST /api/products',
+  },
+  {
+    name: "AJAX",
+    category: "Integration",
+    group: "data-apis",
+    logo: null,
+    icon: "refresh-cw",
+    color: "#22C55E",
+    description: "Updates page data asynchronously without reloading the entire document.",
+    syntax: 'const response =\n  await fetch("/api/data");',
+  },
+  {
+    name: "Git",
+    category: "Development",
+    group: "tools-specialist",
+    logo: "git",
+    icon: null,
+    color: "#F05032",
+    description: "Tracks source-code history and supports branches, collaboration and rollbacks.",
+    syntax: 'git add .\ngit commit -m "Update UI"',
+  },
+  {
+    name: "GitHub",
+    category: "Development",
+    group: "tools-specialist",
+    logo: "github",
+    icon: null,
+    color: "#F5E7E8",
+    description: "Hosts Git repositories and supports code reviews and collaborative workflows.",
+    syntax: 'git push origin main',
+  },
+  {
+    name: "Vercel",
+    category: "Deployment",
+    group: "tools-specialist",
+    logo: "vercel",
+    icon: null,
+    color: "#F5E7E8",
+    description: "Deploys web projects with build automation, previews and hosting integrations.",
+    syntax: 'vercel deploy',
+  },
+  {
+    name: "ESLint",
+    category: "Development",
+    group: "tools-specialist",
+    logo: "eslint",
+    icon: null,
+    color: "#A78BFA",
+    description: "Identifies JavaScript and TypeScript code issues with configurable lint rules.",
+    syntax: 'npx eslint src/',
+  },
+  {
+    name: "Three.js",
+    category: "3D / Motion",
+    group: "tools-specialist",
+    logo: "threedotjs",
+    icon: null,
+    color: "#F5E7E8",
+    description: "Creates interactive 3D scenes, materials, lights and camera-based visuals.",
+    syntax: 'const scene = new THREE.Scene();',
+  },
+  {
+    name: "UI/UX",
+    category: "Design",
+    group: "tools-specialist",
+    logo: null,
+    icon: "panels-top-left",
+    color: "#F472B6",
+    description: "Combines clear interface hierarchy with usable interaction and user flows.",
+    syntax: 'Research → Wireframe → Prototype',
+  },
+  {
+    name: "3D Animation",
+    category: "Motion",
+    group: "tools-specialist",
+    logo: null,
+    icon: "orbit",
+    color: "#8B5CF6",
+    description: "Adds depth and movement through transforms, easing and spatial composition.",
+    syntax: 'transform: rotateY(360deg);',
+  },
+  {
+    name: "Data Analytics",
+    category: "Analytics",
+    group: "tools-specialist",
+    logo: null,
+    icon: "chart-no-axes-combined",
+    color: "#38BDF8",
+    description: "Turns raw datasets into structured metrics, patterns and useful insights.",
+    syntax: 'GROUP BY category\nORDER BY total DESC',
+  },
+  {
+    name: "AI Integration",
+    category: "Intelligence",
+    group: "tools-specialist",
+    logo: null,
+    icon: "brain-circuit",
+    color: "#A78BFA",
+    description: "Connects application workflows to AI models for generation and assistance.",
+    syntax: 'await model.generate(prompt);',
+  },
+  {
+    name: "RAG",
+    category: "Intelligence",
+    group: "tools-specialist",
+    logo: null,
+    icon: "workflow",
+    color: "#F59E0B",
+    description: "Retrieves relevant context before generation to ground model responses in data.",
+    syntax: 'Retrieve → Augment → Generate',
+  },
+  {
+    name: "API Integration",
+    category: "Integration",
+    group: "data-apis",
+    logo: null,
+    icon: "network",
+    color: "#2DD4BF",
+    description: "Connects services through authenticated requests and structured responses.",
+    syntax: 'const data = await response.json();',
+  },
+  {
+    name: "Responsive Design",
+    category: "Frontend",
+    group: "frontend",
+    logo: null,
+    icon: "smartphone",
+    color: "#EC4899",
+    description: "Adapts content, controls and layouts to different screen sizes.",
+    syntax: '@media (max-width: 640px) {\n  .grid { grid-template-columns: 1fr; }\n}',
+  },
+  {
+    name: "Component Architecture",
+    category: "Engineering",
+    group: "frontend",
+    logo: null,
+    icon: "component",
+    color: "#60A5FA",
+    description: "Splits interfaces into reusable components with clear responsibilities.",
+    syntax: 'export function Button() {\n  return <button>Save</button>;\n}',
+  },
+  {
+    name: "Performance",
+    category: "Engineering",
+    group: "tools-specialist",
+    logo: null,
+    icon: "gauge",
+    color: "#F97316",
+    description: "Improves load time and responsiveness by reducing unnecessary work.",
+    syntax: '<img loading="lazy" alt="Preview" />',
+  },
+];
+
+const filters = [
+  { label: "All", value: "all" },
+  { label: "Frontend", value: "frontend" },
+  { label: "Languages", value: "languages" },
+  { label: "Frameworks & Runtime", value: "frameworks" },
+  { label: "Data & APIs", value: "data-apis" },
+  { label: "Tools & Specialist Areas", value: "tools-specialist" },
+];
+
+const logoUrl = (technology: Technology) => {
+  const color = technology.color.replace("#", "");
+
+  if (technology.logo) {
+    return `https://cdn.simpleicons.org/${technology.logo}/${color}`;
+  }
+
+  return `https://api.iconify.design/lucide/${technology.icon}.svg?color=%23${color}`;
+};
+---
+
+<section
+  class="technologies-section"
+  id="technologies"
+  aria-labelledby="technologies-heading"
+>
+  <div class="technology-atmosphere" aria-hidden="true"></div>
+
+  <div class="technology-shell">
+    <header class="section-header">
+      <p class="section-eyebrow">
+        <span class="eyebrow-mark" aria-hidden="true"></span>
+        TECHNOLOGY STACK
+      </p>
+
+      <h2 id="technologies-heading">
+        The tools
+        <span>behind the work.</span>
+      </h2>
+
+      <p class="section-description">
+        Explore the languages, frameworks and tools behind the work.
+        Select a category or move through the stack.
+      </p>
+    </header>
+
+    <div class="technology-toolbar">
+      <p class="toolbar-label">EXPLORE BY CATEGORY</p>
+
+      <div class="technology-filters" role="group" aria-label="Filter technologies">
+        {
+          filters.map((filter, index) => (
+            <button
+              type="button"
+              class:list={["filter-button", index === 0 && "is-active"]}
+              data-filter={filter.value}
+              aria-pressed={index === 0 ? "true" : "false"}
+            >
+              {filter.label}
+            </button>
+          ))
+        }
+      </div>
+
+      <p class="sr-only" aria-live="polite" data-filter-status>
+        Showing all technologies.
+      </p>
+    </div>
+
+    <div class="technology-carousel">
+      <div
+        class="technology-stage"
+        data-tech-stage
+        aria-label="Technology carousel"
+        aria-roledescription="carousel"
+      >
+        <div class="technology-ring" data-tech-ring>
+          {
+            technologies.map((technology) => (
+              <article
+                class="technology-card"
+                data-tech-group={technology.group}
+                data-tech-name={technology.name}
+                style={`--tech-color: ${technology.color};`}
+                role="button"
+                tabindex="0"
+                aria-label={`${technology.name}. ${technology.description}`}
+              >
+                <div class="technology-card-top">
+                  <span class="technology-category">{technology.category}</span>
+                  <span class="technology-indicator" aria-hidden="true"></span>
+                </div>
+
+                <div class="technology-heading">
+                  <span class="technology-logo-wrap">
+                    <img
+                      class="technology-logo"
+                      src={logoUrl(technology)}
+                      alt=""
+                      width="42"
+                      height="42"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <span class="technology-logo-fallback" aria-hidden="true">
+                      {technology.name.slice(0, 2)}
+                    </span>
+                  </span>
+
+                  <h3>{technology.name}</h3>
+                </div>
+
+                <p class="technology-description">{technology.description}</p>
+
+                <div class="technology-syntax">
+                  <span class="syntax-label">EXAMPLE</span>
+                  <pre><code>{technology.syntax}</code></pre>
+                </div>
+
+                <span class="technology-card-line" aria-hidden="true"></span>
+              </article>
+            ))
+          }
+        </div>
+
+        <div class="technology-empty" data-tech-empty hidden>
+          No technologies in this category.
+        </div>
+      </div>
+
+      <div class="carousel-controls">
+        <button
+          class="carousel-arrow"
+          type="button"
+          data-carousel-prev
+          aria-label="Previous technology"
+        >
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+
+        <span class="carousel-hint">EXPLORE THE STACK</span>
+
+        <button
+          class="carousel-arrow"
+          type="button"
+          data-carousel-next
+          aria-label="Next technology"
+        >
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <footer class="technology-footer">
+      <span class="footer-rule" aria-hidden="true"></span>
+      <p>
+        Technology choices depend on the problem, product requirements, and
+        implementation context.
+      </p>
+    </footer>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>(".technologies-section").forEach((section) => {
+    if (section.dataset.carouselInitialized === "true") return;
+    section.dataset.carouselInitialized = "true";
+
+    const stage = section.querySelector<HTMLElement>("[data-tech-stage]");
+    const ring = section.querySelector<HTMLElement>("[data-tech-ring]");
+    const empty = section.querySelector<HTMLElement>("[data-tech-empty]");
+    const filterButtons = Array.from(section.querySelectorAll<HTMLButtonElement>(".filter-button"));
+    const allCards = Array.from(section.querySelectorAll<HTMLElement>(".technology-card"));
+    const status = section.querySelector<HTMLElement>("[data-filter-status]");
+    const prevButton = section.querySelector<HTMLButtonElement>("[data-carousel-prev]");
+    const nextButton = section.querySelector<HTMLButtonElement>("[data-carousel-next]");
+
+    if (!stage || !ring || !empty || !prevButton || !nextButton) return;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const ROTATION_INTERVAL = 3400;
+
+    let activeCards = [...allCards];
+    let activeIndex = 0;
+    let rotationTimer: number | null = null;
+    let isInView = false;
+    let touchStartX: number | null = null;
+
+    allCards.forEach((card) => {
+      const image = card.querySelector<HTMLImageElement>(".technology-logo");
+
+      if (!image) return;
+
+      const markFailed = () => card.classList.add("logo-failed");
+      image.addEventListener("error", markFailed, { once: true });
+
+      if (image.complete && image.naturalWidth === 0) {
+        markFailed();
+      }
+
+      image.addEventListener("load", () => {
+        card.classList.remove("logo-failed");
+      });
+    });
+
+    const getOffset = (index: number, current: number, total: number): number => {
+      if (total <= 1) return 0;
+
+      let offset = (index - current + total) % total;
+      if (offset > total / 2) offset -= total;
+      return offset;
+    };
+
+    const stopRotation = () => {
+      if (rotationTimer !== null) {
+        window.clearTimeout(rotationTimer);
+        rotationTimer = null;
+      }
+    };
+
+    const positionCards = () => {
+      if (!activeCards.length || stage.clientWidth === 0) return;
+
+      const isPhone = window.innerWidth <= 640;
+      const visibleDistance = isPhone ? 1 : 2;
+
+      const step = Math.max(
+        isPhone ? 110 : 175,
+        Math.min(
+          isPhone ? 132 : 245,
+          stage.clientWidth * (isPhone ? 0.39 : 0.26),
+        ),
+      );
+
+      activeCards.forEach((card, index) => {
+        const offset = getOffset(index, activeIndex, activeCards.length);
+        const distance = Math.abs(offset);
+        const visible = distance <= visibleDistance;
+        const scale = distance === 0 ? 1 : Math.max(0.79, 1 - distance * 0.09);
+
+        card.style.transform =
+          `translate(-50%, -50%) translateX(${offset * step}px) ` +
+          `translateZ(${-distance * 34}px) rotateY(${offset * -4}deg) scale(${scale})`;
+
+        card.style.opacity = !visible
+          ? "0"
+          : distance === 0
+            ? "1"
+            : distance === 1
+              ? "0.54"
+              : "0.2";
+
+        card.style.filter =
+          distance === 0 || reducedMotion.matches
+            ? "none"
+            : `blur(${Math.min(1.1, distance * 0.5)}px)`;
+
+        card.style.visibility = visible ? "visible" : "hidden";
+        card.style.pointerEvents = visible ? "auto" : "none";
+        card.style.zIndex = String(10 - distance);
+        card.tabIndex = visible ? 0 : -1;
+        card.classList.toggle("is-active", distance === 0);
+        card.setAttribute("aria-hidden", String(!visible));
+      });
+    };
+
+    const scheduleRotation = () => {
+      stopRotation();
+
+      if (
+        activeCards.length <= 1 ||
+        reducedMotion.matches ||
+        !isInView ||
+        document.visibilityState !== "visible"
+      ) {
+        return;
+      }
+
+      rotationTimer = window.setTimeout(() => {
+        moveTo(activeIndex + 1);
+      }, ROTATION_INTERVAL);
+    };
+
+    const moveTo = (index: number): void => {
+      if (!activeCards.length) return;
+
+      activeIndex = ((index % activeCards.length) + activeCards.length) %
+        activeCards.length;
+
+      positionCards();
+      scheduleRotation();
+    };
+
+    const setFilter = (value: string, clickedButton: HTMLButtonElement | null = null): void => {
+      filterButtons.forEach((button) => {
+        const active = button.dataset.filter === value;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+
+      activeCards = allCards.filter((card) => {
+        return value === "all" || card.dataset.techGroup === value;
+      });
+
+      allCards.forEach((card) => {
+        card.classList.toggle("is-filtered-out", !activeCards.includes(card));
+      });
+
+      activeIndex = 0;
+      ring.hidden = activeCards.length === 0;
+      empty.hidden = activeCards.length > 0;
+
+      if (status) {
+        const label = clickedButton?.textContent?.trim() ||
+          filterButtons.find((button) => button.dataset.filter === value)
+            ?.textContent?.trim() || "All";
+
+        status.textContent = `Showing ${activeCards.length} technologies in ${label}.`;
+      }
+
+      positionCards();
+      scheduleRotation();
+    };
+
+    filterButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        setFilter(button.dataset.filter || "all", button);
+      });
+    });
+
+    allCards.forEach((card) => {
+      const activateCard = () => {
+        const index = activeCards.indexOf(card);
+        if (index !== -1) moveTo(index);
+      };
+
+      card.addEventListener("click", activateCard);
+
+      card.addEventListener("keydown", (event: KeyboardEvent) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          activateCard();
+        } else if (event.key === "ArrowRight") {
+          event.preventDefault();
+          moveTo(activeIndex + 1);
+        } else if (event.key === "ArrowLeft") {
+          event.preventDefault();
+          moveTo(activeIndex - 1);
+        }
+      });
+    });
+
+    prevButton.addEventListener("click", () => moveTo(activeIndex - 1));
+    nextButton.addEventListener("click", () => moveTo(activeIndex + 1));
+
+    stage.addEventListener("pointerdown", (event: PointerEvent) => {
+      if (event.pointerType === "mouse") return;
+      touchStartX = event.clientX;
+    });
+
+    stage.addEventListener("pointerup", (event: PointerEvent) => {
+      if (touchStartX === null) return;
+
+      const delta = event.clientX - touchStartX;
+      touchStartX = null;
+
+      if (Math.abs(delta) > 42) {
+        moveTo(activeIndex + (delta < 0 ? 1 : -1));
+      }
+    });
+
+    stage.addEventListener("pointercancel", () => {
+      touchStartX = null;
+    });
+
+    window.addEventListener("resize", positionCards, { passive: true });
+    document.addEventListener("visibilitychange", scheduleRotation);
+
+    reducedMotion.addEventListener("change", () => {
+      positionCards();
+      scheduleRotation();
+    });
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isInView = Boolean(entry?.isIntersecting);
+        scheduleRotation();
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(stage);
+    setFilter("all");
+  });
+</script>
+
+<style>
+  .technologies-section {
+    --tech-accent: #e44752;
+    position: relative;
+    isolation: isolate;
+    width: 100%;
+    padding: clamp(76px, 8vw, 112px) clamp(18px, 6vw, 88px);
+    overflow: clip;
+    color: #f5e7e8;
+    background: #0b0809;
+    scroll-margin-top: 95px;
+  }
+
+  .technologies-section *,
+  .technologies-section *::before,
+  .technologies-section *::after {
+    box-sizing: border-box;
+  }
+
+  .technology-atmosphere {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse at 85% 18%, rgba(228, 71, 82, 0.08), transparent 35%),
+      radial-gradient(ellipse at 10% 82%, rgba(139, 31, 47, 0.055), transparent 32%);
+  }
+
+  .technology-shell {
+    width: 100%;
+    max-width: 1200px;
+    margin-inline: auto;
+  }
+
+  .section-header {
+    max-width: 780px;
+  }
+
+  .section-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    margin: 0 0 21px;
+    color: #d3a4a9;
+    font-size: 0.7rem;
+    font-weight: 650;
+    letter-spacing: 0.15em;
+    line-height: 1.6;
+  }
+
+  .eyebrow-mark {
+    width: 24px;
+    height: 2px;
+    flex: 0 0 auto;
+    background: #e44752;
+  }
+
+  .section-header h2 {
+    margin: 0;
+    color: #f5e7e8;
+    font-size: clamp(2.5rem, 5.1vw, 4.35rem);
+    font-weight: 650;
+    line-height: 1.08;
+    letter-spacing: -0.05em;
+    overflow-wrap: anywhere;
+  }
+
+  .section-header h2 span {
+    display: block;
+    color: #e66a73;
+  }
+
+  .section-description {
+    max-width: 610px;
+    margin: 20px 0 0;
+    color: #b7a7aa;
+    font-size: 0.93rem;
+    line-height: 1.85;
+  }
+
+  .technology-toolbar {
+    margin-top: 34px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #382126;
+  }
+
+  .toolbar-label {
+    margin: 0 0 13px;
+    color: #a28c91;
+    font-size: 0.65rem;
+    font-weight: 650;
+    letter-spacing: 0.12em;
+  }
+
+  .technology-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .filter-button {
+    min-height: 38px;
+    padding: 9px 12px;
+    border: 1px solid #41262c;
+    border-radius: 4px;
+    color: #c3afb3;
+    background: #130d0f;
+    font: inherit;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    cursor: pointer;
+    transition: color 160ms ease, border-color 160ms ease, background-color 160ms ease;
+  }
+
+  .filter-button:hover {
+    border-color: #8e404a;
+    color: #fff0f1;
+  }
+
+  .filter-button.is-active {
+    border-color: #e44752;
+    color: #fff;
+    background: #e44752;
+  }
+
+  .technology-carousel {
+    position: relative;
+    margin-top: 15px;
+  }
+
+  .technology-stage {
+    position: relative;
+    min-height: 450px;
+    overflow: hidden;
+    perspective: 1200px;
+    perspective-origin: 50% 43%;
+    transform-style: preserve-3d;
+    touch-action: pan-y;
+  }
+
+  .technology-ring {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+  }
+
+  .technology-ring[hidden],
+  .technology-empty[hidden] {
+    display: none !important;
+  }
+
+  .technology-card.is-filtered-out {
+    display: none !important;
+  }
+
+  .technology-card {
+    --tech-color: #e44752;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    flex-direction: column;
+    width: min(365px, calc(100% - 32px));
+    min-height: 350px;
+    max-height: 380px;
+    padding: 22px;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--tech-color) 43%, #302026);
+    border-radius: 14px;
+    background:
+      radial-gradient(ellipse at 100% 0%, color-mix(in srgb, var(--tech-color) 11%, transparent), transparent 45%),
+      linear-gradient(150deg, #191114 0%, #100c0e 78%);
+    transform-origin: center center;
+    backface-visibility: hidden;
+    outline: none;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      transform 680ms cubic-bezier(0.22, 0.68, 0, 1),
+      opacity 480ms ease,
+      filter 480ms ease,
+      border-color 200ms ease,
+      box-shadow 240ms ease;
+  }
+
+  .technology-card.is-active {
+    border-color: var(--tech-color);
+    box-shadow:
+      0 20px 50px rgba(0, 0, 0, 0.32),
+      0 0 0 1px color-mix(in srgb, var(--tech-color) 14%, transparent),
+      0 0 27px color-mix(in srgb, var(--tech-color) 17%, transparent);
+  }
+
+  .technology-card:focus-visible {
+    outline: 2px solid var(--tech-color);
+    outline-offset: 4px;
+  }
+
+  .technology-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .technology-category {
+    color: #a9979b;
+    font-size: 0.72rem;
+    line-height: 1.5;
+  }
+
+  .technology-indicator {
+    width: 7px;
+    height: 7px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: var(--tech-color);
+    box-shadow: 0 0 11px color-mix(in srgb, var(--tech-color) 45%, transparent);
+  }
+
+  .technology-heading {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+    margin-top: 21px;
+  }
+
+  .technology-logo-wrap {
+    position: relative;
+    display: grid;
+    width: 54px;
+    height: 54px;
+    flex: 0 0 54px;
+    place-items: center;
+    border: 1px solid color-mix(in srgb, var(--tech-color) 36%, #342027);
+    border-radius: 9px;
+    background: color-mix(in srgb, var(--tech-color) 7%, #130e10);
+  }
+
+  .technology-logo {
+    display: block;
+    width: 35px;
+    height: 35px;
+    object-fit: contain;
+  }
+
+  .technology-logo-fallback {
+    display: none;
+    width: 100%;
+    height: 100%;
+    place-items: center;
+    padding: 4px;
+    color: var(--tech-color);
+    font-size: 0.8rem;
+    font-weight: 750;
+  }
+
+  .technology-card.logo-failed .technology-logo {
+    display: none;
+  }
+
+  .technology-card.logo-failed .technology-logo-fallback {
+    display: grid;
+  }
+
+  .technology-heading h3 {
+    min-width: 0;
+    margin: 0;
+    color: #f5e7e8;
+    font-size: 1.15rem;
+    font-weight: 650;
+    line-height: 1.35;
+    letter-spacing: -0.025em;
+    overflow-wrap: anywhere;
+  }
+
+  .technology-description {
+    margin: 19px 0 0;
+    color: #c7b7bb;
+    font-size: 0.83rem;
+    line-height: 1.75;
+    overflow-wrap: anywhere;
+  }
+
+  .technology-syntax {
+    min-width: 0;
+    margin-top: auto;
+    padding-top: 17px;
+  }
+
+  .syntax-label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--tech-color);
+    font-size: 0.63rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+  }
+
+  .technology-syntax pre {
+    min-width: 0;
+    min-height: 65px;
+    max-height: 95px;
+    margin: 0;
+    padding: 11px 12px;
+    overflow: auto;
+    border: 1px solid color-mix(in srgb, var(--tech-color) 20%, #302026);
+    border-radius: 6px;
+    background: rgba(5, 5, 6, 0.48);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    scrollbar-width: thin;
+  }
+
+  .technology-syntax code {
+    color: #e3d5d8;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    font-size: 0.7rem;
+    line-height: 1.7;
+  }
+
+  .technology-card-line {
+    position: absolute;
+    right: 22px;
+    bottom: 10px;
+    left: 22px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--tech-color), transparent);
+    opacity: 0.75;
+  }
+
+  .technology-empty {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    color: #b7a7aa;
+    font-size: 0.88rem;
+    text-align: center;
+  }
+
+  .carousel-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 17px;
+    margin-top: 0;
+  }
+
+  .carousel-arrow {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border: 1px solid #493039;
+    border-radius: 7px;
+    color: #f5e7e8;
+    background: #151012;
+    cursor: pointer;
+    transition: color 160ms ease, border-color 160ms ease, background-color 160ms ease;
+  }
+
+  .carousel-arrow svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  .carousel-arrow:hover {
+    border-color: #e44752;
+    background: #251217;
+  }
+
+  .carousel-hint {
+    color: #a9989c;
+    font-size: 0.67rem;
+    font-weight: 650;
+    letter-spacing: 0.1em;
+  }
+
+  .technology-footer {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+    max-width: 680px;
+    margin-top: 25px;
+  }
+
+  .footer-rule {
+    width: 22px;
+    height: 2px;
+    flex: 0 0 22px;
+    margin-top: 10px;
+    background: #e44752;
+  }
+
+  .technology-footer p {
+    margin: 0;
+    color: #a9989c;
+    font-size: 0.79rem;
+    line-height: 1.8;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (max-width: 800px) {
+    .technologies-section {
+      padding: 76px 20px;
+    }
+
+    .section-header h2 {
+      font-size: clamp(2.35rem, 7.8vw, 3.5rem);
+    }
+
+    .technology-stage {
+      min-height: 430px;
+      perspective: 900px;
+    }
+
+    .technology-card {
+      width: min(330px, calc(100% - 30px));
+      min-height: 350px;
+      max-height: 370px;
+      padding: 20px;
+    }
+
+    .technology-description {
+      font-size: 0.81rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .technologies-section {
+      padding: 65px 14px;
+    }
+
+    .section-eyebrow {
+      margin-bottom: 17px;
+      font-size: 0.65rem;
+    }
+
+    .section-header h2 {
+      font-size: clamp(2.1rem, 8.8vw, 2.9rem);
+      line-height: 1.12;
+    }
+
+    .section-description {
+      margin-top: 16px;
+      font-size: 0.85rem;
+    }
+
+    .technology-toolbar {
+      margin-top: 26px;
+      padding-bottom: 17px;
+    }
+
+    .technology-filters {
+      gap: 7px;
+    }
+
+    .filter-button {
+      min-height: 36px;
+      padding: 8px 9px;
+      font-size: 0.68rem;
+    }
+
+    .technology-stage {
+      min-height: 420px;
+      perspective: 760px;
+    }
+
+    .technology-card {
+      width: min(294px, calc(100% - 22px));
+      min-height: 350px;
+      max-height: 365px;
+      padding: 18px;
+      border-radius: 12px;
+    }
+
+    .technology-heading {
+      gap: 11px;
+      margin-top: 18px;
+    }
+
+    .technology-logo-wrap {
+      width: 47px;
+      height: 47px;
+      flex-basis: 47px;
+    }
+
+    .technology-logo {
+      width: 31px;
+      height: 31px;
+    }
+
+    .technology-heading h3 {
+      font-size: 1.03rem;
+    }
+
+    .technology-description {
+      margin-top: 15px;
+      font-size: 0.79rem;
+      line-height: 1.7;
+    }
+
+    .technology-syntax {
+      padding-top: 13px;
+    }
+
+    .technology-syntax pre {
+      min-height: 60px;
+      max-height: 85px;
+      padding: 9px 10px;
+    }
+
+    .technology-syntax code {
+      font-size: 0.67rem;
+    }
+
+    .technology-card-line {
+      right: 18px;
+      left: 18px;
+    }
+
+    .carousel-controls {
+      gap: 13px;
+    }
+
+    .carousel-arrow {
+      width: 39px;
+      height: 39px;
+    }
+
+    .carousel-hint {
+      font-size: 0.61rem;
+      letter-spacing: 0.08em;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .technology-card,
+    .carousel-arrow,
+    .filter-button {
+      transition: none !important;
+    }
+  }
+</style>

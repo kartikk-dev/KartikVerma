@@ -1,0 +1,24 @@
+---
+import BusinessAnalyticsLegalLayout from '../../layouts/BusinessAnalyticsLegalLayout.astro';
+---
+<BusinessAnalyticsLegalLayout title="Privacy settings" description="Review and save local privacy and browser-storage preferences." eyebrow="YOUR CHOICES">
+  <p>These preferences apply to this browser on this device. The demo does not load analytics or advertising trackers, so optional categories remain informational unless a future version installs those services.</p>
+  <div class="settings-choice"><div><strong>Necessary storage</strong><p>Used to remember your theme and interface preferences. Core settings are required for the saved experience.</p></div><span class="choice-state">Always on</span></div>
+  <div class="settings-choice"><div><strong>Analytics</strong><p>No analytics service is installed in this preview.</p></div><span class="choice-state">Not installed</span></div>
+  <div class="settings-choice"><div><strong>Advertising</strong><p>No advertising or cross-site tracking service is installed in this preview.</p></div><span class="choice-state">Not installed</span></div>
+  <p id="privacy-choice-status" role="status" aria-live="polite">Your saved choice will appear here.</p>
+  <div class="settings-buttons"><button type="button" id="privacy-reject">Reject optional</button><button type="button" class="primary" id="privacy-necessary">Save necessary only</button><button type="button" id="privacy-reset">Reset saved choice</button></div>
+  <div class="legal-note">Resetting removes the saved consent choice; it does not delete unrelated browser data.</div>
+  <script is:inline>
+    (() => {
+      const key = 'metricline-cookie-choice-v1';
+      const status = document.getElementById('privacy-choice-status');
+      const read = () => { try { return localStorage.getItem(key); } catch { return null; } };
+      const update = () => { if (status) { const value = read(); status.textContent = value === 'reject-optional' ? 'Saved preference: optional storage rejected.' : value === 'necessary-only' ? 'Saved preference: necessary storage only.' : 'No privacy choice is saved in this browser yet.'; } };
+      document.getElementById('privacy-reject')?.addEventListener('click', () => { try { localStorage.setItem(key, 'reject-optional'); } catch {} update(); });
+      document.getElementById('privacy-necessary')?.addEventListener('click', () => { try { localStorage.setItem(key, 'necessary-only'); } catch {} update(); });
+      document.getElementById('privacy-reset')?.addEventListener('click', () => { try { localStorage.removeItem(key); } catch {} update(); });
+      update();
+    })();
+  </script>
+</BusinessAnalyticsLegalLayout>

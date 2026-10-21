@@ -1,0 +1,1389 @@
+---
+---
+
+<div class="view dispatch-view" data-panel="dispatch">
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">OPERATIONS / DISPATCH</span>
+      <h1>
+        Control the <em>field.</em>
+      </h1>
+      <p>
+        Assign technicians, manage job statuses and monitor the field team's
+        workload.
+      </p>
+    </div>
+
+    <div class="heading-actions">
+      <button
+        class="secondary-action"
+        id="route-view"
+        type="button"
+        aria-pressed="false"
+      >
+        Route view
+      </button>
+
+      <button class="primary-action" id="auto-assign" type="button">
+        Auto Assign
+      </button>
+    </div>
+  </div>
+
+  <section class="dispatch-page-grid">
+    <article class="full-panel dispatch-board">
+      <div class="panel-heading">
+        <div>
+          <span class="panel-label">DISPATCH BOARD</span>
+          <h2>Work allocation</h2>
+        </div>
+
+        <span class="live-pill">
+          <i></i>
+          <span id="dispatch-update-label">Synced with workspace</span>
+        </span>
+      </div>
+
+      <div class="dispatch-summary" id="dispatch-summary">
+        <article>
+          <span>Ready to dispatch</span>
+          <strong id="dispatch-ready-count">0</strong>
+        </article>
+
+        <article>
+          <span>En route</span>
+          <strong id="dispatch-route-count">0</strong>
+        </article>
+
+        <article>
+          <span>In progress</span>
+          <strong id="dispatch-working-count">0</strong>
+        </article>
+      </div>
+
+      <div id="dispatch-board-mode">
+        <div class="dispatch-columns" id="dispatch-columns"></div>
+
+        <section class="dispatch-completed-section">
+          <div class="dispatch-subheading">
+            <div>
+              <span class="panel-label">COMPLETED WORK</span>
+              <h3>Recently completed</h3>
+            </div>
+
+            <strong id="dispatch-completed-count">0</strong>
+          </div>
+
+          <div id="dispatch-completed-list"></div>
+        </section>
+      </div>
+
+      <div id="dispatch-route-mode" hidden>
+        <div class="dispatch-subheading">
+          <div>
+            <span class="panel-label">ACTIVE ASSIGNMENTS</span>
+            <h3>Route and technician roster</h3>
+          </div>
+        </div>
+
+        <div class="dispatch-table-wrap">
+          <table class="dispatch-table">
+            <thead>
+              <tr>
+                <th>WORK ORDER</th>
+                <th>SERVICE</th>
+                <th>TECHNICIAN</th>
+                <th>LOCATION</th>
+                <th>STATUS</th>
+              </tr>
+            </thead>
+
+            <tbody id="dispatch-route-body"></tbody>
+          </table>
+        </div>
+
+        <p class="dispatch-footnote">
+          Route assignments show the location and status from your workspace
+          data. Travel times and GPS positions are not simulated.
+        </p>
+      </div>
+    </article>
+
+    <article class="full-panel field-team-panel">
+      <div class="panel-heading">
+        <div>
+          <span class="panel-label">FIELD TEAM</span>
+          <h2>Technician availability</h2>
+        </div>
+      </div>
+
+      <div class="dispatch-team-summary" id="dispatch-team-summary"></div>
+      <div class="field-team-list" id="dispatch-team-list"></div>
+    </article>
+  </section>
+</div>
+
+<script>
+  import {
+    getState,
+    subscribe,
+    updateWorkOrder,
+    updateTechnician,
+  } from "../../lib/serviq/store";
+
+  import type { WorkOrder } from "../../data/serviq/workOrders";
+  import type { Technician } from "../../data/serviq/technicians";
+
+  type DispatchColumn = "ready" | "en-route" | "working";
+
+  const columnsRoot = document.querySelector<HTMLElement>("#dispatch-columns");
+
+  const completedList = document.querySelector<HTMLElement>(
+    "#dispatch-completed-list",
+  );
+
+  const routeBody = document.querySelector<HTMLElement>("#dispatch-route-body");
+
+  const teamList = document.querySelector<HTMLElement>("#dispatch-team-list");
+
+  const teamSummary = document.querySelector<HTMLElement>(
+    "#dispatch-team-summary",
+  );
+
+  const readyCount = document.querySelector<HTMLElement>(
+    "#dispatch-ready-count",
+  );
+
+  const routeCount = document.querySelector<HTMLElement>(
+    "#dispatch-route-count",
+  );
+
+  const workingCount = document.querySelector<HTMLElement>(
+    "#dispatch-working-count",
+  );
+
+  const completedCount = document.querySelector<HTMLElement>(
+    "#dispatch-completed-count",
+  );
+
+  const updateLabel = document.querySelector<HTMLElement>(
+    "#dispatch-update-label",
+  );
+
+  const boardMode = document.querySelector<HTMLElement>("#dispatch-board-mode");
+
+  const routeMode = document.querySelector<HTMLElement>("#dispatch-route-mode");
+
+  const routeToggle = document.querySelector<HTMLButtonElement>("#route-view");
+
+  const autoAssignButton =
+    document.querySelector<HTMLButtonElement>("#auto-assign");
+
+  const toast = document.querySelector<HTMLElement>("#toast");
+
+  let workOrders = getState().workOrders;
+  let technicians = getState().technicians;
+  let showingRoutes = false;
+  let toastTimer: number | undefined;
+
+  const completedStatuses = ["Completed", "Invoiced", "Paid", "Closed"];
+
+  const enRouteStatuses = ["En Route"];
+
+  const workingStatuses = [
+    "Accepted",
+    "Arrived",
+    "Diagnosing",
+    "In Progress",
+    "Waiting for Parts",
+  ];
+
+  const statusOptions = [
+    "Assigned",
+    "Accepted",
+    "En Route",
+    "Arrived",
+    "Diagnosing",
+    "In Progress",
+    "Waiting for Parts",
+    "Completed",
+    "Invoiced",
+    "Paid",
+  ];
+
+  const priorityRank: Record<string, number> = {
+    High: 0,
+    Medium: 1,
+    Low: 2,
+  };
+
+  const createElement = <K extends keyof HTMLElementTagNameMap>(
+    tag: K,
+    className = "",
+    text?: string,
+  ): HTMLElementTagNameMap[K] => {
+    const element = document.createElement(tag);
+
+    if (className) element.className = className;
+    if (text !== undefined) element.textContent = text;
+
+    return element;
+  };
+
+  const createButton = (
+    text: string,
+    className: string,
+    action: () => void,
+  ): HTMLButtonElement => {
+    const button = createElement("button", className, text);
+
+    button.type = "button";
+
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      action();
+    });
+
+    return button;
+  };
+
+  const notify = (message: string) => {
+    if (!toast) return;
+
+    toast.hidden = false;
+    toast.textContent = message;
+    toast.classList.add("show");
+
+    window.clearTimeout(toastTimer);
+
+    toastTimer = window.setTimeout(() => {
+      toast.classList.remove("show");
+      toast.hidden = true;
+    }, 3000);
+  };
+
+  const formatCurrency = (amount: number) =>
+    `₹${amount.toLocaleString("en-IN", {
+      maximumFractionDigits: 2,
+    })}`;
+
+  const getInitials = (name: string) =>
+    name
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? "")
+      .join("");
+
+  const getTechnician = (id: string) =>
+    technicians.find((tech) => tech.id === id);
+
+  const isCompleted = (status: string) => completedStatuses.includes(status);
+
+  const getColumn = (order: WorkOrder): DispatchColumn => {
+    if (enRouteStatuses.includes(order.status)) {
+      return "en-route";
+    }
+
+    if (workingStatuses.includes(order.status)) {
+      return "working";
+    }
+
+    return "ready";
+  };
+
+  const getActiveOrders = () =>
+    workOrders.filter((order) => !isCompleted(order.status));
+
+  const getAvailableTechnicians = (currentId: string) =>
+    technicians.filter(
+      (tech) => tech.status === "Available" || tech.id === currentId,
+    );
+
+  const showError = (error: unknown) => {
+    notify(
+      error instanceof Error
+        ? error.message
+        : "The operation could not be completed.",
+    );
+  };
+
+  const renderSummary = () => {
+    const active = getActiveOrders();
+
+    if (readyCount) {
+      readyCount.textContent = String(
+        active.filter((order) => getColumn(order) === "ready").length,
+      );
+    }
+
+    if (routeCount) {
+      routeCount.textContent = String(
+        active.filter((order) => getColumn(order) === "en-route").length,
+      );
+    }
+
+    if (workingCount) {
+      workingCount.textContent = String(
+        active.filter((order) => getColumn(order) === "working").length,
+      );
+    }
+
+    if (completedCount) {
+      completedCount.textContent = String(
+        workOrders.filter((order) => isCompleted(order.status)).length,
+      );
+    }
+
+    if (updateLabel) {
+      updateLabel.textContent = "Synced with workspace";
+    }
+  };
+
+  const renderTechnicianSelect = (order: WorkOrder): HTMLSelectElement => {
+    const select = createElement("select", "dispatch-technician-select");
+
+    select.setAttribute("aria-label", `Choose technician for ${order.id}`);
+
+    const unassignedOption = createElement(
+      "option",
+      "",
+      "Choose technician...",
+    );
+
+    unassignedOption.value = "";
+    select.append(unassignedOption);
+
+    getAvailableTechnicians(order.technicianId).forEach((tech) => {
+      const option = createElement("option", "", tech.name);
+      option.value = tech.id;
+      select.append(option);
+    });
+
+    if (technicians.some((tech) => tech.id === order.technicianId)) {
+      select.value = order.technicianId;
+    } else {
+      select.value = "";
+    }
+
+    return select;
+  };
+
+  const updateTechnicianForStatus = (order: WorkOrder, status: string) => {
+    const tech = getTechnician(order.technicianId);
+
+    if (!tech) return;
+
+    if (status === "En Route") {
+      updateTechnician(tech.id, { status: "En Route" });
+      return;
+    }
+
+    if (
+      ["Arrived", "Diagnosing", "In Progress", "Waiting for Parts"].includes(
+        status,
+      )
+    ) {
+      updateTechnician(tech.id, { status: "Working" });
+      return;
+    }
+
+    if (isCompleted(status)) {
+      const hasOtherActiveOrders = workOrders.some(
+        (item) =>
+          item.id !== order.id &&
+          item.technicianId === tech.id &&
+          !isCompleted(item.status),
+      );
+
+      if (!hasOtherActiveOrders) {
+        updateTechnician(tech.id, { status: "Available" });
+      }
+    }
+  };
+
+  const changeStatus = (order: WorkOrder, status: string) => {
+    if (
+      [
+        "Assigned",
+        "Accepted",
+        "En Route",
+        "Arrived",
+        "Diagnosing",
+        "In Progress",
+      ].includes(status) &&
+      !getTechnician(order.technicianId)
+    ) {
+      notify("Assign a technician before moving this order into the field.");
+      return;
+    }
+
+    try {
+      const updated = updateWorkOrder(order.id, { status });
+
+      if (!updated) {
+        notify("This work order no longer exists.");
+        return;
+      }
+
+      updateTechnicianForStatus(updated, status);
+      notify(`${updated.id} moved to ${status}.`);
+    } catch (error) {
+      showError(error);
+    }
+  };
+
+  const assignTechnician = (order: WorkOrder, newTechnicianId: string) => {
+    if (!newTechnicianId) {
+      notify("Choose a technician first.");
+      return;
+    }
+
+    const newTech = getTechnician(newTechnicianId);
+
+    if (!newTech) {
+      notify("The selected technician could not be found.");
+      return;
+    }
+
+    if (newTech.status !== "Available" && newTech.id !== order.technicianId) {
+      notify(`${newTech.name} is not currently available.`);
+      return;
+    }
+
+    try {
+      const oldTechnician = getTechnician(order.technicianId);
+
+      if (oldTechnician && oldTechnician.id !== newTech.id) {
+        const oldHasActiveOrders = workOrders.some(
+          (item) =>
+            item.id !== order.id &&
+            item.technicianId === oldTechnician.id &&
+            !isCompleted(item.status),
+        );
+
+        if (!oldHasActiveOrders) {
+          updateTechnician(oldTechnician.id, {
+            status: "Available",
+          });
+        }
+      }
+
+      if (newTech.id !== order.technicianId) {
+        updateTechnician(newTech.id, {
+          jobs: newTech.jobs + 1,
+          status: "Assigned",
+        });
+      }
+
+      const updated = updateWorkOrder(order.id, {
+        technician: newTech.name,
+        technicianId: newTech.id,
+        status: "Assigned",
+      });
+
+      if (!updated) {
+        notify("The work order could not be updated.");
+        return;
+      }
+
+      notify(`${newTech.name} assigned to ${order.id}.`);
+    } catch (error) {
+      showError(error);
+    }
+  };
+
+  const renderOrderCard = (order: WorkOrder, column: DispatchColumn) => {
+    const card = createElement(
+      "article",
+      `dispatch-work-card dispatch-card-${column}`,
+    );
+
+    card.dataset.orderId = order.id;
+
+    const top = createElement("div", "dispatch-card-top");
+    top.append(
+      createElement("span", "dispatch-order-id", order.id),
+      createElement(
+        "span",
+        `priority ${order.priority.toLowerCase()}`,
+        order.priority,
+      ),
+    );
+
+    const title = createElement("h3", "", order.service);
+
+    const customer = createElement(
+      "p",
+      "dispatch-customer-name",
+      order.customer,
+    );
+
+    const location = createElement("p", "dispatch-location", order.location);
+
+    const statusRow = createElement("div", "dispatch-status-row");
+
+    const badge = createElement(
+      "span",
+      `status-badge status-${order.status.toLowerCase().replaceAll(" ", "-")}`,
+      order.status,
+    );
+
+    const amount = createElement(
+      "strong",
+      "dispatch-amount",
+      formatCurrency(order.amount),
+    );
+
+    statusRow.append(badge, amount);
+
+    card.append(top, title, customer, location, statusRow);
+
+    if (column === "ready") {
+      const assignment = createElement("div", "dispatch-assignment-controls");
+
+      const select = renderTechnicianSelect(order);
+
+      const assignButton = createButton(
+        "Assign",
+        "dispatch-action-button dispatch-primary-button",
+        () => assignTechnician(order, select.value),
+      );
+
+      assignment.append(select, assignButton);
+
+      if (getTechnician(order.technicianId)) {
+        assignment.append(
+          createButton("Send en route", "dispatch-action-button", () =>
+            changeStatus(order, "En Route"),
+          ),
+        );
+      }
+
+      card.append(assignment);
+    } else if (column === "en-route") {
+      const tech = getTechnician(order.technicianId);
+
+      card.append(
+        createElement(
+          "p",
+          "dispatch-assignee",
+          tech ? `Assigned to ${tech.name}` : "Technician not found",
+        ),
+        createButton(
+          "Mark arrived",
+          "dispatch-action-button dispatch-primary-button",
+          () => changeStatus(order, "Arrived"),
+        ),
+      );
+    } else {
+      const controls = createElement("div", "dispatch-status-controls");
+
+      const select = createElement("select", "dispatch-technician-select");
+
+      select.setAttribute("aria-label", `Update status for ${order.id}`);
+
+      statusOptions.forEach((status) => {
+        const option = createElement("option", "", status);
+
+        option.value = status;
+        select.append(option);
+      });
+
+      select.value = order.status;
+
+      controls.append(
+        select,
+        createButton(
+          "Update status",
+          "dispatch-action-button dispatch-primary-button",
+          () => changeStatus(order, select.value),
+        ),
+      );
+
+      card.append(
+        createElement(
+          "p",
+          "dispatch-assignee",
+          `Assigned to ${getTechnician(order.technicianId)?.name ?? "Unassigned"}`,
+        ),
+        controls,
+      );
+    }
+
+    return card;
+  };
+
+  const renderColumn = (
+    title: string,
+    ordersInColumn: WorkOrder[],
+    key: DispatchColumn,
+  ) => {
+    const column = createElement("div", "dispatch-column");
+
+    const heading = createElement("div", "column-heading");
+
+    heading.append(
+      createElement("span", "", title),
+      createElement("b", "", String(ordersInColumn.length)),
+    );
+
+    column.append(heading);
+
+    if (ordersInColumn.length === 0) {
+      column.append(
+        createElement(
+          "p",
+          "dispatch-empty-column",
+          "No work orders in this stage.",
+        ),
+      );
+    } else {
+      ordersInColumn.forEach((order) => {
+        column.append(renderOrderCard(order, key));
+      });
+    }
+
+    return column;
+  };
+
+  const renderBoard = () => {
+    if (!columnsRoot) return;
+
+    const active = getActiveOrders();
+
+    const readyOrders = active
+      .filter((order) => getColumn(order) === "ready")
+      .sort(
+        (a, b) =>
+          (priorityRank[a.priority] ?? 3) - (priorityRank[b.priority] ?? 3),
+      );
+
+    const enRouteOrders = active.filter(
+      (order) => getColumn(order) === "en-route",
+    );
+
+    const workingOrders = active.filter(
+      (order) => getColumn(order) === "working",
+    );
+
+    columnsRoot.replaceChildren(
+      renderColumn("READY TO DISPATCH", readyOrders, "ready"),
+      renderColumn("EN ROUTE", enRouteOrders, "en-route"),
+      renderColumn("ON SITE / WORKING", workingOrders, "working"),
+    );
+  };
+
+  const renderCompleted = () => {
+    if (!completedList) return;
+
+    const completed = workOrders.filter((order) => isCompleted(order.status));
+
+    completedList.replaceChildren();
+
+    if (completed.length === 0) {
+      completedList.append(
+        createElement(
+          "p",
+          "dispatch-empty-column",
+          "Completed work orders will appear here.",
+        ),
+      );
+
+      return;
+    }
+
+    [...completed]
+      .reverse()
+      .slice(0, 8)
+      .forEach((order) => {
+        const row = createElement("div", "dispatch-completed-row");
+
+        const details = createElement("div");
+
+        details.append(
+          createElement("strong", "", `${order.id} · ${order.service}`),
+          createElement("small", "", order.customer),
+        );
+
+        row.append(
+          details,
+          createElement(
+            "span",
+            `status-badge status-${order.status.toLowerCase().replaceAll(" ", "-")}`,
+            order.status,
+          ),
+          createElement("strong", "", formatCurrency(order.amount)),
+        );
+
+        completedList.append(row);
+      });
+  };
+
+  const renderRouteTable = () => {
+    if (!routeBody) return;
+
+    const active = getActiveOrders().filter((order) =>
+      getTechnician(order.technicianId),
+    );
+
+    routeBody.replaceChildren();
+
+    if (active.length === 0) {
+      const row = createElement("tr");
+      const cell = createElement(
+        "td",
+        "dispatch-empty-cell",
+        "No active technician assignments.",
+      );
+
+      cell.colSpan = 5;
+      row.append(cell);
+      routeBody.append(row);
+      return;
+    }
+
+    active.forEach((order) => {
+      const row = createElement("tr");
+      const tech = getTechnician(order.technicianId);
+
+      [
+        order.id,
+        order.service,
+        tech?.name ?? "Unassigned",
+        order.location,
+        order.status,
+      ].forEach((value, index) => {
+        const cell = createElement("td");
+
+        if (index === 4) {
+          cell.append(
+            createElement(
+              "span",
+              `status-badge status-${order.status.toLowerCase().replaceAll(" ", "-")}`,
+              value,
+            ),
+          );
+        } else {
+          cell.textContent = value;
+        }
+
+        row.append(cell);
+      });
+
+      routeBody.append(row);
+    });
+  };
+
+  const renderTechnicians = () => {
+    if (!teamList || !teamSummary) return;
+
+    teamList.replaceChildren();
+
+    const available = technicians.filter(
+      (tech) => tech.status === "Available",
+    ).length;
+
+    const enRoute = technicians.filter(
+      (tech) => tech.status === "En Route",
+    ).length;
+
+    const working = technicians.filter(
+      (tech) => tech.status === "Working" || tech.status === "Assigned",
+    ).length;
+
+    teamSummary.replaceChildren();
+
+    [
+      { label: "Available", value: available, tone: "available" },
+      { label: "En route", value: enRoute, tone: "route" },
+      { label: "Working", value: working, tone: "working" },
+    ].forEach((item) => {
+      const metric = createElement("div", `dispatch-team-metric ${item.tone}`);
+
+      metric.append(
+        createElement("strong", "", String(item.value)),
+        createElement("span", "", item.label),
+      );
+
+      teamSummary.append(metric);
+    });
+
+    technicians.forEach((tech) => {
+      const assignedOrders = workOrders.filter(
+        (order) => order.technicianId === tech.id && !isCompleted(order.status),
+      );
+
+      const row = createElement("article", "dispatch-team-member");
+
+      const avatar = createElement(
+        "span",
+        `tech-avatar ${tech.color}`,
+        tech.initials || getInitials(tech.name),
+      );
+
+      const info = createElement("div", "dispatch-team-info");
+
+      info.append(
+        createElement("strong", "", tech.name),
+        createElement("small", "", tech.role),
+        createElement(
+          "small",
+          "",
+          `${assignedOrders.length} active assignment${assignedOrders.length === 1 ? "" : "s"} · ${tech.zone}`,
+        ),
+      );
+
+      const stateLabel = createElement(
+        "span",
+        `field-state dispatch-tech-state`,
+      );
+
+      const dot = createElement(
+        "i",
+        tech.status === "Available"
+          ? "available"
+          : tech.status === "En Route"
+            ? "route"
+            : "working",
+      );
+
+      stateLabel.append(dot, document.createTextNode(tech.status));
+
+      row.append(avatar, info, stateLabel);
+
+      teamList.append(row);
+    });
+  };
+
+  const render = () => {
+    renderSummary();
+    renderBoard();
+    renderCompleted();
+    renderRouteTable();
+    renderTechnicians();
+  };
+
+  const autoAssign = () => {
+    const order = getActiveOrders()
+      .filter((item) => getColumn(item) === "ready")
+      .sort(
+        (a, b) =>
+          (priorityRank[a.priority] ?? 3) - (priorityRank[b.priority] ?? 3),
+      )[0];
+
+    if (!order) {
+      notify("There are no work orders waiting for assignment.");
+      return;
+    }
+
+    const tech = technicians.find((item) => item.status === "Available");
+
+    if (!tech) {
+      notify("No available technicians. Change a technician's status first.");
+      return;
+    }
+
+    assignTechnician(order, tech.id);
+  };
+
+  routeToggle?.addEventListener("click", () => {
+    showingRoutes = !showingRoutes;
+
+    if (boardMode) boardMode.hidden = showingRoutes;
+    if (routeMode) routeMode.hidden = !showingRoutes;
+
+    routeToggle.setAttribute("aria-pressed", String(showingRoutes));
+
+    routeToggle.textContent = showingRoutes ? "Board view" : "Route view";
+  });
+
+  autoAssignButton?.addEventListener("click", autoAssign);
+
+  const unsubscribe = subscribe((nextState) => {
+    workOrders = nextState.workOrders;
+    technicians = nextState.technicians;
+    render();
+  });
+
+  window.addEventListener("pagehide", unsubscribe, { once: true });
+
+  render();
+</script>
+
+<style>
+  .dispatch-view .dispatch-page-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.7fr);
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .dispatch-view .full-panel {
+    min-width: 0;
+    padding: 1.3rem;
+  }
+
+  .dispatch-view .panel-heading h2 {
+    font-size: 1.15rem;
+  }
+
+  .dispatch-view .panel-label {
+    font-size: 0.68rem;
+  }
+
+  .dispatch-summary,
+  .dispatch-team-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.7rem;
+    margin: 1rem 0 1.2rem;
+  }
+
+  .dispatch-summary article,
+  .dispatch-team-metric {
+    padding: 0.95rem;
+    border: 1px solid var(--line);
+    border-radius: 0.8rem;
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .dispatch-summary article {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .dispatch-summary article span,
+  .dispatch-team-metric span {
+    color: var(--muted);
+    font-size: 0.76rem;
+    line-height: 1.4;
+  }
+
+  .dispatch-summary article strong {
+    font-size: 1.65rem;
+    letter-spacing: -0.04em;
+  }
+
+  .dispatch-summary article:nth-child(1) strong {
+    color: var(--gold);
+  }
+
+  .dispatch-summary article:nth-child(2) strong {
+    color: var(--blue);
+  }
+
+  .dispatch-summary article:nth-child(3) strong {
+    color: var(--green);
+  }
+
+  :global(.dispatch-columns) {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+    gap: 0.75rem;
+  }
+
+  :global(.dispatch-column) {
+    min-width: 0;
+    padding: 0.8rem;
+    border: 1px solid var(--line);
+    border-radius: 0.9rem;
+    background: rgba(255, 255, 255, 0.014);
+  }
+
+  :global(.dispatch-column .column-heading) {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 35px;
+    margin-bottom: 0.8rem;
+    color: #9aa69e;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.055em;
+    line-height: 1.4;
+  }
+
+  :global(.dispatch-column .column-heading b) {
+    flex: 0 0 auto;
+    color: var(--gold);
+    font-size: 0.85rem;
+  }
+
+  :global(.dispatch-work-card) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    padding: 0.9rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid var(--line);
+    border-radius: 0.8rem;
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  :global(.dispatch-card-ready) {
+    border-top: 2px solid rgba(217, 199, 139, 0.45);
+  }
+
+  :global(.dispatch-card-en-route) {
+    border-top: 2px solid rgba(127, 174, 215, 0.55);
+  }
+
+  :global(.dispatch-card-working) {
+    border-top: 2px solid rgba(128, 184, 151, 0.45);
+  }
+
+  :global(.dispatch-card-top) {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  :global(.dispatch-order-id) {
+    color: var(--gold);
+    font-size: 0.76rem;
+    font-weight: 800;
+  }
+
+  :global(.dispatch-work-card h3) {
+    margin: 0;
+    color: #e4e9e4;
+    font-size: 0.96rem;
+    line-height: 1.4;
+  }
+
+  :global(.dispatch-customer-name) {
+    margin: 0;
+    color: #b5c0b8;
+    font-size: 0.84rem;
+    font-weight: 650;
+  }
+
+  :global(.dispatch-location),
+  :global(.dispatch-assignee) {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.78rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  :global(.dispatch-status-row) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid var(--line);
+  }
+
+  :global(.dispatch-amount) {
+    color: #e2e8e0;
+    font-size: 0.85rem;
+  }
+
+  :global(.dispatch-assignment-controls),
+  :global(.dispatch-status-controls) {
+    display: grid;
+    gap: 0.55rem;
+    margin-top: 0.15rem;
+  }
+
+  :global(.dispatch-technician-select) {
+    width: 100%;
+    min-width: 0;
+    min-height: 41px;
+    padding: 0.55rem 0.6rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 0.6rem;
+    outline: none;
+    background: #101c16;
+    color: var(--text);
+    font-size: 0.78rem;
+  }
+
+  :global(.dispatch-technician-select option) {
+    background: #101c16;
+    color: var(--text);
+  }
+
+  :global(.dispatch-action-button) {
+    min-height: 40px;
+    padding: 0.6rem 0.7rem;
+    border: 1px solid var(--line);
+    border-radius: 0.6rem;
+    background: rgba(255, 255, 255, 0.025);
+    color: #c7d1c9;
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 700;
+    transition:
+      background 0.2s ease,
+      border-color 0.2s ease;
+  }
+
+  :global(.dispatch-action-button:hover) {
+    border-color: var(--line-strong);
+    background: rgba(255, 255, 255, 0.055);
+  }
+
+  :global(.dispatch-primary-button) {
+    border-color: rgba(217, 199, 139, 0.25);
+    background: rgba(217, 199, 139, 0.055);
+    color: var(--gold-bright);
+  }
+
+  :global(.dispatch-primary-button:hover) {
+    border-color: rgba(217, 199, 139, 0.45);
+    background: rgba(217, 199, 139, 0.09);
+  }
+
+  :global(.dispatch-empty-column) {
+    margin: 0.3rem 0;
+    padding: 0.85rem 0.2rem;
+    color: #718077;
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+
+  .dispatch-completed-section {
+    margin-top: 1.35rem;
+    padding-top: 1.15rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .dispatch-subheading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .dispatch-subheading h3 {
+    margin: 0.3rem 0 0;
+    font-size: 1.08rem;
+  }
+
+  .dispatch-subheading > strong {
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+
+  :global(.dispatch-completed-row) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 0.9rem;
+    align-items: center;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid rgba(231, 239, 231, 0.05);
+  }
+
+  :global(.dispatch-completed-row > div) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+
+  :global(.dispatch-completed-row > div strong) {
+    color: #cfd7d0;
+    font-size: 0.82rem;
+    line-height: 1.4;
+  }
+
+  :global(.dispatch-completed-row > div small) {
+    color: var(--muted);
+    font-size: 0.76rem;
+  }
+
+  :global(.dispatch-completed-row > strong) {
+    font-size: 0.82rem;
+  }
+
+  .dispatch-table-wrap {
+    overflow-x: auto;
+  }
+
+  .dispatch-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 650px;
+  }
+
+  .dispatch-table th {
+    padding: 0.85rem 0.75rem;
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
+    text-align: left;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+  }
+
+  .dispatch-table td {
+    padding: 0.9rem 0.75rem;
+    border-bottom: 1px solid rgba(231, 239, 231, 0.06);
+    color: #cbd4cd;
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+
+  .dispatch-footnote {
+    margin: 0.9rem 0 0;
+    color: #77847b;
+    font-size: 0.77rem;
+    line-height: 1.6;
+  }
+
+  :global(.dispatch-empty-cell) {
+    padding: 1.5rem !important;
+    color: var(--muted) !important;
+    text-align: center;
+  }
+
+  .dispatch-team-summary {
+    gap: 0.5rem;
+  }
+
+  .dispatch-team-metric {
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .dispatch-team-metric strong {
+    font-size: 1.5rem;
+  }
+
+  .dispatch-team-metric.available strong {
+    color: var(--green);
+  }
+
+  .dispatch-team-metric.route strong {
+    color: var(--blue);
+  }
+
+  .dispatch-team-metric.working strong {
+    color: var(--gold);
+  }
+
+  #dispatch-team-list {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  :global(.dispatch-team-member) {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid rgba(231, 239, 231, 0.06);
+  }
+
+  :global(.dispatch-team-member .tech-avatar) {
+    width: 42px;
+    height: 42px;
+    font-size: 0.8rem;
+  }
+
+  :global(.dispatch-team-info) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+
+  :global(.dispatch-team-info strong) {
+    color: #dce3dd;
+    font-size: 0.88rem;
+    line-height: 1.4;
+  }
+
+  :global(.dispatch-team-info small) {
+    color: var(--muted);
+    font-size: 0.75rem;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+
+  :global(.dispatch-tech-state) {
+    grid-column: 2;
+    justify-self: start;
+    font-size: 0.75rem;
+  }
+
+  #dispatch-board-mode[hidden],
+  #dispatch-route-mode[hidden] {
+    display: none;
+  }
+
+  body.wo-editor-open {
+    overflow: hidden;
+  }
+
+  @media (max-width: 1150px) {
+    .dispatch-view .dispatch-page-grid {
+      grid-template-columns: 1fr;
+    }
+
+    :global(.dispatch-columns) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    :global(.dispatch-column:last-child) {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .dispatch-view .full-panel {
+      padding: 0.9rem;
+    }
+
+    .dispatch-summary {
+      gap: 0.45rem;
+    }
+
+    .dispatch-summary article {
+      padding: 0.7rem;
+    }
+
+    .dispatch-summary article span {
+      font-size: 0.7rem;
+    }
+
+    .dispatch-summary article strong {
+      font-size: 1.3rem;
+    }
+
+    :global(.dispatch-columns) {
+      grid-template-columns: 1fr;
+    }
+
+    :global(.dispatch-column:last-child) {
+      grid-column: auto;
+    }
+
+    :global(.dispatch-completed-row) {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    :global(.dispatch-completed-row > .status-badge) {
+      grid-column: 1;
+      justify-self: start;
+    }
+
+    :global(.dispatch-completed-row > strong) {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+    }
+  }
+</style>

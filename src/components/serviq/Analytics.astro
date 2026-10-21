@@ -1,0 +1,1086 @@
+---
+---
+
+<section class="view serviq-analytics" data-panel="analytics">
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">INSIGHTS / ANALYTICS</span>
+      <h1>
+        Operations, <em>in focus.</em>
+      </h1>
+      <p>Review service delivery, billing, collections and team workload.</p>
+    </div>
+
+    <button class="secondary-action" type="button" id="serviq-analytics-export">
+      <span>↓</span>
+      Export report
+    </button>
+  </div>
+
+  <div
+    class="serviq-analytics-feedback"
+    id="serviq-analytics-feedback"
+    role="status"
+    aria-live="polite"
+    hidden
+  ></div>
+
+  <section
+    class="serviq-analytics-metrics"
+    id="serviq-analytics-metrics"
+    aria-label="Performance metrics"
+  ></section>
+
+  <section class="serviq-analytics-grid">
+    <article class="panel serviq-analytics-panel serviq-analytics-revenue">
+      <div class="panel-heading">
+        <div>
+          <span class="panel-label">COLLECTIONS</span>
+          <h2>Revenue trend</h2>
+        </div>
+        <span id="serviq-analytics-revenue-total" class="chart-value">
+          ₹0
+        </span>
+      </div>
+
+      <p class="serviq-analytics-note" id="serviq-analytics-revenue-note">
+        Preparing collection history...
+      </p>
+
+      <div
+        class="serviq-analytics-chart"
+        id="serviq-analytics-revenue-chart"
+        aria-label="Revenue chart"
+      ></div>
+    </article>
+
+    <article class="panel serviq-analytics-panel">
+      <div class="panel-heading">
+        <div>
+          <span class="panel-label">OPERATIONS</span>
+          <h2>Work order status</h2>
+        </div>
+      </div>
+
+      <div
+        class="serviq-analytics-breakdown"
+        id="serviq-analytics-status-breakdown"
+      ></div>
+    </article>
+
+    <article class="panel serviq-analytics-panel">
+      <div class="panel-heading">
+        <div>
+          <span class="panel-label">SERVICE MIX</span>
+          <h2>Work by category</h2>
+        </div>
+      </div>
+
+      <div
+        class="serviq-analytics-breakdown"
+        id="serviq-analytics-service-breakdown"
+      ></div>
+    </article>
+
+    <article class="panel serviq-analytics-panel">
+      <div class="panel-heading">
+        <div>
+          <span class="panel-label">FINANCE</span>
+          <h2>Invoice collection</h2>
+        </div>
+      </div>
+
+      <div
+        id="serviq-analytics-invoice-breakdown"
+        class="serviq-analytics-breakdown"
+      ></div>
+    </article>
+  </section>
+
+  <section class="panel serviq-analytics-team-panel">
+    <div class="panel-heading">
+      <div>
+        <span class="panel-label">RESOURCE PERFORMANCE</span>
+        <h2>Technician workload</h2>
+      </div>
+      <button class="panel-link" type="button" data-view="technicians">
+        View team ↗
+      </button>
+    </div>
+
+    <div class="serviq-analytics-team-wrap">
+      <table class="serviq-analytics-team-table">
+        <thead>
+          <tr>
+            <th>TECHNICIAN</th>
+            <th>STATUS</th>
+            <th>OPEN JOBS</th>
+            <th>JOBS TODAY</th>
+            <th>RATING</th>
+            <th>WORKLOAD</th>
+          </tr>
+        </thead>
+        <tbody id="serviq-analytics-team-body"></tbody>
+      </table>
+    </div>
+    <p class="serviq-analytics-note">
+      Open jobs are counted from currently open work orders assigned to each
+      technician.
+    </p>
+  </section>
+</section>
+
+<script>
+  import { getState, subscribe } from "../../lib/serviq/store";
+
+  const metricsRoot = document.querySelector<HTMLElement>(
+    "#serviq-analytics-metrics",
+  );
+
+  const revenueTotal = document.querySelector<HTMLElement>(
+    "#serviq-analytics-revenue-total",
+  );
+
+  const revenueNote = document.querySelector<HTMLElement>(
+    "#serviq-analytics-revenue-note",
+  );
+
+  const revenueChart = document.querySelector<HTMLElement>(
+    "#serviq-analytics-revenue-chart",
+  );
+
+  const statusBreakdown = document.querySelector<HTMLElement>(
+    "#serviq-analytics-status-breakdown",
+  );
+
+  const serviceBreakdown = document.querySelector<HTMLElement>(
+    "#serviq-analytics-service-breakdown",
+  );
+
+  const invoiceBreakdown = document.querySelector<HTMLElement>(
+    "#serviq-analytics-invoice-breakdown",
+  );
+
+  const teamBody = document.querySelector<HTMLElement>(
+    "#serviq-analytics-team-body",
+  );
+
+  const feedback = document.querySelector<HTMLElement>(
+    "#serviq-analytics-feedback",
+  );
+
+  if (
+    metricsRoot &&
+    revenueTotal &&
+    revenueNote &&
+    revenueChart &&
+    statusBreakdown &&
+    serviceBreakdown &&
+    invoiceBreakdown &&
+    teamBody &&
+    feedback
+  ) {
+    let feedbackTimeout: ReturnType<typeof setTimeout> | undefined;
+
+    const escapeHtml = (value: unknown): string =>
+      String(value ?? "").replace(/[&<>"']/g, (character) => {
+        const entities: Record<string, string> = {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        };
+
+        return entities[character] ?? character;
+      });
+
+    const formatCurrency = (value: number): string =>
+      new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 0,
+      }).format(value);
+
+    const formatPercent = (value: number): string =>
+      `${Math.round(value * 10) / 10}%`;
+
+    const isClosed = (status: string): boolean =>
+      [
+        "completed",
+        "complete",
+        "closed",
+        "cancelled",
+        "canceled",
+        "invoiced",
+        "paid",
+      ].includes(status.trim().toLowerCase());
+
+    const statusTone = (status: string): string => {
+      const value = status.toLowerCase();
+
+      if (value === "paid" || value === "completed") return "good";
+      if (value === "overdue" || value === "cancelled" || value === "canceled")
+        return "risk";
+      if (value === "new" || value === "waiting for parts") return "warning";
+      return "neutral";
+    };
+
+    const dateKey = (date: Date): string => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+
+      return `${year}-${month}-${day}`;
+    };
+
+    const parseDate = (value: string): Date | null => {
+      if (!value) return null;
+
+      const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+      const parsed = match
+        ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+        : new Date(value);
+
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    };
+
+    const showFeedback = (
+      message: string,
+      kind: "success" | "error" = "success",
+    ): void => {
+      if (feedbackTimeout) clearTimeout(feedbackTimeout);
+
+      feedback.textContent = message;
+      feedback.className = `serviq-analytics-feedback ${kind}`;
+      feedback.hidden = false;
+
+      feedbackTimeout = setTimeout(() => {
+        feedback.hidden = true;
+      }, 4000);
+    };
+
+    const renderMetrics = (): void => {
+      const state = getState();
+      const totalOrders = state.workOrders.length;
+      const completedOrders = state.workOrders.filter((order) =>
+        isClosed(order.status),
+      ).length;
+
+      const openOrders = totalOrders - completedOrders;
+      const completionRate = totalOrders
+        ? (completedOrders / totalOrders) * 100
+        : 0;
+
+      const totalBilled = state.invoices.reduce(
+        (sum, invoice) => sum + invoice.amount,
+        0,
+      );
+
+      const collected = state.invoices
+        .filter((invoice) => invoice.status === "Paid")
+        .reduce((sum, invoice) => sum + invoice.amount, 0);
+
+      const outstanding = state.invoices
+        .filter((invoice) => invoice.status !== "Paid")
+        .reduce((sum, invoice) => sum + invoice.amount, 0);
+
+      const collectionRate = totalBilled ? (collected / totalBilled) * 100 : 0;
+
+      const metrics = [
+        {
+          label: "WORK ORDERS",
+          value: totalOrders,
+          detail: `${openOrders} currently open`,
+          tone: "gold",
+          icon: "▤",
+        },
+        {
+          label: "COMPLETION RATE",
+          value: formatPercent(completionRate),
+          detail: `${completedOrders} closed records`,
+          tone: "green",
+          icon: "✓",
+        },
+        {
+          label: "COLLECTED",
+          value: formatCurrency(collected),
+          detail: `${formatPercent(collectionRate)} of recorded billing`,
+          tone: "blue",
+          icon: "₹",
+        },
+        {
+          label: "OUTSTANDING",
+          value: formatCurrency(outstanding),
+          detail: `${state.invoices.filter((invoice) => invoice.status !== "Paid").length} unpaid invoices`,
+          tone: "purple",
+          icon: "◷",
+        },
+      ];
+
+      metricsRoot.innerHTML = metrics
+        .map(
+          (metric) => `
+          <article class="serviq-analytics-metric ${metric.tone}">
+            <div class="serviq-analytics-metric-top">
+              <span>${escapeHtml(metric.label)}</span>
+              <span class="serviq-analytics-metric-icon" aria-hidden="true">${metric.icon}</span>
+            </div>
+            <strong>${escapeHtml(metric.value)}</strong>
+            <small>${escapeHtml(metric.detail)}</small>
+          </article>
+        `,
+        )
+        .join("");
+    };
+
+    const getRevenueSeries = () => {
+      const state = getState();
+      const today = new Date();
+
+      const points = Array.from({ length: 7 }, (_, index) => {
+        const date = new Date(today);
+        date.setDate(today.getDate() - (6 - index));
+
+        return {
+          day: new Intl.DateTimeFormat("en-IN", { weekday: "short" }).format(
+            date,
+          ),
+          key: dateKey(date),
+          value: 0,
+        };
+      });
+
+      const byDate = new Map(points.map((point) => [point.key, point]));
+      let matched = 0;
+
+      for (const invoice of state.invoices) {
+        if (invoice.status !== "Paid") continue;
+
+        const date = parseDate(invoice.date);
+        if (!date) continue;
+
+        const point = byDate.get(dateKey(date));
+        if (!point) continue;
+
+        point.value += invoice.amount;
+        matched += 1;
+      }
+
+      if (matched > 0) {
+        return {
+          points,
+          source: "Paid invoice records from the last seven days.",
+        };
+      }
+
+      return {
+        points: state.revenueData.map((point) => ({
+          day: point.day,
+          key: point.day,
+          value: point.value,
+        })),
+        source:
+          "No paid invoice dates match the last seven days. Showing the seeded workspace trend.",
+      };
+    };
+
+    const renderRevenue = (): void => {
+      const series = getRevenueSeries();
+      const maxValue = Math.max(
+        ...series.points.map((point) => point.value),
+        1,
+      );
+      const total = series.points.reduce((sum, point) => sum + point.value, 0);
+
+      revenueTotal.textContent = formatCurrency(total);
+      revenueNote.textContent = series.source;
+
+      revenueChart.innerHTML = `
+        <div class="serviq-analytics-y-axis">
+          <span>${escapeHtml(formatCurrency(maxValue))}</span>
+          <span>${escapeHtml(formatCurrency(maxValue * 0.75))}</span>
+          <span>${escapeHtml(formatCurrency(maxValue * 0.5))}</span>
+          <span>${escapeHtml(formatCurrency(maxValue * 0.25))}</span>
+          <span>₹0</span>
+        </div>
+        <div class="serviq-analytics-chart-bars">
+          ${series.points
+            .map((point) => {
+              const height = Math.round((point.value / maxValue) * 100);
+
+              return `
+              <div class="serviq-analytics-bar-item">
+                <div class="serviq-analytics-bar-track">
+                  <div class="serviq-analytics-bar" style="height:${height}%">
+                    <span>${escapeHtml(formatCurrency(point.value))}</span>
+                  </div>
+                </div>
+                <small>${escapeHtml(point.day)}</small>
+              </div>
+            `;
+            })
+            .join("")}
+        </div>
+      `;
+    };
+
+    const renderStatusBreakdown = (): void => {
+      const state = getState();
+      const counts = new Map<string, number>();
+
+      for (const order of state.workOrders) {
+        counts.set(order.status, (counts.get(order.status) ?? 0) + 1);
+      }
+
+      const sorted = [...counts.entries()]
+        .sort((first, second) => second[1] - first[1])
+        .slice(0, 7);
+
+      const max = Math.max(...sorted.map((entry) => entry[1]), 1);
+
+      statusBreakdown.innerHTML = sorted.length
+        ? sorted
+            .map(
+              ([status, count]) => `
+            <div class="serviq-analytics-breakdown-row">
+              <div class="serviq-analytics-breakdown-title">
+                <span>${escapeHtml(status)}</span>
+                <strong>${count}</strong>
+              </div>
+              <div class="serviq-analytics-track">
+                <span class="${statusTone(status)}" style="width:${Math.round((count / max) * 100)}%"></span>
+              </div>
+            </div>
+          `,
+            )
+            .join("")
+        : `<p class="serviq-analytics-empty">No work order data yet.</p>`;
+    };
+
+    const renderServiceBreakdown = (): void => {
+      const state = getState();
+      const counts = new Map<string, number>();
+
+      for (const order of state.workOrders) {
+        const category = order.category?.trim() || "Uncategorised";
+        counts.set(category, (counts.get(category) ?? 0) + 1);
+      }
+
+      const sorted = [...counts.entries()]
+        .sort((first, second) => second[1] - first[1])
+        .slice(0, 7);
+
+      const total = state.workOrders.length;
+
+      serviceBreakdown.innerHTML = sorted.length
+        ? sorted
+            .map(
+              ([category, count]) => `
+            <div class="serviq-analytics-breakdown-row">
+              <div class="serviq-analytics-breakdown-title">
+                <span>${escapeHtml(category)}</span>
+                <strong>${count} · ${total ? Math.round((count / total) * 100) : 0}%</strong>
+              </div>
+              <div class="serviq-analytics-track">
+                <span style="width:${total ? Math.round((count / total) * 100) : 0}%"></span>
+              </div>
+            </div>
+          `,
+            )
+            .join("")
+        : `<p class="serviq-analytics-empty">No service categories have been recorded.</p>`;
+    };
+
+    const renderInvoiceBreakdown = (): void => {
+      const state = getState();
+      const statuses = ["Paid", "Draft", "Overdue"] as const;
+      const total = state.invoices.length;
+
+      invoiceBreakdown.innerHTML = statuses
+        .map((status) => {
+          const matching = state.invoices.filter(
+            (invoice) => invoice.status === status,
+          );
+          const amount = matching.reduce(
+            (sum, invoice) => sum + invoice.amount,
+            0,
+          );
+          const proportion = total
+            ? Math.round((matching.length / total) * 100)
+            : 0;
+
+          return `
+          <div class="serviq-analytics-breakdown-row">
+            <div class="serviq-analytics-breakdown-title">
+              <span class="serviq-analytics-invoice-status ${status.toLowerCase()}">${status}</span>
+              <strong>${matching.length} · ${escapeHtml(formatCurrency(amount))}</strong>
+            </div>
+            <div class="serviq-analytics-track">
+              <span class="${statusTone(status)}" style="width:${proportion}%"></span>
+            </div>
+          </div>
+        `;
+        })
+        .join("");
+    };
+
+    const renderTeam = (): void => {
+      const state = getState();
+
+      teamBody.innerHTML = state.technicians.length
+        ? state.technicians
+            .map((technician) => {
+              const openJobs = state.workOrders.filter(
+                (order) =>
+                  order.technicianId === technician.id &&
+                  !isClosed(order.status),
+              ).length;
+
+              const maxCapacity = Math.max(5, openJobs);
+              const percent = Math.min(
+                100,
+                Math.round((openJobs / maxCapacity) * 100),
+              );
+
+              return `
+              <tr>
+                <td>
+                  <div class="serviq-analytics-tech-name">
+                    <span class="tech-avatar ${escapeHtml(technician.color)}">${escapeHtml(technician.initials)}</span>
+                    <span>
+                      <strong>${escapeHtml(technician.name)}</strong>
+                      <small>${escapeHtml(technician.role)}</small>
+                    </span>
+                  </div>
+                </td>
+                <td>
+                  <span class="serviq-analytics-team-status ${statusTone(technician.status)}">
+                    ${escapeHtml(technician.status)}
+                  </span>
+                </td>
+                <td>${openJobs}</td>
+                <td>${technician.jobs}</td>
+                <td>${Number(technician.rating).toFixed(1)} ★</td>
+                <td>
+                  <div class="serviq-analytics-workload">
+                    <span style="width:${percent}%"></span>
+                  </div>
+                </td>
+              </tr>
+            `;
+            })
+            .join("")
+        : `<tr><td colspan="6" class="serviq-analytics-empty">No technicians have been added.</td></tr>`;
+    };
+
+    const render = (): void => {
+      renderMetrics();
+      renderRevenue();
+      renderStatusBreakdown();
+      renderServiceBreakdown();
+      renderInvoiceBreakdown();
+      renderTeam();
+    };
+
+    document
+      .querySelector<HTMLButtonElement>("#serviq-analytics-export")
+      ?.addEventListener("click", () => {
+        const state = getState();
+
+        const rows: (string | number)[][] = [
+          ["SERVIQ Analytics Export"],
+          ["Generated", new Date().toLocaleString("en-IN")],
+          [],
+          ["Metric", "Value"],
+          ["Total work orders", state.workOrders.length],
+          [
+            "Open work orders",
+            state.workOrders.filter((order) => !isClosed(order.status)).length,
+          ],
+          ["Total technicians", state.technicians.length],
+          ["Total inventory items", state.inventory.length],
+          ["Total invoices", state.invoices.length],
+          [
+            "Total billed",
+            state.invoices.reduce((sum, invoice) => sum + invoice.amount, 0),
+          ],
+          [
+            "Collected",
+            state.invoices
+              .filter((invoice) => invoice.status === "Paid")
+              .reduce((sum, invoice) => sum + invoice.amount, 0),
+          ],
+          [
+            "Outstanding",
+            state.invoices
+              .filter((invoice) => invoice.status !== "Paid")
+              .reduce((sum, invoice) => sum + invoice.amount, 0),
+          ],
+          [],
+          ["Invoice", "Customer", "Work order", "Amount", "Status", "Date"],
+          ...state.invoices.map((invoice) => [
+            invoice.id,
+            invoice.customer,
+            invoice.workOrder,
+            invoice.amount,
+            invoice.status,
+            invoice.date,
+          ]),
+        ];
+
+        const quote = (value: string | number): string =>
+          `"${String(value).replace(/"/g, '""')}"`;
+
+        const csv = rows.map((row) => row.map(quote).join(",")).join("\r\n");
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+
+        anchor.href = url;
+        anchor.download = `serviq-analytics-${dateKey(new Date())}.csv`;
+        document.body.append(anchor);
+        anchor.click();
+        anchor.remove();
+        URL.revokeObjectURL(url);
+
+        showFeedback("Analytics CSV export prepared.");
+      });
+
+    subscribe(render);
+    render();
+  }
+</script>
+
+<style is:global>
+  .serviq-analytics-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin: 28px 0 24px;
+  }
+
+  .serviq-analytics-metric {
+    min-width: 0;
+    padding: 21px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.09));
+    border-radius: 17px;
+    background: var(--panel, #101814);
+  }
+
+  .serviq-analytics-metric-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    color: var(--muted, #97a59c);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .serviq-analytics-metric-icon {
+    display: grid;
+    width: 33px;
+    height: 33px;
+    flex: 0 0 33px;
+    place-items: center;
+    border: 1px solid currentColor;
+    border-radius: 10px;
+  }
+
+  .serviq-analytics-metric.gold .serviq-analytics-metric-icon {
+    color: var(--gold, #d6b568);
+  }
+
+  .serviq-analytics-metric.green .serviq-analytics-metric-icon {
+    color: #79d9a3;
+  }
+
+  .serviq-analytics-metric.blue .serviq-analytics-metric-icon {
+    color: #85c7ee;
+  }
+
+  .serviq-analytics-metric.purple .serviq-analytics-metric-icon {
+    color: #c4a4f5;
+  }
+
+  .serviq-analytics-metric > strong {
+    display: block;
+    margin: 14px 0 6px;
+    color: var(--text, #edf3ed);
+    font-size: clamp(24px, 2vw, 32px);
+    font-weight: 680;
+    line-height: 1.2;
+    letter-spacing: -0.04em;
+    overflow-wrap: anywhere;
+  }
+
+  .serviq-analytics-metric > small {
+    color: var(--muted, #97a59c);
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  .serviq-analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .serviq-analytics-panel {
+    min-width: 0;
+    padding: 23px;
+  }
+
+  .serviq-analytics-panel h2,
+  .serviq-analytics-team-panel h2 {
+    margin-top: 7px;
+  }
+
+  .serviq-analytics-revenue {
+    min-height: 340px;
+  }
+
+  .serviq-analytics-note {
+    margin: 12px 0 0;
+    color: var(--muted, #97a59c);
+    font-size: 11px;
+    line-height: 1.6;
+  }
+
+  .serviq-analytics-chart {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 14px;
+    height: 225px;
+    margin-top: 25px;
+    padding-bottom: 8px;
+  }
+
+  .serviq-analytics-y-axis {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-bottom: 22px;
+    color: var(--muted, #97a59c);
+    font-size: 9px;
+  }
+
+  .serviq-analytics-chart-bars {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 10px;
+    align-items: stretch;
+    border-bottom: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent calc(25% - 1px),
+      rgba(255, 255, 255, 0.055) calc(25% - 1px),
+      rgba(255, 255, 255, 0.055) 25%
+    );
+  }
+
+  .serviq-analytics-bar-item {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .serviq-analytics-bar-track {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .serviq-analytics-bar {
+    position: relative;
+    width: min(27px, 75%);
+    min-height: 2px;
+    border-radius: 6px 6px 2px 2px;
+    background: linear-gradient(
+      180deg,
+      var(--gold, #d6b568),
+      rgba(214, 181, 104, 0.18)
+    );
+  }
+
+  .serviq-analytics-bar > span {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    z-index: 1;
+    padding: 3px 5px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+    border-radius: 5px;
+    color: var(--text, #edf3ed);
+    background: var(--panel, #101814);
+    font-size: 9px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+
+  .serviq-analytics-bar-item:hover .serviq-analytics-bar > span {
+    opacity: 1;
+  }
+
+  .serviq-analytics-bar-item > small {
+    color: var(--muted, #97a59c);
+    font-size: 10px;
+  }
+
+  .serviq-analytics-breakdown {
+    display: grid;
+    gap: 19px;
+    margin-top: 23px;
+  }
+
+  .serviq-analytics-breakdown-row {
+    display: grid;
+    gap: 9px;
+  }
+
+  .serviq-analytics-breakdown-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    color: var(--text, #edf3ed);
+    font-size: 12px;
+  }
+
+  .serviq-analytics-breakdown-title > span {
+    overflow-wrap: anywhere;
+  }
+
+  .serviq-analytics-breakdown-title > strong {
+    font-size: 11px;
+    font-weight: 650;
+    text-align: right;
+  }
+
+  .serviq-analytics-track,
+  .serviq-analytics-workload {
+    height: 6px;
+    overflow: hidden;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.07);
+  }
+
+  .serviq-analytics-track > span,
+  .serviq-analytics-workload > span {
+    display: block;
+    height: 100%;
+    min-width: 0;
+    border-radius: inherit;
+    background: var(--gold, #d6b568);
+    transition: width 180ms ease;
+  }
+
+  .serviq-analytics-track > span.good {
+    background: #79d9a3;
+  }
+
+  .serviq-analytics-track > span.risk {
+    background: #ef9595;
+  }
+
+  .serviq-analytics-track > span.warning {
+    background: #e6c078;
+  }
+
+  .serviq-analytics-track > span.neutral {
+    background: #85c7ee;
+  }
+
+  .serviq-analytics-invoice-status {
+    font-size: 12px;
+    font-weight: 650;
+  }
+
+  .serviq-analytics-invoice-status.paid {
+    color: #79d9a3;
+  }
+
+  .serviq-analytics-invoice-status.draft {
+    color: #e6c078;
+  }
+
+  .serviq-analytics-invoice-status.overdue {
+    color: #ef9595;
+  }
+
+  .serviq-analytics-team-panel {
+    margin-top: 18px;
+    padding: 23px;
+  }
+
+  .serviq-analytics-team-wrap {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 18px;
+  }
+
+  .serviq-analytics-team-table {
+    width: 100%;
+    min-width: 760px;
+    border-collapse: collapse;
+    text-align: left;
+  }
+
+  .serviq-analytics-team-table th {
+    padding: 13px 12px;
+    border-bottom: 1px solid var(--line, rgba(255, 255, 255, 0.09));
+    color: var(--muted, #97a59c);
+    font-size: 9px;
+    font-weight: 750;
+    letter-spacing: 0.055em;
+  }
+
+  .serviq-analytics-team-table td {
+    padding: 15px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+    color: var(--text, #edf3ed);
+    font-size: 12px;
+  }
+
+  .serviq-analytics-team-table tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .serviq-analytics-tech-name {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+
+  .serviq-analytics-tech-name > span:last-child {
+    display: grid;
+    gap: 5px;
+  }
+
+  .serviq-analytics-tech-name strong {
+    font-size: 12px;
+    font-weight: 650;
+  }
+
+  .serviq-analytics-tech-name small {
+    color: var(--muted, #97a59c);
+    font-size: 10px;
+  }
+
+  .serviq-analytics-team-status {
+    display: inline-block;
+    max-width: 150px;
+    padding: 6px 8px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.09));
+    border-radius: 7px;
+    color: var(--muted, #97a59c);
+    font-size: 10px;
+  }
+
+  .serviq-analytics-team-status.good {
+    color: #79d9a3;
+    border-color: rgba(121, 217, 163, 0.2);
+  }
+
+  .serviq-analytics-team-status.warning {
+    color: #e6c078;
+    border-color: rgba(230, 192, 120, 0.2);
+  }
+
+  .serviq-analytics-team-status.risk {
+    color: #ef9595;
+    border-color: rgba(239, 149, 149, 0.2);
+  }
+
+  .serviq-analytics-workload {
+    width: 100px;
+  }
+
+  .serviq-analytics-empty {
+    padding: 18px 0;
+    color: var(--muted, #97a59c);
+    font-size: 12px;
+    text-align: center;
+  }
+
+  .serviq-analytics-feedback {
+    margin: 18px 0 0;
+    padding: 12px 15px;
+    border: 1px solid rgba(121, 217, 163, 0.25);
+    border-radius: 11px;
+    color: #a1e8bb;
+    background: rgba(121, 217, 163, 0.055);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .serviq-analytics-feedback.error {
+    border-color: rgba(237, 117, 117, 0.3);
+    color: #f0a5a5;
+    background: rgba(237, 117, 117, 0.06);
+  }
+
+  .serviq-analytics-feedback[hidden] {
+    display: none !important;
+  }
+
+  @media (max-width: 1050px) {
+    .serviq-analytics-metrics {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .serviq-analytics-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .serviq-analytics-metrics {
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .serviq-analytics-metric {
+      padding: 14px;
+    }
+
+    .serviq-analytics-metric > strong {
+      font-size: 23px;
+    }
+
+    .serviq-analytics-panel,
+    .serviq-analytics-team-panel {
+      padding: 17px;
+    }
+
+    .serviq-analytics-chart {
+      gap: 8px;
+    }
+
+    .serviq-analytics-chart-bars {
+      gap: 5px;
+    }
+
+    .serviq-analytics-y-axis {
+      font-size: 8px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .serviq-analytics-track > span,
+    .serviq-analytics-workload > span {
+      transition: none;
+    }
+  }
+</style>

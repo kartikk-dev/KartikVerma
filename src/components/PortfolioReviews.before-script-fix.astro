@@ -1,0 +1,839 @@
+---
+const supabaseUrl = (import.meta.env.PUBLIC_SUPABASE_URL ?? "").trim().replace(/\/$/, "");
+const supabaseKey = (
+  import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+  import.meta.env.PUBLIC_SUPABASE_ANON_KEY ??
+  ""
+).trim();
+const developmentPreview = import.meta.env.DEV;
+---
+
+<section
+  class="portfolio-reviews"
+  id="reviews"
+  aria-labelledby="portfolio-reviews-title"
+  data-supabase-url={supabaseUrl}
+  data-supabase-key={supabaseKey}
+  data-dev-preview={String(developmentPreview)}
+>
+  <div class="reviews-shell">
+    <header class="reviews-heading-row">
+      <div class="reviews-heading-copy">
+        <p class="reviews-eyebrow">PEOPLE · PROJECTS · PERSPECTIVES</p>
+        <h2 id="portfolio-reviews-title">Good work deserves <span>honest feedback.</span></h2>
+        <p class="reviews-intro">
+          Share your experience of working with Kartik, reviewing a project, or collaborating on an idea.
+          Reviews are moderated before they are published for everyone.
+        </p>
+      </div>
+      <button class="reviews-button reviews-button-primary" type="button" data-review-open>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+        Add a review
+      </button>
+    </header>
+
+    <div class="reviews-stage-wrap">
+      <div class="reviews-stage-topline">
+        <span class="reviews-live-dot" aria-hidden="true"></span>
+        <span data-review-status role="status" aria-live="polite">Preparing reviews…</span>
+        <span class="reviews-stage-hint">Hover or tap a card to bring it forward · rotates every 10 seconds</span>
+      </div>
+
+      <div class="reviews-stage" data-review-stage tabindex="0" aria-label="Horizontal 3D review carousel">
+        <div class="reviews-loading" data-review-loading>
+          <span class="reviews-spinner" aria-hidden="true"></span>
+          <span>Loading reviews…</span>
+        </div>
+        <div class="reviews-empty" data-review-empty hidden>
+          <span class="reviews-empty-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M4 5.5h16v11H11l-5 3v-3H4z"/><path d="M8 9h8M8 12h5"/></svg>
+          </span>
+          <h3>Your perspective belongs here.</h3>
+          <p data-review-empty-text>No approved reviews yet. Be the first to share honest feedback.</p>
+          <button class="reviews-button reviews-button-secondary" type="button" data-review-open>Write the first review</button>
+        </div>
+        <div class="reviews-track" data-review-track hidden aria-live="polite"></div>
+      </div>
+
+      <div class="reviews-progress" aria-hidden="true"><span data-review-progress></span></div>
+
+      <div class="reviews-carousel-controls" aria-label="Carousel controls">
+        <button type="button" class="reviews-arrow" data-review-prev aria-label="Previous review">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7" /></svg>
+        </button>
+        <div class="reviews-carousel-indicators" data-review-indicators aria-label="Choose a review"></div>
+        <button type="button" class="reviews-arrow" data-review-next aria-label="Next review">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="reviews-footer-note">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 19 6v5c0 4.8-3 8-7 10-4-2-7-5.2-7-10V6z"/><path d="m9 12 2 2 4-4"/></svg>
+      <p><strong>Honest feedback only.</strong> <span>Local development shows labelled sample cards for layout testing. Public reviews come from real submissions and are only published after approval.</span></p>
+    </div>
+  </div>
+
+  <dialog class="reviews-dialog" data-review-dialog aria-labelledby="review-dialog-title">
+    <form class="reviews-form" data-review-form>
+      <div class="reviews-dialog-header">
+        <div>
+          <p class="reviews-eyebrow">YOUR PERSPECTIVE MATTERS</p>
+          <h3 id="review-dialog-title">Add a review</h3>
+          <p>Tell visitors about your own experience. Do not include private or sensitive information.</p>
+        </div>
+        <button class="reviews-close" type="button" data-review-close aria-label="Close review form">×</button>
+      </div>
+
+      <div class="reviews-form-grid">
+        <label class="reviews-field">
+          <span>Your name <b>*</b></span>
+          <input name="reviewer_name" type="text" required minlength="2" maxlength="60" autocomplete="name" placeholder="Your name" />
+        </label>
+        <label class="reviews-field">
+          <span>Your role <small>(optional)</small></span>
+          <input name="reviewer_role" type="text" maxlength="80" autocomplete="organization-title" placeholder="e.g. Product manager" />
+        </label>
+        <label class="reviews-field">
+          <span>What are you reviewing? <b>*</b></span>
+          <select name="work_area" required>
+            <option value="">Choose a project or area</option>
+            <option>Overall portfolio</option>
+            <option>AI Business Analytics</option>
+            <option>MovieFlex</option>
+            <option>Engineering and code quality</option>
+            <option>Communication and collaboration</option>
+            <option>Other work</option>
+          </select>
+        </label>
+        <label class="reviews-field">
+          <span>Your connection to the work <b>*</b></span>
+          <select name="relationship" required>
+            <option value="">Choose one</option>
+            <option>Client / customer</option>
+            <option>Collaborator / colleague</option>
+            <option>Project reviewer</option>
+            <option>Recruiter / hiring manager</option>
+            <option>Peer / fellow developer</option>
+            <option>Other</option>
+          </select>
+        </label>
+      </div>
+
+      <fieldset class="reviews-rating-field">
+        <legend>Your rating <b>*</b></legend>
+        <div class="reviews-star-picker" data-review-star-picker role="group" aria-label="Select a rating from one to five stars">
+          <button type="button" data-review-star="1" aria-label="1 star" aria-pressed="false">★</button>
+          <button type="button" data-review-star="2" aria-label="2 stars" aria-pressed="false">★</button>
+          <button type="button" data-review-star="3" aria-label="3 stars" aria-pressed="false">★</button>
+          <button type="button" data-review-star="4" aria-label="4 stars" aria-pressed="false">★</button>
+          <button type="button" data-review-star="5" aria-label="5 stars" aria-pressed="false">★</button>
+          <span data-review-rating-label>Choose a rating</span>
+        </div>
+        <input type="hidden" name="rating" value="" data-review-rating-input />
+      </fieldset>
+
+      <label class="reviews-field">
+        <span>Headline <small>(optional)</small></span>
+        <input name="review_title" type="text" maxlength="90" placeholder="A short summary" />
+      </label>
+      <label class="reviews-field">
+        <span>Your review <b>*</b></span>
+        <textarea name="review_text" rows="5" required minlength="20" maxlength="1200" placeholder="What did you work on together? How were communication, delivery, reliability, or the finished work?" data-review-text></textarea>
+        <small class="reviews-char-count"><span data-review-char-count>0</span>/1200</small>
+      </label>
+      <label class="reviews-consent">
+        <input name="review_consent" type="checkbox" required />
+        <span>I confirm this is my own honest feedback, based on work or collaboration I have actually experienced.</span>
+      </label>
+      <label class="reviews-honeypot" aria-hidden="true" tabindex="-1">
+        Leave this field empty
+        <input name="website" type="text" tabindex="-1" autocomplete="off" />
+      </label>
+      <p class="reviews-form-error" data-review-error role="alert" hidden></p>
+      <div class="reviews-form-actions">
+        <button class="reviews-button reviews-button-secondary" type="button" data-review-cancel>Cancel</button>
+        <button class="reviews-button reviews-button-primary" type="submit" data-review-submit>Submit review</button>
+      </div>
+      <p class="reviews-form-privacy">New reviews are submitted for approval before they become public.</p>
+    </form>
+  </dialog>
+
+  <div class="reviews-toast" data-review-toast role="status" aria-live="polite" hidden></div>
+</section>
+
+<script src="./PortfolioReviews.client.ts"></script>
+
+  const root = document.querySelector<HTMLElement>(".portfolio-reviews[data-dev-preview]");
+
+  if (root && root.dataset.initialized !== "true") {
+    root.dataset.initialized = "true";
+
+    const stage = root.querySelector<HTMLDivElement>("[data-review-stage]");
+    const track = root.querySelector<HTMLDivElement>("[data-review-track]");
+    const loading = root.querySelector<HTMLDivElement>("[data-review-loading]");
+    const empty = root.querySelector<HTMLDivElement>("[data-review-empty]");
+    const emptyText = root.querySelector<HTMLParagraphElement>("[data-review-empty-text]");
+    const statusText = root.querySelector<HTMLSpanElement>("[data-review-status]");
+    const progress = root.querySelector<HTMLSpanElement>("[data-review-progress]");
+    const indicators = root.querySelector<HTMLDivElement>("[data-review-indicators]");
+    const dialog = root.querySelector<HTMLDialogElement>("[data-review-dialog]");
+    const form = root.querySelector<HTMLFormElement>("[data-review-form]");
+    const ratingInput = root.querySelector<HTMLInputElement>("[data-review-rating-input]");
+    const ratingLabel = root.querySelector<HTMLSpanElement>("[data-review-rating-label]");
+    const textInput = root.querySelector<HTMLTextAreaElement>("[data-review-text]");
+    const charCount = root.querySelector<HTMLSpanElement>("[data-review-char-count]");
+    const formError = root.querySelector<HTMLParagraphElement>("[data-review-error]");
+    const toast = root.querySelector<HTMLDivElement>("[data-review-toast]");
+    const previousButton = root.querySelector<HTMLButtonElement>("[data-review-prev]");
+    const nextButton = root.querySelector<HTMLButtonElement>("[data-review-next]");
+    const closeButton = root.querySelector<HTMLButtonElement>("[data-review-close]");
+    const cancelButton = root.querySelector<HTMLButtonElement>("[data-review-cancel]");
+    const submitButton = root.querySelector<HTMLButtonElement>("[data-review-submit]");
+    const starButtons = Array.from(root.querySelectorAll<HTMLButtonElement>("[data-review-star]"));
+    const openButtons = Array.from(root.querySelectorAll<HTMLButtonElement>("[data-review-open]"));
+
+    if (
+      stage && track && loading && empty && emptyText && statusText && progress &&
+      indicators && dialog && form && ratingInput && ratingLabel && textInput &&
+      charCount && formError && toast && previousButton && nextButton && closeButton &&
+      cancelButton && submitButton
+    ) {
+      const supabaseUrl = (root.dataset.supabaseUrl ?? "").replace(/\/$/, "");
+      const supabaseKey = root.dataset.supabaseKey ?? "";
+      const supabaseConfigured = Boolean(supabaseUrl && supabaseKey);
+      const devPreview = root.dataset.devPreview === "true";
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+      const apiEndpoint = supabaseConfigured ? `${supabaseUrl}/rest/v1/portfolio_reviews` : "";
+
+      // These are clearly labelled layout samples for local development only, not real testimonials.
+      const demoReviews: Review[] = [
+        { id: "sample-01", reviewer_name: "Sample Reviewer 01", reviewer_role: "Preview copy", relationship: "Sample only", work_area: "Communication and collaboration", rating: 5, review_title: "Clear communication", review_text: "SAMPLE PREVIEW ONLY — Replace this draft with honest feedback from someone who has actually collaborated with Kartik. A real review might describe responsiveness, clarity, and how updates were shared.", status: "sample", created_at: "" },
+        { id: "sample-02", reviewer_name: "Sample Reviewer 02", reviewer_role: "Preview copy", relationship: "Sample only", work_area: "Engineering and code quality", rating: 5, review_title: "Careful implementation", review_text: "SAMPLE PREVIEW ONLY — Use this card to preview a review about code readability, thoughtful implementation, and useful handover notes. Do not publish it as a real endorsement.", status: "sample", created_at: "" },
+        { id: "sample-03", reviewer_name: "Sample Reviewer 03", reviewer_role: "Preview copy", relationship: "Sample only", work_area: "Overall portfolio", rating: 4, review_title: "A well-organised portfolio", review_text: "SAMPLE PREVIEW ONLY — Replace this with a real person's feedback about how easy it was to explore the portfolio, understand project goals, and find useful details.", status: "sample", created_at: "" },
+        { id: "sample-04", reviewer_name: "Sample Reviewer 04", reviewer_role: "Preview copy", relationship: "Sample only", work_area: "AI Business Analytics", rating: 5, review_title: "Useful data presentation", review_text: "SAMPLE PREVIEW ONLY — A real reviewer could explain whether charts, business metrics, and context helped them understand the work. This text is only for testing the design.", status: "sample", created_at: "" },
+        { id: "sample-05", reviewer_name: "Sample Reviewer 05", reviewer_role: "Preview copy", relationship: "Sample only", work_area: "MovieFlex", rating: 5, review_title: "A smooth discovery flow", review_text: "SAMPLE PREVIEW ONLY — Replace this with feedback from someone who has actually used MovieFlex and can describe its search, browsing, and detail-view experience.", status: "sample", created_at: "" },
+        { id: "sample-06", reviewer_name: "Sample Reviewer 06", reviewer_role: "Preview copy", relationship: "Sample only", work_area: "Engineering and code quality", rating: 4, review_title: "Responsive details", review_text: "SAMPLE PREVIEW ONLY — This card previews how feedback about desktop layouts, mobile spacing, and touch interactions can appear. It does not claim to come from a real client.", status: "sample", created_at: "" },
+        { id: "sample-07", reviewer_name: "Sample Reviewer 07", reviewer_role: "Preview copy", relationship: "Sample only", work_area: "Communication and collaboration", rating: 5, review_title: "A professional process", review_text: "SAMPLE PREVIEW ONLY — Replace this with an actual collaborator's account of expectations, feedback cycles, and how project decisions were discussed.", status: "sample", created_at: "" },
+        { id: "sample-08", reviewer_name: "Sample Reviewer 08", reviewer_role: "Preview copy", relationship: "Sample only", work_area: "Overall portfolio", rating: 4, review_title: "Projects with context", review_text: "SAMPLE PREVIEW ONLY — A genuine reviewer might mention whether project descriptions explain the problem, the choices made, and the result in a helpful way.", status: "sample", created_at: "" },
+        { id: "sample-09", reviewer_name: "Sample Reviewer 09", reviewer_role: "Preview copy", relationship: "Sample only", work_area: "Engineering and code quality", rating: 5, review_title: "Thoughtful edge cases", review_text: "SAMPLE PREVIEW ONLY — Use verified feedback here if someone has reviewed error states, validation, accessibility, or other engineering details in the real project.", status: "sample", created_at: "" },
+        { id: "sample-10", reviewer_name: "Sample Reviewer 10", reviewer_role: "Preview copy", relationship: "Sample only", work_area: "AI Business Analytics", rating: 4, review_title: "Business-focused metrics", review_text: "SAMPLE PREVIEW ONLY — Replace this with a real user's assessment of whether the analytics view answers their questions and presents metrics clearly.", status: "sample", created_at: "" },
+        { id: "sample-11", reviewer_name: "Sample Reviewer 11", reviewer_role: "Preview copy", relationship: "Sample only", work_area: "Communication and collaboration", rating: 5, review_title: "Reliable project updates", review_text: "SAMPLE PREVIEW ONLY — A real client can share how deadlines, progress, dependencies, and any changes were communicated. This sample should not be presented as a real claim.", status: "sample", created_at: "" },
+        { id: "sample-12", reviewer_name: "Sample Reviewer 12", reviewer_role: "Preview copy", relationship: "Sample only", work_area: "Overall portfolio", rating: 5, review_title: "A consistent visual system", review_text: "SAMPLE PREVIEW ONLY — This is placeholder copy for showing a review about visual consistency. Replace it with specific, consented feedback from a real reviewer.", status: "sample", created_at: "" },
+        { id: "sample-13", reviewer_name: "Sample Reviewer 13", reviewer_role: "Preview copy", relationship: "Sample only", work_area: "Engineering and code quality", rating: 4, review_title: "Security-conscious choices", review_text: "SAMPLE PREVIEW ONLY — Do not make security guarantees based on this draft. Insert a real review only when the reviewer can substantiate their own experience of the work.", status: "sample", created_at: "" },
+        { id: "sample-14", reviewer_name: "Sample Reviewer 14", reviewer_role: "Preview copy", relationship: "Sample only", work_area: "MovieFlex", rating: 5, review_title: "Thoughtful browsing experience", review_text: "SAMPLE PREVIEW ONLY — Replace this with an honest account from someone who has actually browsed the app, including what worked well and any suggestions they have.", status: "sample", created_at: "" },
+        { id: "sample-15", reviewer_name: "Sample Reviewer 15", reviewer_role: "Preview copy", relationship: "Sample only", work_area: "Other work", rating: 4, review_title: "A useful collaboration", review_text: "SAMPLE PREVIEW ONLY — This final card demonstrates the end of a 15-card sequence. Use a genuine, permissioned review in production rather than publishing this sample.", status: "sample", created_at: "" },
+      ];
+
+      let reviews: Review[] = [];
+      let cardElements: HTMLElement[] = [];
+      let activeIndex = 0;
+      let activeRating = 0;
+      let autoTimer: number | null = null;
+      let toastTimer: number | null = null;
+      let hoverLock = false;
+      let swipeStartX: number | null = null;
+
+      const makeNode = <K extends keyof HTMLElementTagNameMap>(
+        tag: K,
+        className = "",
+        text = "",
+      ): HTMLElementTagNameMap[K] => {
+        const node = document.createElement(tag);
+        if (className) node.className = className;
+        if (text) node.textContent = text;
+        return node;
+      };
+
+      const toastMessage = (message: string, isError = false): void => {
+        toast.textContent = message;
+        toast.classList.toggle("is-error", isError);
+        toast.hidden = false;
+        toast.classList.add("is-visible");
+        if (toastTimer !== null) window.clearTimeout(toastTimer);
+        toastTimer = window.setTimeout(() => {
+          toast.classList.remove("is-visible");
+          toast.hidden = true;
+        }, 4600);
+      };
+
+      const showFormError = (message: string): void => {
+        formError.textContent = message;
+        formError.hidden = false;
+      };
+
+      const normaliseDbReview = (value: unknown): Review | null => {
+        if (typeof value !== "object" || value === null) return null;
+        const row = value as Record<string, unknown>;
+        if (
+          typeof row.reviewer_name !== "string" ||
+          typeof row.work_area !== "string" ||
+          typeof row.relationship !== "string" ||
+          typeof row.review_text !== "string" ||
+          typeof row.rating !== "number"
+        ) return null;
+
+        return {
+          id: typeof row.id === "string" ? row.id : crypto.randomUUID(),
+          reviewer_name: row.reviewer_name,
+          reviewer_role: typeof row.reviewer_role === "string" ? row.reviewer_role : "",
+          work_area: row.work_area,
+          relationship: row.relationship,
+          rating: Math.max(1, Math.min(5, Math.round(row.rating))),
+          review_title: typeof row.review_title === "string" ? row.review_title : "",
+          review_text: row.review_text,
+          status: "approved",
+          created_at: typeof row.created_at === "string" ? row.created_at : "",
+        };
+      };
+
+      const dateLabel = (value: string): string => {
+        if (!value) return "";
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return "";
+        return new Intl.DateTimeFormat(undefined, { month: "short", year: "numeric" }).format(date);
+      };
+
+      const getInitials = (name: string): string => {
+        const parts = name.trim().split(/\s+/).filter(Boolean);
+        return parts.slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join("") || "R";
+      };
+
+      const buildCard = (review: Review, index: number): HTMLElement => {
+        const card = makeNode("article", "review-card");
+        card.tabIndex = 0;
+        card.dataset.index = String(index);
+        card.setAttribute("aria-label", `Review by ${review.reviewer_name}`);
+
+        const header = makeNode("div", "review-card-header");
+        const identity = makeNode("div", "review-card-identity");
+        const avatar = makeNode("span", "review-avatar", getInitials(review.reviewer_name));
+        avatar.setAttribute("aria-hidden", "true");
+        const nameStack = makeNode("div", "review-name-stack");
+        nameStack.append(
+          makeNode("h3", "reviewer-name", review.reviewer_name),
+          makeNode("p", "reviewer-role", review.reviewer_role || review.relationship),
+        );
+        identity.append(avatar, nameStack);
+
+        const badgeText = review.status === "sample"
+          ? "SAMPLE PREVIEW"
+          : review.status === "pending"
+            ? "PENDING APPROVAL"
+            : review.status === "local"
+              ? "LOCAL PREVIEW"
+              : "APPROVED REVIEW";
+        const badge = makeNode("span", `review-card-badge badge-${review.status}`, badgeText);
+        header.append(identity, badge);
+
+        const stars = makeNode("div", "review-card-stars", "★".repeat(review.rating) + "☆".repeat(5 - review.rating));
+        stars.setAttribute("aria-label", `${review.rating} out of 5 stars`);
+        stars.setAttribute("role", "img");
+
+        const heading = makeNode("h4", "review-card-title", review.review_title || review.work_area);
+        const body = makeNode("p", "review-card-body", review.review_text);
+        const footer = makeNode("div", "review-card-footer");
+        const area = makeNode("span", "review-work-area", review.work_area);
+        const date = makeNode("span", "review-date", review.status === "sample" ? "Local design preview" : dateLabel(review.created_at));
+        footer.append(area, date);
+
+        card.append(header, stars, heading, body, footer);
+        card.addEventListener("pointerenter", () => {
+          if (!hoverLock && index !== activeIndex) {
+            hoverLock = true;
+            goTo(index, true);
+            window.setTimeout(() => { hoverLock = false; }, 450);
+          }
+        });
+        card.addEventListener("click", () => goTo(index, true));
+        card.addEventListener("keydown", (event: KeyboardEvent) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            goTo(index, true);
+          }
+        });
+        return card;
+      };
+
+      const relativeOffset = (index: number, current: number, total: number): number => {
+        if (total <= 1) return 0;
+        let offset = (index - current + total) % total;
+        if (offset > total / 2) offset -= total;
+        return offset;
+      };
+
+      const updateCarouselPositions = (): void => {
+        const step = Math.max(175, Math.min(365, stage.clientWidth * (window.innerWidth <= 640 ? 0.57 : 0.34)));
+        cardElements.forEach((card, index) => {
+          const offset = relativeOffset(index, activeIndex, cardElements.length);
+          const distance = Math.abs(offset);
+          const visible = distance <= 2;
+          const scale = Math.max(0.68, 1 - distance * 0.14);
+          card.style.transform = `translate(-50%, -50%) translateX(${offset * step}px) translateZ(${-distance * 92}px) rotateY(${offset * -13}deg) scale(${scale})`;
+          card.style.opacity = visible ? String(1 - distance * 0.19) : "0";
+          card.style.visibility = visible ? "visible" : "hidden";
+          card.style.pointerEvents = visible ? "auto" : "none";
+          card.style.zIndex = String(100 - distance);
+          card.classList.toggle("is-active", offset === 0);
+          card.setAttribute("aria-hidden", visible ? "false" : "true");
+          card.tabIndex = visible ? 0 : -1;
+        });
+        Array.from(indicators.querySelectorAll<HTMLButtonElement>("button")).forEach((button, index) => {
+          const selected = index === activeIndex;
+          button.classList.toggle("is-active", selected);
+          button.setAttribute("aria-current", selected ? "true" : "false");
+        });
+      };
+
+      const animateProgress = (): void => {
+        progress.style.animation = "none";
+        if (reducedMotion.matches) return;
+        void progress.offsetWidth;
+        progress.style.animation = "review-progress 10s linear forwards";
+      };
+
+      const restartAutoTimer = (): void => {
+        if (autoTimer !== null) window.clearTimeout(autoTimer);
+        animateProgress();
+        if (reducedMotion.matches || reviews.length <= 1) return;
+        autoTimer = window.setTimeout(() => goTo(activeIndex + 1, true), 10000);
+      };
+
+      const goTo = (requestedIndex: number, resetTimer = true): void => {
+        if (reviews.length === 0) return;
+        activeIndex = (requestedIndex % reviews.length + reviews.length) % reviews.length;
+        updateCarouselPositions();
+        if (resetTimer) restartAutoTimer();
+      };
+
+      const render = (): void => {
+        loading.hidden = true;
+        const hasReviews = reviews.length > 0;
+        empty.hidden = hasReviews;
+        track.hidden = !hasReviews;
+        track.replaceChildren();
+        indicators.replaceChildren();
+        cardElements = [];
+
+        if (!hasReviews) {
+          emptyText.textContent = devPreview
+            ? "No approved reviews loaded yet. Add a review or connect Supabase; local sample cards appear only in development."
+            : "No approved reviews yet. Be the first to share honest feedback.";
+          statusText.textContent = "No published reviews yet";
+          progress.style.animation = "none";
+          return;
+        }
+
+        reviews.forEach((review, index) => {
+          const card = buildCard(review, index);
+          cardElements.push(card);
+          track.append(card);
+          const dot = makeNode("button", "review-indicator");
+          dot.type = "button";
+          dot.setAttribute("aria-label", `Show review ${index + 1} of ${reviews.length}`);
+          dot.addEventListener("click", () => goTo(index, true));
+          indicators.append(dot);
+        });
+
+        activeIndex = Math.min(activeIndex, reviews.length - 1);
+        statusText.textContent = reviews[activeIndex]?.status === "sample"
+          ? `Development preview · ${reviews.length} sample cards`
+          : `${reviews.length} review${reviews.length === 1 ? "" : "s"} · each card advances every 10 seconds`;
+        updateCarouselPositions();
+        restartAutoTimer();
+      };
+
+      const loadReviews = async (): Promise<void> => {
+        loading.hidden = false;
+        empty.hidden = true;
+        track.hidden = true;
+        statusText.textContent = supabaseConfigured ? "Loading approved reviews…" : "Preparing local preview…";
+
+        if (!supabaseConfigured) {
+          reviews = devPreview ? [...demoReviews] : [];
+          render();
+          if (devPreview) statusText.textContent = "Development preview · sample cards are not real testimonials";
+          return;
+        }
+
+        try {
+          const query = new URLSearchParams({
+            select: "id,reviewer_name,reviewer_role,work_area,relationship,rating,review_title,review_text,created_at,status",
+            status: "eq.approved",
+            order: "created_at.desc",
+            limit: "100",
+          });
+          const response = await fetch(`${apiEndpoint}?${query.toString()}`, {
+            method: "GET",
+            headers: {
+              apikey: supabaseKey,
+              Authorization: `Bearer ${supabaseKey}`,
+              Accept: "application/json",
+            },
+          });
+          if (!response.ok) throw new Error(`Supabase returned ${response.status}`);
+          const payload: unknown = await response.json();
+          const rows = Array.isArray(payload) ? payload : [];
+          reviews = rows.map(normaliseDbReview).filter((review): review is Review => review !== null);
+          if (reviews.length === 0 && devPreview) {
+            reviews = [...demoReviews];
+            statusText.textContent = "No approved database reviews yet · showing labelled local samples";
+          }
+          render();
+          if (reviews.length > 0 && reviews[0]?.status === "approved") {
+            statusText.textContent = `${reviews.length} approved review${reviews.length === 1 ? "" : "s"} · next card in 10 seconds`;
+          }
+        } catch (error) {
+          console.error("[PortfolioReviews] Could not load reviews.", error);
+          reviews = devPreview ? [...demoReviews] : [];
+          render();
+          statusText.textContent = devPreview
+            ? "Supabase could not be reached · showing labelled local samples"
+            : "Could not load published reviews. Please try again later.";
+        }
+      };
+
+      const openDialog = (): void => {
+        formError.hidden = true;
+        if (typeof dialog.showModal === "function") dialog.showModal();
+        else dialog.setAttribute("open", "true");
+      };
+
+      const closeDialog = (): void => {
+        if (typeof dialog.close === "function" && dialog.open) dialog.close();
+        else dialog.removeAttribute("open");
+      };
+
+      openButtons.forEach((button) => button.addEventListener("click", openDialog));
+      closeButton.addEventListener("click", closeDialog);
+      cancelButton.addEventListener("click", closeDialog);
+      dialog.addEventListener("click", (event: MouseEvent) => {
+        if (event.target === dialog) closeDialog();
+      });
+
+      starButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          activeRating = Number(button.dataset.reviewStar ?? 0);
+          ratingInput.value = activeRating > 0 ? String(activeRating) : "";
+          ratingLabel.textContent = activeRating > 0 ? `${activeRating} out of 5` : "Choose a rating";
+          starButtons.forEach((starButton) => {
+            const starValue = Number(starButton.dataset.reviewStar ?? 0);
+            const selected = starValue <= activeRating;
+            starButton.classList.toggle("is-selected", selected);
+            starButton.setAttribute("aria-pressed", String(starValue === activeRating));
+          });
+        });
+      });
+
+      textInput.addEventListener("input", () => {
+        charCount.textContent = String(textInput.value.length);
+        formError.hidden = true;
+      });
+
+      form.addEventListener("input", () => { formError.hidden = true; });
+
+      form.addEventListener("submit", async (event: SubmitEvent) => {
+        event.preventDefault();
+        if (!form.reportValidity()) return;
+        if (activeRating < 1 || activeRating > 5) {
+          showFormError("Please choose a star rating before submitting.");
+          return;
+        }
+
+        const data = new FormData(form);
+        const honeypot = String(data.get("website") ?? "").trim();
+        if (honeypot) return;
+
+        const reviewerName = String(data.get("reviewer_name") ?? "").trim();
+        const reviewerRole = String(data.get("reviewer_role") ?? "").trim();
+        const workArea = String(data.get("work_area") ?? "").trim();
+        const relationship = String(data.get("relationship") ?? "").trim();
+        const reviewTitle = String(data.get("review_title") ?? "").trim();
+        const reviewText = String(data.get("review_text") ?? "").trim();
+
+        if (reviewerName.length < 2 || reviewText.length < 20) {
+          showFormError("Please provide your name and a review of at least 20 characters.");
+          return;
+        }
+
+        submitButton.disabled = true;
+        submitButton.textContent = "Submitting…";
+        formError.hidden = true;
+
+        const submittedReview: Review = {
+          id: `local-${crypto.randomUUID()}`,
+          reviewer_name: reviewerName,
+          reviewer_role: reviewerRole,
+          work_area: workArea,
+          relationship,
+          rating: activeRating,
+          review_title: reviewTitle,
+          review_text: reviewText,
+          status: "pending",
+          created_at: new Date().toISOString(),
+        };
+
+        try {
+          if (supabaseConfigured) {
+            const response = await fetch(apiEndpoint, {
+              method: "POST",
+              headers: {
+                apikey: supabaseKey,
+                Authorization: `Bearer ${supabaseKey}`,
+                "Content-Type": "application/json",
+                Prefer: "return=minimal",
+              },
+              body: JSON.stringify({
+                reviewer_name: reviewerName,
+                reviewer_role: reviewerRole || null,
+                work_area: workArea,
+                relationship,
+                rating: activeRating,
+                review_title: reviewTitle || null,
+                review_text: reviewText,
+                status: "pending",
+              }),
+            });
+            if (!response.ok) {
+              const responseText = await response.text();
+              console.error("[PortfolioReviews] Submission rejected.", response.status, responseText.slice(0, 500));
+              throw new Error("The review could not be saved. Check the Supabase table and RLS setup.");
+            }
+            submittedReview.id = `submitted-${crypto.randomUUID()}`;
+            reviews.push(submittedReview);
+            activeIndex = reviews.length - 1;
+            render();
+            closeDialog();
+            form.reset();
+            activeRating = 0;
+            ratingLabel.textContent = "Choose a rating";
+            charCount.textContent = "0";
+            starButtons.forEach((starButton) => {
+              starButton.classList.remove("is-selected");
+              starButton.setAttribute("aria-pressed", "false");
+            });
+            toastMessage("Thanks for sharing. Your review is in the carousel for this session and is pending approval before public publication.");
+          } else if (devPreview) {
+            submittedReview.status = "local";
+            reviews.push(submittedReview);
+            activeIndex = reviews.length - 1;
+            render();
+            closeDialog();
+            form.reset();
+            activeRating = 0;
+            ratingLabel.textContent = "Choose a rating";
+            charCount.textContent = "0";
+            starButtons.forEach((starButton) => {
+              starButton.classList.remove("is-selected");
+              starButton.setAttribute("aria-pressed", "false");
+            });
+            toastMessage("Added to this local preview only. Connect Supabase to save reviews across devices.");
+          } else {
+            throw new Error("Reviews are not connected yet. Please try again later.");
+          }
+        } catch (error) {
+          showFormError(error instanceof Error ? error.message : "Could not submit the review. Please try again.");
+        } finally {
+          submitButton.disabled = false;
+          submitButton.textContent = "Submit review";
+        }
+      });
+
+      previousButton.addEventListener("click", () => goTo(activeIndex - 1, true));
+      nextButton.addEventListener("click", () => goTo(activeIndex + 1, true));
+
+      stage.addEventListener("keydown", (event: KeyboardEvent) => {
+        if (event.target !== stage) return;
+        if (event.key === "ArrowLeft") {
+          event.preventDefault();
+          goTo(activeIndex - 1, true);
+        } else if (event.key === "ArrowRight") {
+          event.preventDefault();
+          goTo(activeIndex + 1, true);
+        }
+      });
+
+      stage.addEventListener("pointerdown", (event: PointerEvent) => {
+        if (event.pointerType === "mouse") return;
+        swipeStartX = event.clientX;
+      });
+      stage.addEventListener("pointerup", (event: PointerEvent) => {
+        if (swipeStartX === null) return;
+        const delta = event.clientX - swipeStartX;
+        swipeStartX = null;
+        if (Math.abs(delta) > 45) goTo(activeIndex + (delta < 0 ? 1 : -1), true);
+      });
+      stage.addEventListener("pointercancel", () => { swipeStartX = null; });
+      window.addEventListener("resize", updateCarouselPositions, { passive: true });
+      reducedMotion.addEventListener("change", restartAutoTimer);
+
+      void loadReviews();
+    }
+  }
+</script>
+
+<style>
+  .portfolio-reviews {
+    --review-ink: #192b28;
+    --review-muted: #5f716d;
+    --review-line: #dce6e1;
+    --review-accent: #168c73;
+    --review-accent-dark: #0e6e5a;
+    --review-paper: #f7faf8;
+    position: relative;
+    isolation: isolate;
+    padding: clamp(48px, 7vw, 92px) 0;
+    color: var(--review-ink);
+    background: var(--review-paper);
+    overflow: clip;
+    scroll-margin-top: 100px;
+  }
+
+  .reviews-shell { width: min(1200px, calc(100% - 40px)); margin: 0 auto; }
+  .reviews-heading-row { display: flex; align-items: end; justify-content: space-between; gap: 28px; margin-bottom: 34px; }
+  .reviews-heading-copy { max-width: 730px; }
+  .reviews-eyebrow { margin: 0 0 12px; color: var(--review-accent-dark); font-size: 11px; font-weight: 800; letter-spacing: .15em; line-height: 1.5; }
+  .reviews-heading-copy h2 { margin: 0; max-width: 800px; color: var(--review-ink); font-size: clamp(30px, 4.4vw, 54px); font-weight: 760; letter-spacing: -.055em; line-height: 1.06; text-wrap: balance; }
+  .reviews-heading-copy h2 span { color: var(--review-accent); }
+  .reviews-intro { max-width: 690px; margin: 18px 0 0; color: var(--review-muted); font-size: 15px; line-height: 1.75; }
+
+  .reviews-button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 46px; padding: 0 18px; border: 1px solid transparent; border-radius: 999px; font: inherit; font-size: 13px; font-weight: 750; cursor: pointer; transition: background-color .22s ease, color .22s ease, border-color .22s ease, transform .22s ease; }
+  .reviews-button svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+  .reviews-button:hover { transform: translateY(-2px); }
+  .reviews-button:focus-visible, .reviews-arrow:focus-visible, .review-indicator:focus-visible, .reviews-close:focus-visible, .reviews-star-picker button:focus-visible { outline: 3px solid #80caba; outline-offset: 3px; }
+  .reviews-button-primary { color: #fff; background: var(--review-accent-dark); box-shadow: 0 7px 18px rgba(14, 110, 90, .14); }
+  .reviews-button-primary:hover { background: #095743; }
+  .reviews-button-secondary { color: var(--review-ink); border-color: var(--review-line); background: #fff; }
+  .reviews-button-secondary:hover { background: #edf5f1; border-color: #b5d5c9; }
+  .reviews-button:disabled { opacity: .6; cursor: wait; transform: none; }
+
+  .reviews-stage-wrap { position: relative; padding: 14px 0 0; border: 1px solid #e3ebe6; border-radius: 28px; background: linear-gradient(145deg, #fff 0%, #f1f7f3 100%); box-shadow: 0 24px 60px rgba(31, 65, 54, .06); }
+  .reviews-stage-topline { display: flex; align-items: center; gap: 9px; min-height: 24px; padding: 0 22px; color: #526760; font-size: 11px; font-weight: 700; }
+  .reviews-live-dot { flex: 0 0 auto; width: 8px; height: 8px; border-radius: 50%; background: #1ba581; box-shadow: 0 0 0 4px rgba(27, 165, 129, .1); }
+  .reviews-stage-hint { margin-left: auto; color: #71817b; font-weight: 550; text-align: right; }
+  .reviews-stage { position: relative; min-height: 430px; margin: 4px 0 0; overflow: hidden; perspective: 1250px; perspective-origin: 50% 48%; transform-style: preserve-3d; touch-action: pan-y; outline: none; }
+  .reviews-track { position: absolute; inset: 0; transform-style: preserve-3d; }
+  .review-card { position: absolute; top: 50%; left: 50%; display: flex; flex-direction: column; width: min(440px, calc(100% - 44px)); min-height: 294px; max-height: 360px; padding: 23px; overflow: hidden; border: 1px solid #dce8e1; border-radius: 21px; background: rgba(255, 255, 255, .98); box-shadow: 0 18px 42px rgba(23, 54, 44, .12), inset 0 1px 0 rgba(255, 255, 255, .95); transform-origin: center center; transition: transform 850ms cubic-bezier(.2, .76, .2, 1), opacity 650ms ease, border-color 250ms ease, box-shadow 250ms ease; cursor: pointer; backface-visibility: hidden; }
+  .review-card.is-active { border-color: #9ccdbd; box-shadow: 0 24px 55px rgba(23, 54, 44, .16), inset 0 1px 0 #fff; }
+  .review-card:hover { border-color: #7dbba8; }
+  .review-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .review-card-identity { display: flex; min-width: 0; align-items: center; gap: 11px; }
+  .review-avatar { display: grid; flex: 0 0 auto; width: 42px; height: 42px; place-items: center; border: 1px solid #b8d9cd; border-radius: 14px; color: #0c6954; background: #e7f4ee; font-size: 12px; font-weight: 850; letter-spacing: .03em; }
+  .review-name-stack { min-width: 0; }
+  .reviewer-name { margin: 0; color: #1e302b; font-size: 14px; font-weight: 800; line-height: 1.35; overflow-wrap: anywhere; }
+  .reviewer-role { margin: 4px 0 0; color: #687a74; font-size: 11px; line-height: 1.45; }
+  .review-card-badge { flex: 0 0 auto; max-width: 125px; padding: 5px 7px; border-radius: 7px; color: #52665f; background: #edf3ef; font-size: 8px; font-weight: 850; letter-spacing: .07em; line-height: 1.35; text-align: center; }
+  .badge-sample { color: #855c0c; background: #fff3cd; }
+  .badge-pending, .badge-local { color: #77530b; background: #fff0c2; }
+  .badge-approved { color: #08644f; background: #dff4e9; }
+  .review-card-stars { margin-top: 18px; color: #b88220; font-size: 17px; letter-spacing: .12em; line-height: 1; }
+  .review-card-title { margin: 13px 0 7px; color: #1c3029; font-size: 18px; font-weight: 800; letter-spacing: -.025em; line-height: 1.3; overflow-wrap: anywhere; }
+  .review-card-body { margin: 0; color: #51645d; font-size: 13px; line-height: 1.68; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 5; line-clamp: 5; overflow: hidden; overflow-wrap: anywhere; }
+  .review-card-footer { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-top: auto; padding-top: 15px; color: #6f8179; font-size: 10px; line-height: 1.4; }
+  .review-work-area { max-width: 74%; font-weight: 750; }
+  .review-date { flex: 0 0 auto; text-align: right; }
+
+  .reviews-loading, .reviews-empty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 13px; padding: 24px; color: var(--review-muted); text-align: center; }
+  .reviews-loading[hidden], .reviews-empty[hidden], .reviews-track[hidden], .reviews-toast[hidden] { display: none !important; }
+  .reviews-spinner { width: 26px; height: 26px; border: 3px solid #dbeae2; border-top-color: var(--review-accent); border-radius: 50%; animation: review-spin .9s linear infinite; }
+  .reviews-empty-icon { display: grid; width: 54px; height: 54px; place-items: center; border: 1px solid #d5e6dd; border-radius: 17px; color: var(--review-accent-dark); background: #fff; }
+  .reviews-empty-icon svg { width: 25px; height: 25px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .reviews-empty h3 { margin: 0; color: #20372e; font-size: 22px; letter-spacing: -.03em; }
+  .reviews-empty p { max-width: 400px; margin: 0 0 5px; color: var(--review-muted); font-size: 13px; line-height: 1.65; }
+  .reviews-progress { height: 3px; margin: 0 22px; overflow: hidden; border-radius: 999px; background: #e2eee7; }
+  .reviews-progress span { display: block; width: 100%; height: 100%; border-radius: inherit; background: var(--review-accent); transform-origin: left; }
+  @keyframes review-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  @keyframes review-spin { to { transform: rotate(360deg); } }
+
+  .reviews-carousel-controls { display: flex; align-items: center; justify-content: center; gap: 16px; min-height: 64px; padding: 8px 18px 13px; }
+  .reviews-arrow { display: grid; flex: 0 0 auto; width: 35px; height: 35px; place-items: center; border: 1px solid #dce7e1; border-radius: 50%; color: #24453a; background: #fff; cursor: pointer; transition: background .2s ease, border-color .2s ease, transform .2s ease; }
+  .reviews-arrow:hover { border-color: #9bcbbb; background: #eaf6ef; transform: translateY(-1px); }
+  .reviews-arrow svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .reviews-carousel-indicators { display: flex; max-width: min(440px, 55vw); align-items: center; justify-content: center; gap: 6px; overflow-x: auto; padding: 7px 2px; scrollbar-width: none; }
+  .reviews-carousel-indicators::-webkit-scrollbar { display: none; }
+  .review-indicator { flex: 0 0 auto; width: 6px; height: 6px; padding: 0; border: 0; border-radius: 99px; background: #c6d5cd; cursor: pointer; transition: width .25s ease, background .25s ease; }
+  .review-indicator.is-active { width: 22px; background: var(--review-accent); }
+  .reviews-footer-note { display: flex; align-items: flex-start; gap: 10px; max-width: 920px; margin: 19px auto 0; color: #63766e; }
+  .reviews-footer-note svg { flex: 0 0 auto; width: 19px; height: 19px; margin-top: 2px; fill: none; stroke: var(--review-accent); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .reviews-footer-note p { margin: 0; font-size: 12px; line-height: 1.7; }
+  .reviews-footer-note strong { color: #2d473c; }
+
+  .reviews-dialog { width: min(680px, calc(100% - 28px)); max-height: min(88vh, 860px); padding: 0; overflow: auto; border: 1px solid #dce7e1; border-radius: 22px; color: var(--review-ink); background: #fbfdfb; box-shadow: 0 28px 100px rgba(8, 32, 24, .26); }
+  .reviews-dialog::backdrop { background: rgba(11, 25, 21, .58); backdrop-filter: blur(5px); }
+  .reviews-form { padding: clamp(20px, 4vw, 32px); }
+  .reviews-dialog-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 24px; }
+  .reviews-dialog-header h3 { margin: 0; color: #1e332a; font-size: 27px; letter-spacing: -.04em; }
+  .reviews-dialog-header p:not(.reviews-eyebrow) { max-width: 510px; margin: 8px 0 0; color: var(--review-muted); font-size: 13px; line-height: 1.65; }
+  .reviews-close { flex: 0 0 auto; width: 37px; height: 37px; border: 1px solid var(--review-line); border-radius: 50%; color: #334e42; background: #fff; font-size: 24px; line-height: 1; cursor: pointer; }
+  .reviews-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .reviews-field { display: flex; min-width: 0; flex-direction: column; gap: 7px; margin: 0 0 16px; color: #334a40; font-size: 12px; font-weight: 750; }
+  .reviews-field b, .reviews-rating-field b { color: #bd5b36; }
+  .reviews-field small { color: #7a8a83; font-size: 11px; font-weight: 500; }
+  .reviews-field input, .reviews-field select, .reviews-field textarea { width: 100%; min-width: 0; border: 1px solid #d5e2db; border-radius: 11px; padding: 12px 13px; color: #20372e; background: #fff; font: inherit; font-size: 13px; font-weight: 500; outline: none; transition: border-color .2s ease, box-shadow .2s ease; }
+  .reviews-field textarea { min-height: 120px; resize: vertical; line-height: 1.6; }
+  .reviews-field input:focus, .reviews-field select:focus, .reviews-field textarea:focus { border-color: #60aa90; box-shadow: 0 0 0 3px rgba(36, 148, 111, .1); }
+  .reviews-rating-field { min-width: 0; margin: 0 0 18px; padding: 0; border: 0; }
+  .reviews-rating-field legend { margin-bottom: 8px; color: #334a40; font-size: 12px; font-weight: 750; }
+  .reviews-star-picker { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; }
+  .reviews-star-picker button { width: 34px; height: 34px; border: 1px solid #dce7e1; border-radius: 9px; color: #c5d0ca; background: #fff; font-size: 19px; cursor: pointer; }
+  .reviews-star-picker button.is-selected { border-color: #ead7a6; color: #b98017; background: #fff8e6; }
+  .reviews-star-picker span { margin-left: 8px; color: #687a72; font-size: 12px; }
+  .reviews-char-count { display: block; margin-top: -2px; color: #788981; font-size: 11px; font-weight: 500; text-align: right; }
+  .reviews-consent { display: flex; align-items: flex-start; gap: 9px; margin: 4px 0 15px; color: #596d63; font-size: 12px; font-weight: 500; line-height: 1.6; }
+  .reviews-consent input { flex: 0 0 auto; width: 16px; height: 16px; margin: 2px 0 0; accent-color: var(--review-accent); }
+  .reviews-honeypot { position: absolute !important; left: -10000px !important; width: 1px !important; height: 1px !important; overflow: hidden !important; }
+  .reviews-form-error { margin: 0 0 14px; padding: 10px 12px; border: 1px solid #edc6bd; border-radius: 10px; color: #8f3023; background: #fff1ed; font-size: 12px; line-height: 1.55; }
+  .reviews-form-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 20px; }
+  .reviews-form-privacy { margin: 13px 0 0; color: #788981; font-size: 11px; line-height: 1.55; }
+  .reviews-toast { position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 2000; width: min(440px, calc(100vw - 32px)); padding: 14px 16px; border: 1px solid #b6d9cb; border-radius: 14px; color: #1e4c3b; background: #f0fbf5; box-shadow: 0 14px 40px rgba(15, 48, 35, .18); font-size: 13px; line-height: 1.55; opacity: 0; transform: translateY(8px); transition: opacity .22s ease, transform .22s ease; }
+  .reviews-toast.is-visible { opacity: 1; transform: translateY(0); }
+  .reviews-toast.is-error { border-color: #edc6bd; color: #8f3023; background: #fff1ed; }
+
+  @media (max-width: 760px) {
+    .reviews-shell { width: min(100% - 26px, 620px); }
+    .reviews-heading-row { align-items: flex-start; flex-direction: column; gap: 18px; margin-bottom: 24px; }
+    .reviews-heading-copy h2 { font-size: clamp(30px, 8vw, 43px); }
+    .reviews-intro { margin-top: 13px; font-size: 13px; line-height: 1.7; }
+    .reviews-stage-wrap { border-radius: 22px; }
+    .reviews-stage-topline { align-items: flex-start; flex-wrap: wrap; padding: 0 14px; font-size: 10px; }
+    .reviews-stage-hint { flex-basis: 100%; margin-left: 17px; text-align: left; }
+    .reviews-stage { min-height: 430px; perspective: 950px; }
+    .review-card { width: min(322px, calc(100% - 32px)); min-height: 310px; max-height: 355px; padding: 19px; border-radius: 18px; }
+    .review-card-badge { max-width: 98px; font-size: 7px; }
+    .review-card-title { font-size: 17px; }
+    .review-card-body { font-size: 12px; -webkit-line-clamp: 6; line-clamp: 6; }
+    .reviews-progress { margin: 0 14px; }
+    .reviews-carousel-controls { gap: 10px; padding-right: 10px; padding-left: 10px; }
+    .reviews-carousel-indicators { max-width: calc(100% - 106px); gap: 5px; }
+    .review-indicator { width: 5px; height: 5px; }
+    .review-indicator.is-active { width: 17px; }
+    .reviews-footer-note { margin-top: 15px; }
+    .reviews-footer-note p { font-size: 11px; }
+  }
+
+  @media (max-width: 480px) {
+    .portfolio-reviews { padding: 44px 0 50px; scroll-margin-top: 82px; }
+    .reviews-shell { width: calc(100% - 22px); }
+    .reviews-heading-copy h2 { max-width: 370px; }
+    .reviews-button { min-height: 43px; padding: 0 15px; }
+    .reviews-stage-wrap { padding-top: 12px; }
+    .reviews-stage { min-height: 422px; }
+    .review-card { width: min(300px, calc(100% - 26px)); min-height: 314px; max-height: 358px; padding: 17px; }
+    .review-avatar { width: 37px; height: 37px; border-radius: 12px; }
+    .reviewer-name { font-size: 13px; }
+    .reviewer-role { font-size: 10px; }
+    .review-card-header { gap: 7px; }
+    .review-card-title { font-size: 16px; }
+    .reviews-form-grid { grid-template-columns: minmax(0, 1fr); gap: 0; }
+    .reviews-dialog { width: calc(100% - 18px); max-height: 92vh; border-radius: 18px; }
+    .reviews-form { padding: 18px; }
+    .reviews-dialog-header h3 { font-size: 24px; }
+    .reviews-form-actions { flex-direction: column-reverse; }
+    .reviews-form-actions .reviews-button { width: 100%; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .portfolio-reviews *, .portfolio-reviews *::before, .portfolio-reviews *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    .reviews-spinner { animation: none !important; border-top-color: #dbeae2; }
+  }
+</style>

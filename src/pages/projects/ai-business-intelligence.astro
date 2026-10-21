@@ -1,0 +1,806 @@
+---
+const pageTitle = 'Metricline | Business Analytics Workspace';
+const pageDescription = 'A business analytics workspace for reviewing your own CSV exports, with client-owned workspaces and browser-local data processing.';
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f5f7f5" />
+    <meta name="description" content={pageDescription} />
+    <link rel="icon" type="image/svg+xml" href="/business-analytics.svg?v=2" />
+    <title>{pageTitle}</title>
+    <script is:inline>
+      (() => {
+        try {
+          if (localStorage.getItem('metricline-theme-v1') === 'dark') document.documentElement.classList.add('theme-dark');
+        } catch {}
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <div class="app-frame">
+      <button class="mobile-scrim" type="button" aria-label="Close navigation" data-close-mobile-nav hidden></button>
+
+      <aside class="sidebar" id="app-sidebar" aria-label="Main navigation">
+        <a class="brand" href="#overview" aria-label="Metricline overview">
+          <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 40 40" focusable="false"><rect class="brand-shell" x="1" y="1" width="38" height="38" rx="11"/><path class="brand-bars" d="M9 27V21M15.5 27V16M22 27V19M28.5 27V12"/><path class="brand-trend" d="m8 16 7-5 7 2 9-6"/><circle class="brand-node" cx="31" cy="7" r="2.3"/></svg></span>
+          <span class="brand-copy"><strong>Metricline</strong><small>BUSINESS ANALYTICS</small></span>
+        </a>
+
+        <div class="workspace-control">
+          <label for="workspace-picker">WORKSPACE</label>
+          <select id="workspace-picker" class="workspace-picker" data-workspace-picker aria-label="Choose workspace" hidden><option value="">Choose a workspace</option></select>
+          <div class="no-workspace" data-no-workspace><span class="workspace-avatar">＋</span><span><strong>No workspace yet</strong><small>Start with your own data</small></span></div>
+          <button class="button button-outline workspace-create" type="button" data-create-workspace><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Create workspace</button>
+        </div>
+
+        <p class="nav-label">ANALYSIS</p>
+        <nav class="primary-nav" aria-label="Analysis sections">
+          <a class="nav-link is-active" href="#overview" data-nav-link><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Overview</span></a>
+          <a class="nav-link" href="#revenue" data-nav-link><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h16M7 15l4-4 3 2 5-6"/></svg><span>Revenue</span></a>
+          <a class="nav-link" href="#products" data-nav-link><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4.5 7.7 7.5 4.4 7.5-4.4M12 12.1V21"/></svg><span>Products</span></a>
+          <a class="nav-link" href="#records" data-nav-link><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg><span>Imported records</span></a>
+        </nav>
+
+        <p class="nav-label nav-label-lower">PREFERENCES</p>
+        <nav class="primary-nav" aria-label="Preferences">
+          <button class="nav-link" type="button" data-open-settings><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.1.9-1.2 2.1-1.4-.5a7.7 7.7 0 0 1-1.4.8l-.3 1.5h-2.5l-.3-1.5a7.7 7.7 0 0 1-1.5-.8l-1.4.5-1.2-2.1 1.1-.9a6.6 6.6 0 0 1 0-1.7l-1.1-.9 1.2-2.1 1.4.5a7.7 7.7 0 0 1 1.5-.8l.3-1.5h2.5l.3 1.5a7.7 7.7 0 0 1 1.4.8l1.4-.5 1.2 2.1-1.1.9a6.6 6.6 0 0 1-.1 1.6Z" transform="translate(-1 -1) scale(.98)"/></svg><span>Settings</span></button>
+          <a class="nav-link" href="/business-analytics/privacy-settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 19 6v5c0 4.8-3 8-7 10-4-2-7-5.2-7-10V6l7-3Z"/><path d="m9 12 2 2 4-4"/></svg><span>Privacy & data</span></a>
+        </nav>
+
+        <div class="sidebar-spacer"></div>
+        <div class="sidebar-status"><span class="status-dot"></span><div><strong data-sidebar-status>No workspace loaded</strong><small data-sidebar-subtitle>Data stays in this browser</small></div></div>
+        <div class="sidebar-footer"><span>Metricline</span><span>Client-owned workspace</span></div>
+      </aside>
+
+      <div class="main-column">
+        <header class="topbar">
+          <div class="topbar-leading">
+            <button class="icon-button mobile-menu-button" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="app-sidebar" data-open-mobile-nav><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+            <div class="breadcrumb"><span>Workspace</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 4 6 6-6 6"/></svg><strong data-breadcrumb>Get started</strong></div>
+          </div>
+          <div class="topbar-actions">
+            <label class="global-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg><input type="search" placeholder="Search imported records" aria-label="Search imported records" data-global-search disabled /></label>
+            <button class="icon-button" type="button" aria-label="Show workspace status" data-open-notifications><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg></button>
+            <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark theme"><svg class="theme-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="theme-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.7 8.7 0 0 1 9.8 3.5 8.8 8.8 0 1 0 20.5 14.2Z"/></svg><span data-theme-label>Dark theme</span></button>
+            <a class="back-to-portfolio" href="/" aria-label="Back to portfolio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 5-7 7 7 7M7 12h14"/></svg><span>Back to Portfolio</span></a>
+          </div>
+        </header>
+
+        <main class="dashboard-main" id="main-content">
+          <section class="setup-view" data-setup-view aria-labelledby="setup-title">
+            <div class="setup-intro">
+              <span class="eyebrow">A workspace built around your business</span>
+              <h1 id="setup-title">Your data, clearly understood.</h1>
+              <p>Create a workspace for your own business, identify it with your internal reference, then import a CSV export. You can review the detected fields before building the dashboard.</p>
+            </div>
+            <form class="setup-card" data-workspace-form>
+              <div class="form-heading"><span class="step-number">01</span><div><h2>Create a workspace</h2><p>These details identify this workspace on this browser and device.</p></div></div>
+              <div class="form-grid">
+                <label class="field"><span>Business name <b aria-hidden="true">*</b></span><input name="businessName" type="text" minlength="2" maxlength="100" placeholder="e.g. Acme Trading Co." autocomplete="organization" required data-business-name /></label>
+                <label class="field"><span>Business / workspace ID <b aria-hidden="true">*</b></span><input name="businessId" type="text" minlength="2" maxlength="64" placeholder="e.g. ACME-OPS-01" autocomplete="off" required data-business-id /><small>Use an internal business reference. Do not enter passwords or government-issued personal IDs.</small></label>
+                <label class="field"><span>Reporting currency</span><select name="currency" data-currency><option value="INR">INR — Indian rupee</option><option value="USD">USD — US dollar</option><option value="GBP">GBP — Pound sterling</option><option value="EUR">EUR — Euro</option><option value="CAD">CAD — Canadian dollar</option><option value="AUD">AUD — Australian dollar</option><option value="AED">AED — UAE dirham</option><option value="none">No currency symbol</option></select></label>
+              </div>
+              <div class="upload-section">
+                <div class="form-heading upload-heading"><span class="step-number">02</span><div><h2>Import your spreadsheet</h2><p>Export your Excel workbook as <strong>CSV UTF-8</strong> first.</p></div></div>
+                <label class="upload-drop" data-upload-drop for="workspace-file"><input id="workspace-file" name="workspaceFile" type="file" accept=".csv,.tsv,text/csv,text/tab-separated-values" required data-workspace-file /><span class="upload-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m-5 5 5-5 5 5"/><path d="M4 15v4h16v-4"/></svg></span><strong data-file-label>Choose a CSV file</strong><span data-file-helper>or drag and drop it here · no fixed size cap</span><span class="file-chip" data-file-chip hidden></span></label>
+                <div class="csv-preview" data-csv-preview hidden aria-live="polite"></div>
+              </div>
+              <div class="setup-footer"><p><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 19 6v5c0 4.8-3 8-7 10-4-2-7-5.2-7-10V6l7-3Z"/><path d="m9 12 2 2 4-4"/></svg>Your CSV is processed in this browser and saved in this browser’s local database. It is not uploaded to a server in this preview.</p><button class="button button-primary button-large" type="submit" data-create-submit disabled>Create workspace <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button></div>
+              <p class="form-feedback" data-setup-feedback role="status"></p>
+            </form>
+            <div class="setup-footnote"><span>No prefilled business data</span><span>Review column matches before import</span><span>Saved on this device only</span></div>
+          </section>
+
+          <section class="dashboard-view" data-dashboard-view hidden aria-labelledby="overview-title">
+            <section class="page-heading" id="overview" aria-labelledby="overview-title">
+              <div><p class="eyebrow">BUSINESS PERFORMANCE</p><h1 id="overview-title" data-overview-title>Business overview</h1><p class="page-subtitle" data-page-subtitle>Built from the records you imported.</p></div>
+              <div class="heading-actions"><span class="data-badge"><span></span><span data-data-badge>Imported CSV</span></span><button class="button button-primary" type="button" data-export-report><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 17v3h16v-3"/></svg>Export CSV</button></div>
+            </section>
+
+            <div class="dataset-summary" data-dataset-summary role="status"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5 12 2l8 3.5v13L12 22l-8-3.5v-13Z"/><path d="m4 5.5 8 3.8 8-3.8M12 9.3V22"/></svg><div><strong data-dataset-name>Workspace data</strong><p data-dataset-detail></p></div><button class="text-button" type="button" data-create-workspace>＋ Add workspace</button></div>
+
+            <section class="kpi-grid" aria-label="Key business metrics">
+              <article class="metric-card metric-revenue"><div class="metric-topline"><span class="metric-label" data-revenue-label>Total revenue</span><span class="metric-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M17 7.5c0-1.7-2.2-3-5-3s-5 1.3-5 3 2 2.5 5 3 5 1.3 5 3-2.2 3-5 3-5-1.3-5-3"/></svg></span></div><strong class="metric-value" data-kpi="revenue">—</strong><div class="metric-foot"><span class="metric-note" data-revenue-note>Needs a revenue or amount column</span></div></article>
+              <article class="metric-card"><div class="metric-topline"><span class="metric-label" data-record-label>Imported records</span><span class="metric-icon icon-blue"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg></span></div><strong class="metric-value" data-kpi="records">—</strong><div class="metric-foot"><span class="metric-note" data-record-note>Rows in this dataset</span></div></article>
+              <article class="metric-card"><div class="metric-topline"><span class="metric-label" data-customer-label>Unique customers</span><span class="metric-icon icon-amber"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3.5 20v-1.5A4.5 4.5 0 0 1 8 14h2a4.5 4.5 0 0 1 4.5 4.5V20M16 5.5a3 3 0 0 1 0 5.5M17 14.5a4.5 4.5 0 0 1 3.5 4.5v1"/></svg></span></div><strong class="metric-value" data-kpi="customers">—</strong><div class="metric-foot"><span class="metric-note" data-customer-note>Needs a customer identifier</span></div></article>
+              <article class="metric-card"><div class="metric-topline"><span class="metric-label">Average order value</span><span class="metric-icon icon-rose"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18 9 13l4 3 7-9"/><path d="M14 7h6v6"/></svg></span></div><strong class="metric-value" data-kpi="average">—</strong><div class="metric-foot"><span class="metric-note" data-average-note>Calculated when revenue data is available</span></div></article>
+            </section>
+
+            <section class="content-grid" id="revenue">
+              <article class="panel revenue-panel"><div class="panel-heading"><div><p class="eyebrow">TREND</p><h2>Revenue over time</h2><p class="panel-subtitle" data-chart-subtitle>Based on your imported date and revenue columns.</p></div><span class="panel-badge" data-trend-unit>Imported data</span></div><div class="chart-area" data-revenue-chart><div class="empty-panel">Import a dataset to see a revenue trend.</div></div></article>
+              <article class="panel channel-panel"><div class="panel-heading"><div><p class="eyebrow">BREAKDOWN</p><h2 data-breakdown-title>Records by category</h2><p class="panel-subtitle" data-breakdown-subtitle>Detected from your fields.</p></div></div><div class="breakdown-content" data-breakdown-content><div class="empty-panel">A channel, category, or status column will appear here when available.</div></div></article>
+            </section>
+
+            <section class="panel records-panel" id="products"><div class="panel-heading records-heading"><div><p class="eyebrow">PRODUCT PERFORMANCE</p><h2 data-products-title>Product summary</h2><p class="panel-subtitle" data-products-subtitle>Grouped from the product fields in your file.</p></div><span class="table-count" data-product-count>—</span></div><div class="table-scroll"><table class="data-table"><thead data-product-head><tr><th scope="col">Product</th><th scope="col">Records</th><th scope="col">Revenue</th></tr></thead><tbody data-product-rows><tr><td colspan="3" class="table-empty">Import records to see product analysis.</td></tr></tbody></table></div></section>
+
+            <section class="panel records-panel recent-panel" id="records"><div class="panel-heading records-heading"><div><p class="eyebrow">SOURCE DATA</p><h2>Imported records</h2><p class="panel-subtitle" data-records-subtitle>Preview of rows from your CSV file.</p></div><span class="table-count" data-row-count>—</span></div><div class="table-scroll"><table class="data-table"><thead data-record-head></thead><tbody data-record-rows><tr><td class="table-empty">No imported data.</td></tr></tbody></table></div></section>
+            <div class="dashboard-bottom-actions"><button class="button button-outline" type="button" data-create-workspace>＋ Create another workspace</button><button class="text-button danger-text" type="button" data-delete-workspace>Remove this workspace</button></div>
+          </section>
+        </main>
+
+        <footer class="app-footer"><a class="footer-brand" href="#overview">Metricline</a><span>Your imported data stays in this browser in this preview.</span><nav aria-label="Legal pages"><a href="/business-analytics/privacy">Privacy</a><a href="/business-analytics/terms">Terms</a><a href="/business-analytics/cookies">Cookies</a><a href="/business-analytics/privacy-settings">Privacy settings</a><a href="/business-analytics/user-agreement">User agreement</a></nav></footer>
+      </div>
+    </div>
+
+    <dialog class="app-dialog" data-settings-dialog aria-labelledby="settings-title"><form method="dialog" class="dialog-top"><div><p class="eyebrow">PREFERENCES</p><h2 id="settings-title">Workspace settings</h2></div><button class="icon-button" aria-label="Close settings" value="close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></form><div class="settings-group"><div><strong>Appearance</strong><p>Choose the theme that works for you.</p></div><div class="settings-control"><button class="choice-button" type="button" data-settings-theme="light">Light</button><button class="choice-button" type="button" data-settings-theme="dark">Dark</button></div></div><div class="settings-group"><div><strong>Compact tables</strong><p>Fit more records on screen.</p></div><label class="switch"><input type="checkbox" data-compact-toggle/><span></span></label></div><div class="settings-group"><div><strong>Reduce motion</strong><p>Use shorter transitions and less movement.</p></div><label class="switch"><input type="checkbox" data-motion-toggle/><span></span></label></div><div class="settings-group"><div><strong>Local data</strong><p>Imported workspace files are stored in this browser's IndexedDB. Clearing site data removes them.</p></div><span class="setting-status">Browser only</span></div><div class="dialog-actions"><a class="button button-outline" href="/business-analytics/privacy-settings">Privacy settings</a><button class="button button-primary" type="button" data-save-settings>Save preferences</button></div></dialog>
+    <dialog class="app-dialog small-dialog" data-notifications-dialog aria-labelledby="notifications-title"><form method="dialog" class="dialog-top"><div><p class="eyebrow">WORKSPACE STATUS</p><h2 id="notifications-title">Status and activity</h2></div><button class="icon-button" aria-label="Close status" value="close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></form><div class="status-message"><span class="status-dot"></span><div><strong data-status-title>No workspace is active</strong><p data-status-message>Create a workspace and import a CSV file to start analysing your own data.</p></div></div><p class="dialog-help">This preview runs analysis locally in your browser and does not send your spreadsheet to a backend service.</p></dialog>
+    <dialog class="app-dialog privacy-dialog" data-privacy-dialog aria-labelledby="privacy-title"><form method="dialog" class="dialog-top"><div><p class="eyebrow">YOUR CHOICE</p><h2 id="privacy-title">Privacy preferences</h2></div><button class="icon-button" aria-label="Close privacy preferences" value="close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></form><div class="settings-group"><div><strong>Essential local storage</strong><p>Used to remember theme and workspace preferences. This is required for this browser-only preview.</p></div><span class="setting-status">Always active</span></div><div class="settings-group"><div><strong>Analytics and advertising</strong><p>No analytics or advertising trackers are installed by this preview.</p></div><span class="setting-status">Not installed</span></div><div class="dialog-actions"><button class="button button-outline" type="button" data-cookie-choice="reject">Reject optional</button><button class="button button-primary" type="button" data-cookie-choice="necessary">Save necessary only</button></div><nav class="dialog-legal-links"><a href="/business-analytics/privacy">Privacy policy</a><a href="/business-analytics/cookies">Cookie policy</a><a href="/business-analytics/cookies/essential">Essential storage</a><a href="/business-analytics/cookies/necessary">Necessary storage</a><a href="/business-analytics/cookies/reject">Reject optional cookies</a></nav></dialog>
+
+    <section class="cookie-banner" data-cookie-banner hidden aria-label="Privacy preferences"><div><strong>Privacy choices</strong><p>This preview uses essential browser storage for workspace data and preferences. Optional tracking is not installed.</p></div><div class="cookie-actions"><button class="button button-outline" type="button" data-cookie-choice="reject">Reject optional</button><button class="button button-primary" type="button" data-cookie-choice="necessary">Necessary only</button><button class="text-button" type="button" data-open-privacy>Manage</button></div></section>
+    <button class="back-to-top" type="button" data-back-to-top aria-label="Back to top"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14 6-6 6 6"/></svg><span>Top</span></button>
+    <div class="toast" data-toast role="status" aria-live="polite"></div>
+
+    <script is:inline>
+      (() => {
+        const $ = (selector, root = document) => root.querySelector(selector);
+        const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+        const root = document.documentElement;
+        const toast = $('[data-toast]');
+        const setupView = $('[data-setup-view]');
+        const dashboardView = $('[data-dashboard-view]');
+        const workspaceForm = $('[data-workspace-form]');
+        const fileInput = $('[data-workspace-file]');
+        const fileLabel = $('[data-file-label]');
+        const fileHelper = $('[data-file-helper]');
+        const fileChip = $('[data-file-chip]');
+        const csvPreview = $('[data-csv-preview]');
+        const createSubmit = $('[data-create-submit]');
+        const setupFeedback = $('[data-setup-feedback]');
+        const workspacePicker = $('[data-workspace-picker]');
+        const globalSearch = $('[data-global-search]');
+        const backToTop = $('[data-back-to-top]');
+        const settingsDialog = $('[data-settings-dialog]');
+        const privacyDialog = $('[data-privacy-dialog]');
+        const notificationsDialog = $('[data-notifications-dialog]');
+        const cookieBanner = $('[data-cookie-banner]');
+        const sidebar = $('#app-sidebar');
+        const mobileScrim = $('[data-close-mobile-nav]');
+        let toastTimer = null;
+        let selectedFile = null;
+        let selectedParsed = null;
+        let activeWorkspace = null;
+        let workspaces = [];
+        let compactTables = false;
+        let reduceMotion = false;
+        let searchTerm = '';
+
+        const DB_NAME = 'metricline-workspaces-v1';
+        const STORE_NAME = 'workspaces';
+        const ACTIVE_KEY = 'metricline-active-workspace-v1';
+
+        function safeStore(key, value) { try { localStorage.setItem(key, value); } catch {} }
+        function safeRead(key) { try { return localStorage.getItem(key); } catch { return null; } }
+        function openDatabase() {
+          return new Promise((resolve, reject) => {
+            if (!('indexedDB' in window)) { reject(new Error('This browser does not support local workspace storage.')); return; }
+            const request = indexedDB.open(DB_NAME, 1);
+            request.onupgradeneeded = () => {
+              const database = request.result;
+              if (!database.objectStoreNames.contains(STORE_NAME)) database.createObjectStore(STORE_NAME, { keyPath: 'key' });
+            };
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(new Error('Could not open local workspace storage.'));
+          });
+        }
+        async function dbRun(mode, action, value) {
+          const database = await openDatabase();
+          return new Promise((resolve, reject) => {
+            const transaction = database.transaction(STORE_NAME, mode);
+            const store = transaction.objectStore(STORE_NAME);
+            let request;
+            if (action === 'put') request = store.put(value);
+            else if (action === 'get') request = store.get(value);
+            else if (action === 'getAll') request = store.getAll();
+            else if (action === 'delete') request = store.delete(value);
+            if (request) {
+              request.onsuccess = () => resolve(request.result);
+              request.onerror = () => reject(new Error('Workspace storage operation failed.'));
+            } else {
+              transaction.oncomplete = () => resolve(true);
+              transaction.onerror = () => reject(new Error('Workspace storage operation failed.'));
+            }
+            transaction.oncomplete = () => { if (action === 'put' || action === 'delete') resolve(true); database.close(); };
+            transaction.onerror = () => { database.close(); reject(new Error('Workspace storage operation failed.')); };
+          });
+        }
+        function openDialog(dialog) { if (dialog && !dialog.open) dialog.showModal(); }
+        function closeDialog(dialog) { if (dialog?.open) dialog.close(); }
+        function showToast(message, isError = false) {
+          if (!toast) return;
+          toast.textContent = message;
+          toast.classList.toggle('is-error', isError);
+          toast.classList.add('is-visible');
+          window.clearTimeout(toastTimer);
+          toastTimer = window.setTimeout(() => toast.classList.remove('is-visible'), 3200);
+        }
+        function escapeHtml(value) {
+          return String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+        }
+        function setTheme(theme) {
+          const dark = theme === 'dark';
+          root.classList.toggle('theme-dark', dark);
+          safeStore('metricline-theme-v1', dark ? 'dark' : 'light');
+          const toggle = $('[data-theme-toggle]');
+          if (toggle) {
+            toggle.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
+            const label = $('[data-theme-label]', toggle);
+            if (label) label.textContent = dark ? 'Light theme' : 'Dark theme';
+          }
+          $$('[data-settings-theme]').forEach(button => button.classList.toggle('is-selected', button.dataset.settingsTheme === (dark ? 'dark' : 'light')));
+          const meta = $('meta[name="theme-color"]');
+          if (meta) meta.content = dark ? '#111916' : '#f5f7f5';
+        }
+        function configureSettings() {
+          compactTables = safeRead('metricline-compact-v1') === 'true';
+          reduceMotion = safeRead('metricline-reduced-motion-v1') === 'true';
+          root.classList.toggle('compact-tables', compactTables);
+          root.classList.toggle('reduce-motion', reduceMotion);
+          $('[data-compact-toggle]').checked = compactTables;
+          $('[data-motion-toggle]').checked = reduceMotion;
+          setTheme(safeRead('metricline-theme-v1') === 'dark' || (safeRead('metricline-theme-v1') === null && root.classList.contains('theme-dark')) ? 'dark' : 'light');
+        }
+
+        function detectDelimiter(text) {
+          const line = (text.split(/\r?\n/, 1)[0] || '');
+          const candidates = [',', '\t', ';', '|'];
+          let selected = ',', max = -1;
+          for (const delimiter of candidates) {
+            let count = 0, quoted = false;
+            for (let i = 0; i < line.length; i++) {
+              if (line[i] === '"' && line[i + 1] === '"' && quoted) { i++; continue; }
+              if (line[i] === '"') quoted = !quoted;
+              else if (line[i] === delimiter && !quoted) count++;
+            }
+            if (count > max) { max = count; selected = delimiter; }
+          }
+          return selected;
+        }
+        function parseDelimited(text) {
+          const cleaned = String(text || '').replace(/^\uFEFF/, '');
+          const delimiter = detectDelimiter(cleaned);
+          const output = [];
+          let row = [], field = '', quoted = false;
+          for (let i = 0; i < cleaned.length; i++) {
+            const char = cleaned[i];
+            if (char === '"') {
+              if (quoted && cleaned[i + 1] === '"') { field += '"'; i++; }
+              else quoted = !quoted;
+            } else if (char === delimiter && !quoted) {
+              row.push(field); field = '';
+            } else if ((char === '\n' || char === '\r') && !quoted) {
+              if (char === '\r' && cleaned[i + 1] === '\n') i++;
+              row.push(field); field = '';
+              if (row.some(value => value.trim() !== '')) output.push(row);
+              row = [];
+            } else field += char;
+          }
+          row.push(field);
+          if (row.some(value => value.trim() !== '')) output.push(row);
+          if (output.length < 2) throw new Error('The file needs a header row and at least one data row.');
+          const headers = output.shift().map((header, index) => (header.trim() || `Column ${index + 1}`).slice(0, 120));
+          if (headers.length > 100) throw new Error('This file contains over 100 columns. Please narrow the export and retry.');
+          const rows = output.map(cells => {
+            const item = {};
+            headers.forEach((header, index) => { item[header] = String(cells[index] ?? '').trim(); });
+            return item;
+          }).filter(item => Object.values(item).some(value => value !== ''));
+          if (!rows.length) throw new Error('No data rows were found below the header.');
+          return { headers, rows, delimiter };
+        }
+        function normalizeHeader(header) { return String(header).toLowerCase().trim().replace(/[^a-z0-9]/g, ''); }
+        function findColumn(headers, aliases) {
+          const normalised = headers.map(header => ({ header, key: normalizeHeader(header) }));
+          for (const alias of aliases) {
+            const match = normalised.find(item => item.key === alias);
+            if (match) return match.header;
+          }
+          for (const alias of aliases.filter(value => value.length >= 6)) {
+            const match = normalised.find(item => item.key.includes(alias));
+            if (match) return match.header;
+          }
+          return null;
+        }
+        function analyseColumns(headers, rows) {
+          const columns = {
+            revenue: findColumn(headers, ['revenue', 'totalrevenue', 'netrevenue', 'grossrevenue', 'netsales', 'grosssales', 'salesamount', 'totalamount', 'ordertotal', 'orderamount', 'amount', 'sales', 'total', 'netamount']),
+            order: findColumn(headers, ['orderid', 'ordernumber', 'invoiceid', 'transactionid', 'referenceid']),
+            customer: findColumn(headers, ['customerid', 'clientid', 'customeremail', 'customername', 'customer', 'client', 'email', 'accountid']),
+            product: findColumn(headers, ['productname', 'itemname', 'product', 'item', 'sku', 'service']),
+            date: findColumn(headers, ['orderdate', 'transactiondate', 'createdat', 'date', 'timestamp', 'month']),
+            channel: findColumn(headers, ['saleschannel', 'channel', 'source', 'medium', 'category', 'segment', 'status']),
+            quantity: findColumn(headers, ['quantity', 'qty', 'unitssold', 'units']),
+            price: findColumn(headers, ['unitprice', 'unitcost', 'price']),
+            sessions: findColumn(headers, ['sessions', 'visits', 'traffic']),
+            conversion: findColumn(headers, ['conversionrate', 'conversion'])
+          };
+          if (!columns.revenue && columns.price && columns.quantity) columns.revenue = '__calculated_line_total__';
+          return columns;
+        }
+        function toNumber(value) {
+          if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+          let text = String(value ?? '').trim();
+          if (!text) return 0;
+          const negative = /^\(.*\)$/.test(text);
+          text = text.replace(/[₹$€£,%\s]/g, '').replace(/[()]/g, '').replace(/,/g, '');
+          const number = Number(text);
+          if (!Number.isFinite(number)) return 0;
+          return negative ? -number : number;
+        }
+        function getRowRevenue(row, columns) {
+          if (columns.revenue === '__calculated_line_total__') return toNumber(row[columns.price]) * toNumber(row[columns.quantity]);
+          return columns.revenue ? toNumber(row[columns.revenue]) : null;
+        }
+        function distinctCount(rows, column) {
+          if (!column) return null;
+          return new Set(rows.map(row => String(row[column] ?? '').trim()).filter(Boolean)).size;
+        }
+        function currencyFormat(value, currency) {
+          if (!Number.isFinite(value)) return '—';
+          const formatted = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 0 }).format(value);
+          if (!currency || currency === 'none') return formatted;
+          try { return new Intl.NumberFormat('en-IN', { style: 'currency', currency, maximumFractionDigits: 2 }).format(value); }
+          catch { return formatted; }
+        }
+        function compactNumber(value) { return new Intl.NumberFormat('en-IN', { notation: 'compact', maximumFractionDigits: 1 }).format(value); }
+        function getDataSummary(workspace) {
+          const { rows, columns, headers } = workspace;
+          const revenueValues = rows.map(row => getRowRevenue(row, columns)).filter(value => value !== null);
+          const revenueTotal = revenueValues.length ? revenueValues.reduce((total, value) => total + value, 0) : null;
+          const orderCount = columns.order ? distinctCount(rows, columns.order) : rows.length;
+          const customerCount = distinctCount(rows, columns.customer);
+          const average = revenueTotal !== null && orderCount > 0 ? revenueTotal / orderCount : null;
+          return { revenueTotal, orderCount, customerCount, average, revenueValues, headerCount: headers.length };
+        }
+        function renderPreview(parsed) {
+          if (!csvPreview) return;
+          const head = parsed.headers.slice(0, 6);
+          const rows = parsed.rows.slice(0, 4);
+          const columns = parsed.columns || analyseColumns(parsed.headers, parsed.rows);
+          const mappingFields = [
+            { key: 'revenue', label: 'Revenue / amount' },
+            { key: 'order', label: 'Order / invoice ID' },
+            { key: 'customer', label: 'Customer identifier' },
+            { key: 'date', label: 'Date / month' },
+            { key: 'product', label: 'Product / service' },
+            { key: 'channel', label: 'Category / channel' },
+            { key: 'quantity', label: 'Quantity / units' },
+            { key: 'price', label: 'Unit price' }
+          ];
+          const mappingMarkup = mappingFields.map(field => {
+            const currentValue = columns[field.key] || '';
+            const options = ['<option value="">Not mapped</option>'];
+            if (field.key === 'revenue') {
+              options.push(`<option value="__calculated_line_total__" ${currentValue === '__calculated_line_total__' ? 'selected' : ''}>Calculate from unit price × quantity</option>`);
+            }
+            parsed.headers.forEach(header => {
+              options.push(`<option value="${escapeHtml(header)}" ${currentValue === header ? 'selected' : ''}>${escapeHtml(header)}</option>`);
+            });
+            return `<label class="column-map-field"><span>${field.label}</span><select data-column-map-key="${field.key}" aria-label="Map ${field.label}">${options.join('')}</select></label>`;
+          }).join('');
+          const mappedCount = mappingFields.filter(field => columns[field.key] && columns[field.key] !== '__calculated_line_total__').length;
+          csvPreview.hidden = false;
+          csvPreview.innerHTML = `<div class="preview-topline"><strong>File preview</strong><span>${parsed.rows.length.toLocaleString()} rows · ${parsed.headers.length} columns</span></div><section class="column-mapping" aria-label="Review detected data columns"><div class="column-mapping-heading"><div><strong>Confirm your column matches</strong><p>We matched ${mappedCount} fields. Change any selection before importing.</p></div><span class="mapping-status">${mappedCount} matched</span></div><div class="column-map-grid">${mappingMarkup}</div><p class="preview-note">Only mapped fields power the metrics. All original columns and rows remain available in Imported records.</p><p class="mapping-feedback" data-mapping-feedback role="status"></p></section><div class="preview-table-wrap"><table class="preview-table"><thead><tr>${head.map(header => `<th>${escapeHtml(header)}</th>`).join('')}${parsed.headers.length > 6 ? '<th>…</th>' : ''}</tr></thead><tbody>${rows.map(row => `<tr>${head.map(header => `<td>${escapeHtml(row[header] || '—')}</td>`).join('')}${parsed.headers.length > 6 ? '<td>…</td>' : ''}</tr>`).join('')}</tbody></table></div><p class="preview-note">Previewing the first 4 rows. The complete file is analysed when you create the workspace.</p>`;
+        }
+        function formatFileSize(bytes) {
+          if (!Number.isFinite(bytes) || bytes < 0) return 'Unknown file size';
+          if (bytes < 1024) return `${bytes} B`;
+          const units = ['KB', 'MB', 'GB', 'TB'];
+          let size = bytes / 1024;
+          let unitIndex = 0;
+          while (size >= 1024 && unitIndex < units.length - 1) {
+            size /= 1024;
+            unitIndex++;
+          }
+          return `${size.toLocaleString(undefined, { maximumFractionDigits: 1 })} ${units[unitIndex]}`;
+        }
+
+        async function previewSelectedFile(file) {
+          selectedFile = file || null;
+          selectedParsed = null;
+          if (!file) {
+            if (fileLabel) fileLabel.textContent = 'Choose a CSV file';
+            if (fileHelper) fileHelper.textContent = 'or drag and drop it here · no fixed size cap';
+            if (fileChip) fileChip.hidden = true;
+            if (csvPreview) csvPreview.hidden = true;
+            if (createSubmit) createSubmit.disabled = true;
+            return;
+          }
+          if (!/\.(csv|tsv)$/i.test(file.name)) { setSetupError('Please upload a .csv or .tsv file. For Excel workbooks, choose Save As → CSV UTF-8 first.'); fileInput.value = ''; selectedFile = null; if (createSubmit) createSubmit.disabled = true; if (csvPreview) csvPreview.hidden = true; return; }
+          try {
+            const text = await file.text();
+            const parsed = parseDelimited(text);
+            const columns = analyseColumns(parsed.headers, parsed.rows);
+            selectedParsed = { ...parsed, columns };
+            if (fileLabel) fileLabel.textContent = file.name;
+            if (fileHelper) fileHelper.textContent = `${formatFileSize(file.size)} · ready to import`;
+            if (fileChip) { fileChip.hidden = false; fileChip.textContent = `${parsed.rows.length.toLocaleString()} rows · ${parsed.headers.length} columns`; }
+            renderPreview(selectedParsed);
+            if (createSubmit) createSubmit.disabled = false;
+            clearSetupError();
+          } catch (error) {
+            setSetupError(error instanceof Error ? error.message : 'The file could not be read.');
+            fileInput.value = ''; selectedFile = null; selectedParsed = null;
+            if (createSubmit) createSubmit.disabled = true;
+          }
+        }
+        function setSetupError(message) { if (setupFeedback) { setupFeedback.textContent = message; setupFeedback.classList.add('is-error'); } }
+        function clearSetupError() { if (setupFeedback) { setupFeedback.textContent = ''; setupFeedback.classList.remove('is-error'); } }
+        function renderWorkspacePicker() {
+          workspacePicker.innerHTML = '<option value="">Choose a workspace</option>' + workspaces.map(workspace => `<option value="${escapeHtml(workspace.key)}">${escapeHtml(workspace.businessName)}</option>`).join('');
+          workspacePicker.hidden = workspaces.length === 0;
+          $('[data-no-workspace]').hidden = workspaces.length > 0;
+          if (activeWorkspace) workspacePicker.value = activeWorkspace.key;
+        }
+        function showSetup() {
+          setupView.hidden = false;
+          dashboardView.hidden = true;
+          $('[data-breadcrumb]').textContent = 'Create workspace';
+          globalSearch.disabled = true;
+          $('[data-sidebar-status]').textContent = 'No active workspace';
+          $('[data-sidebar-subtitle]').textContent = 'Import data to begin';
+          $('[data-status-title]').textContent = 'No workspace is active';
+          $('[data-status-message]').textContent = 'Create a workspace and import a CSV file to start analysing your own data.';
+        }
+        function showDashboard() {
+          setupView.hidden = true;
+          dashboardView.hidden = false;
+          $('[data-breadcrumb]').textContent = 'Overview';
+          globalSearch.disabled = false;
+          $('[data-sidebar-status]').textContent = activeWorkspace.businessName;
+          $('[data-sidebar-subtitle]').textContent = `${activeWorkspace.rows.length.toLocaleString()} imported rows`;
+          $('[data-status-title]').textContent = `${activeWorkspace.businessName} is ready`;
+          $('[data-status-message]').textContent = `${activeWorkspace.rows.length.toLocaleString()} rows are available in the current browser workspace.`;
+          $('[data-overview-title]').textContent = `${activeWorkspace.businessName}`;
+          $('[data-page-subtitle]').textContent = `Business overview · ${activeWorkspace.businessId}`;
+          $('[data-dataset-name]').textContent = activeWorkspace.fileName;
+          $('[data-dataset-detail]').textContent = `${activeWorkspace.rows.length.toLocaleString()} rows · ${activeWorkspace.headers.length} columns · imported ${new Date(activeWorkspace.updatedAt).toLocaleString()}`;
+          $('[data-records-subtitle]').textContent = `Showing the latest ${Math.min(8, activeWorkspace.rows.length)} rows from ${activeWorkspace.fileName}.`;
+          $('[data-data-badge]').textContent = `${activeWorkspace.rows.length.toLocaleString()} records`;
+          renderDashboard(activeWorkspace);
+        }
+        function renderDashboard(workspace) {
+          const summary = getDataSummary(workspace);
+          const columns = workspace.columns;
+          $('[data-kpi="revenue"]').textContent = summary.revenueTotal === null ? '—' : currencyFormat(summary.revenueTotal, workspace.currency);
+          $('[data-revenue-label]').textContent = columns.revenue === '__calculated_line_total__' ? 'Estimated line revenue' : columns.revenue ? `Total ${columns.revenue}` : 'Total revenue';
+          $('[data-revenue-note]').textContent = columns.revenue ? `${workspace.rows.length.toLocaleString()} imported rows` : 'No revenue or amount field detected';
+          $('[data-kpi="records"]').textContent = summary.orderCount.toLocaleString();
+          $('[data-record-label]').textContent = columns.order ? 'Unique orders' : 'Imported records';
+          $('[data-record-note]').textContent = columns.order ? `Counted by ${columns.order}` : 'One record per CSV row';
+          $('[data-kpi="customers"]').textContent = summary.customerCount === null ? '—' : summary.customerCount.toLocaleString();
+          $('[data-customer-note]').textContent = columns.customer ? `Distinct values in ${columns.customer}` : 'No customer field detected';
+          $('[data-kpi="average"]').textContent = summary.average === null ? '—' : currencyFormat(summary.average, workspace.currency);
+          $('[data-average-note]').textContent = summary.average === null ? 'Needs revenue and record count' : 'Revenue divided by orders / records';
+          $('[data-trend-unit]').textContent = columns.date ? 'Date grouped' : 'Row sequence';
+          $('[data-chart-subtitle]').textContent = columns.revenue ? (columns.date ? `Grouped using ${columns.date} and the detected amount field.` : 'No date field found, so values follow the row order in the source file.') : 'Add a revenue, sales, amount, or total column to build this chart.';
+          renderRevenueChart(workspace);
+          renderBreakdown(workspace);
+          renderProducts(workspace);
+          renderRecords(workspace, workspace.rows);
+        }
+        function getDateKey(value) {
+          if (!value) return null;
+          const parsed = new Date(value);
+          return Number.isNaN(parsed.getTime()) ? null : `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, '0')}`;
+        }
+        function renderRevenueChart(workspace) {
+          const target = $('[data-revenue-chart]');
+          const { rows, columns } = workspace;
+          const revenueExists = Boolean(columns.revenue);
+          const points = new Map();
+          if (revenueExists) {
+            rows.forEach((row, index) => {
+              const value = getRowRevenue(row, columns);
+              if (value === null) return;
+              const month = columns.date ? getDateKey(row[columns.date]) : null;
+              const key = month || `row-${Math.floor(index / Math.max(1, Math.ceil(rows.length / 12))) + 1}`;
+              if (!points.has(key)) points.set(key, { value: 0, count: 0 });
+              const point = points.get(key); point.value += value; point.count++;
+            });
+          }
+          const data = [...points.entries()].slice(-12);
+          if (!revenueExists || !data.length) {
+            target.innerHTML = '<div class="empty-panel"><span class="empty-symbol">↗</span><strong>No revenue trend yet</strong><p>Upload a CSV with a recognised revenue, sales, amount, total, or price × quantity field.</p></div>';
+            return;
+          }
+          const max = Math.max(...data.map(([, point]) => point.value), 1);
+          target.innerHTML = `<div class="chart-y-labels"><span>${escapeHtml(currencyFormat(max, workspace.currency))}</span><span>${escapeHtml(currencyFormat(max / 2, workspace.currency))}</span><span>0</span></div><div class="chart-bars" role="img" aria-label="Revenue bars based on the imported dataset">${data.map(([label, point], index) => { const height = Math.max(5, Math.round((Math.abs(point.value) / max) * 100)); return `<div class="chart-bar-wrap"><span class="chart-value">${escapeHtml(compactNumber(point.value))}</span><div class="chart-bar ${index === data.length - 1 ? 'is-current' : ''}" style="--bar-height:${height}%" title="${escapeHtml(label)}: ${escapeHtml(currencyFormat(point.value, workspace.currency))}"></div><small>${escapeHtml(columns.date ? label : `Rows ${label.replace('row-', '')}`)}</small></div>`; }).join('')}</div><p class="chart-footnote">Values are calculated from ${escapeHtml(columns.revenue === '__calculated_line_total__' ? `${columns.price} × ${columns.quantity}` : columns.revenue)}. This chart uses your imported file, not a live feed.</p>`;
+        }
+        function renderBreakdown(workspace) {
+          const target = $('[data-breakdown-content]');
+          const channel = workspace.columns.channel;
+          if (!channel) {
+            $('[data-breakdown-title]').textContent = 'Field breakdown';
+            $('[data-breakdown-subtitle]').textContent = 'No category or channel field detected.';
+            target.innerHTML = `<div class="empty-panel"><span class="empty-symbol">≡</span><strong>Add a category field</strong><p>To see this breakdown, include a column like <code>category</code>, <code>channel</code>, <code>source</code>, or <code>status</code>.</p></div><div class="field-list">${workspace.headers.slice(0, 8).map(header => `<span>${escapeHtml(header)}</span>`).join('')}</div>`;
+            return;
+          }
+          $('[data-breakdown-title]').textContent = `By ${channel}`;
+          $('[data-breakdown-subtitle]').textContent = 'Share of records in the selected file.';
+          const counts = new Map();
+          workspace.rows.forEach(row => { const name = String(row[channel] || 'Unspecified').trim() || 'Unspecified'; counts.set(name, (counts.get(name) || 0) + 1); });
+          const list = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+          const total = workspace.rows.length || 1;
+          const colors = ['#17796c', '#6789bc', '#d89a48', '#d66f66', '#7f8e83', '#9ca3af'];
+          target.innerHTML = `<div class="breakdown-list">${list.map(([name, count], index) => `<div class="breakdown-row"><span class="breakdown-dot" style="--dot:${colors[index % colors.length]}"></span><span class="breakdown-name">${escapeHtml(name)}</span><span class="breakdown-count">${count.toLocaleString()}</span><div class="breakdown-track"><span style="--bar-width:${Math.round(count / total * 100)}%;--dot:${colors[index % colors.length]}"></span></div><small>${(count / total * 100).toFixed(1)}%</small></div>`).join('')}</div><p class="chart-footnote">Grouped from ${escapeHtml(channel)}. Blank values are counted as “Unspecified”.</p>`;
+        }
+        function renderProducts(workspace) {
+          const products = workspace.columns.product;
+          const rowsTarget = $('[data-product-rows]');
+          const headTarget = $('[data-product-head]');
+          if (!products) {
+            $('[data-products-title]').textContent = 'Product summary';
+            $('[data-products-subtitle]').textContent = 'No product, item, service, or SKU column detected.';
+            $('[data-product-count]').textContent = 'Not available';
+            headTarget.innerHTML = '<tr><th>Product</th><th>Records</th><th>Revenue</th></tr>';
+            rowsTarget.innerHTML = `<tr><td colspan="3" class="table-empty">Add a product, item, service, or SKU column to see a product summary. Your imported records are still available below.</td></tr>`;
+            return;
+          }
+          const groups = new Map();
+          workspace.rows.forEach(row => {
+            const name = String(row[products] || 'Unspecified').trim() || 'Unspecified';
+            if (!groups.has(name)) groups.set(name, { count: 0, revenue: 0, hasRevenue: Boolean(workspace.columns.revenue) });
+            const group = groups.get(name); group.count++;
+            const revenue = getRowRevenue(row, workspace.columns); if (revenue !== null) group.revenue += revenue;
+          });
+          const list = [...groups.entries()].sort((a, b) => b[1].revenue - a[1].revenue || b[1].count - a[1].count).slice(0, 12);
+          $('[data-products-title]').textContent = `Summary by ${products}`;
+          $('[data-products-subtitle]').textContent = 'Grouped from the product field in your imported file.';
+          $('[data-product-count]').textContent = `${groups.size.toLocaleString()} groups`;
+          headTarget.innerHTML = `<tr><th>${escapeHtml(products)}</th><th>Records</th><th>${workspace.columns.revenue ? 'Revenue' : 'Amount'}</th></tr>`;
+          rowsTarget.innerHTML = list.map(([name, group]) => `<tr><td><span class="product-name">${escapeHtml(name)}</span></td><td>${group.count.toLocaleString()}</td><td>${group.hasRevenue ? escapeHtml(currencyFormat(group.revenue, workspace.currency)) : '—'}</td></tr>`).join('');
+        }
+        function renderRecords(workspace, rows) {
+          const head = $('[data-record-head]');
+          const body = $('[data-record-rows]');
+          const headers = workspace.headers.slice(0, 6);
+          head.innerHTML = `<tr>${headers.map(header => `<th scope="col">${escapeHtml(header)}</th>`).join('')}${workspace.headers.length > 6 ? '<th scope="col">More fields</th>' : ''}</tr>`;
+          const visibleRows = rows.slice(-8).reverse();
+          body.innerHTML = visibleRows.length ? visibleRows.map(row => `<tr>${headers.map(header => `<td title="${escapeHtml(row[header] || '')}">${escapeHtml(row[header] || '—')}</td>`).join('')}${workspace.headers.length > 6 ? `<td>+${workspace.headers.length - 6} columns</td>` : ''}</tr>`).join('') : `<tr><td colspan="${headers.length + (workspace.headers.length > 6 ? 1 : 0)}" class="table-empty">No records match this search.</td></tr>`;
+          $('[data-row-count]').textContent = `${rows.length.toLocaleString()} rows`;
+        }
+        function applySearch() {
+          if (!activeWorkspace) return;
+          const query = searchTerm.trim().toLocaleLowerCase();
+          const filtered = query ? activeWorkspace.rows.filter(row => Object.values(row).some(value => String(value).toLocaleLowerCase().includes(query))) : activeWorkspace.rows;
+          renderRecords(activeWorkspace, filtered);
+          const subtitle = $('[data-records-subtitle]');
+          if (subtitle) subtitle.textContent = query ? `${filtered.length.toLocaleString()} rows match “${searchTerm.trim()}”.` : `Showing the latest ${Math.min(8, activeWorkspace.rows.length)} rows from ${activeWorkspace.fileName}.`;
+        }
+        function csvEscape(value) {
+          let text = String(value ?? '');
+          if (/^[=+@\t\r]/.test(text) || /^-[^0-9]/.test(text)) text = `'${text}`;
+          return `"${text.replace(/"/g, '""')}"`;
+        }
+        function exportCsv() {
+          if (!activeWorkspace) { showToast('Create a workspace before exporting.', true); return; }
+          const csv = [activeWorkspace.headers, ...activeWorkspace.rows.map(row => activeWorkspace.headers.map(header => row[header] ?? ''))].map(row => row.map(csvEscape).join(',')).join('\r\n');
+          const blob = new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url; link.download = `${activeWorkspace.businessName.replace(/[^a-z0-9-_]+/gi, '-').replace(/^-|-$/g, '') || 'workspace'}-data-export.csv`;
+          document.body.append(link); link.click(); link.remove(); URL.revokeObjectURL(url);
+          showToast('Your CSV export is ready.');
+        }
+        async function createWorkspace(event) {
+          event.preventDefault();
+          clearSetupError();
+          if (!selectedFile || !selectedParsed) { setSetupError('Choose a valid CSV or TSV file before creating the workspace.'); return; }
+          const data = new FormData(workspaceForm);
+          const businessName = String(data.get('businessName') || '').trim();
+          const businessId = String(data.get('businessId') || '').trim();
+          const currency = String(data.get('currency') || 'INR');
+          if (businessName.length < 2 || businessId.length < 2) { setSetupError('Enter a business name and an internal business ID.'); return; }
+          const button = createSubmit; button.disabled = true; button.classList.add('is-busy');
+          if (button) button.innerHTML = '<span class="button-spinner" aria-hidden="true"></span> Preparing workspace…';
+          try {
+            const key = `workspace-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+            const workspace = {
+              key, businessName, businessId, currency, fileName: selectedFile.name,
+              headers: selectedParsed.headers, rows: selectedParsed.rows, columns: selectedParsed.columns,
+              importedAt: new Date().toISOString(), updatedAt: Date.now(), rowCount: selectedParsed.rows.length
+            };
+            await dbRun('readwrite', 'put', workspace);
+            workspaces = await dbRun('readonly', 'getAll');
+            activeWorkspace = workspace;
+            safeStore(ACTIVE_KEY, workspace.key);
+            renderWorkspacePicker(); showDashboard();
+            workspaceForm.reset(); selectedFile = null; selectedParsed = null;
+            if (csvPreview) csvPreview.hidden = true;
+            if (fileChip) fileChip.hidden = true;
+            if (fileLabel) fileLabel.textContent = 'Choose a CSV file';
+            if (fileHelper) fileHelper.textContent = 'or drag and drop it here · no fixed size cap';
+            showToast(`Workspace created for ${businessName}.`);
+            closeMobileNav();
+          } catch (error) {
+            const errorName = error && typeof error === 'object' && 'name' in error ? String(error.name) : '';
+            const message = errorName === 'QuotaExceededError'
+              ? 'The file was parsed, but this browser has run out of local storage space. The app has no fixed upload-size cap; browser storage is still finite. Clear unused local workspaces or use a server-backed database for larger datasets.'
+              : error instanceof Error ? error.message : 'Workspace could not be saved. Check your browser storage settings.';
+            setSetupError(message);
+          } finally {
+            button.classList.remove('is-busy');
+            button.innerHTML = 'Create workspace <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>';
+            button.disabled = !selectedFile || !selectedParsed;
+          }
+        }
+        async function loadWorkspace(key) {
+          try {
+            const workspace = await dbRun('readonly', 'get', key);
+            if (!workspace) { showToast('That workspace could not be found.', true); return; }
+            activeWorkspace = workspace;
+            activeWorkspace.updatedAt = Date.now();
+            safeStore(ACTIVE_KEY, key);
+            renderWorkspacePicker(); showDashboard();
+            closeMobileNav();
+          } catch (error) { showToast(error instanceof Error ? error.message : 'Could not load workspace.', true); }
+        }
+        function isLegacyDemoWorkspace(workspace) {
+          const name = String(workspace?.businessName || '').trim().toLowerCase().replace(/\s+/g, ' ');
+          const id = String(workspace?.businessId || '').trim().toLowerCase();
+          return workspace?.isDemo === true
+            || workspace?.dataSource === 'sample'
+            || name === 'northstar retail'
+            || name === 'demo workspace'
+            || name === 'sample workspace'
+            || name === 'sample business'
+            || ['northstar-demo', 'sample-business', 'demo-business'].includes(id);
+        }
+        async function initWorkspaces() {
+          try {
+            const storedWorkspaces = await dbRun('readonly', 'getAll');
+            const legacyDemos = storedWorkspaces.filter(isLegacyDemoWorkspace);
+            for (const legacy of legacyDemos) {
+              if (legacy?.key) await dbRun('readwrite', 'delete', legacy.key);
+            }
+            workspaces = storedWorkspaces.filter(workspace => !isLegacyDemoWorkspace(workspace));
+            const activeKey = safeRead(ACTIVE_KEY);
+            if (!workspaces.some(workspace => workspace.key === activeKey)) safeStore(ACTIVE_KEY, '');
+            renderWorkspacePicker();
+            if (activeKey && workspaces.some(workspace => workspace.key === activeKey)) { await loadWorkspace(activeKey); return; }
+            if (workspaces.length) { await loadWorkspace(workspaces.sort((a, b) => Number(b.updatedAt || 0) - Number(a.updatedAt || 0))[0].key); return; }
+          } catch (error) {
+            showToast(error instanceof Error ? error.message : 'Local workspace storage is not available.', true);
+          }
+          showSetup();
+        }
+        function openCreateWorkspace() {
+          showSetup();
+          closeDialog(settingsDialog); closeDialog(privacyDialog);
+          setTimeout(() => $('[data-business-name]')?.focus(), 50);
+          if (window.scrollY > 0) window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+          closeMobileNav();
+        }
+        async function deleteActiveWorkspace() {
+          if (!activeWorkspace) { showToast('There is no active workspace to remove.', true); return; }
+          if (!window.confirm(`Remove “${activeWorkspace.businessName}” and its locally stored data from this browser? This cannot be undone.`)) return;
+          const deletedName = activeWorkspace.businessName;
+          try {
+            await dbRun('readwrite', 'delete', activeWorkspace.key);
+            workspaces = await dbRun('readonly', 'getAll');
+            activeWorkspace = null; searchTerm = ''; globalSearch.value = '';
+            safeStore(ACTIVE_KEY, ''); renderWorkspacePicker();
+            if (workspaces.length) await loadWorkspace(workspaces.sort((a, b) => b.updatedAt - a.updatedAt)[0].key);
+            else showSetup();
+            showToast(`${deletedName} was removed from this browser.`);
+          } catch (error) { showToast(error instanceof Error ? error.message : 'Could not remove workspace.', true); }
+        }
+        function closeMobileNav() {
+          sidebar.classList.remove('is-mobile-open');
+          mobileScrim.hidden = true;
+          $('[data-open-mobile-nav]')?.setAttribute('aria-expanded', 'false');
+        }
+        function openMobileNav() {
+          sidebar.classList.add('is-mobile-open');
+          mobileScrim.hidden = false;
+          $('[data-open-mobile-nav]')?.setAttribute('aria-expanded', 'true');
+        }
+        function setPrivacyChoice(choice) {
+          safeStore('metricline-cookie-choice-v1', choice === 'reject' ? 'reject-optional' : 'necessary-only');
+          cookieBanner.hidden = true;
+          closeDialog(privacyDialog);
+          showToast(choice === 'reject' ? 'Optional storage and tracking remain disabled.' : 'Necessary storage preference saved.');
+        }
+        function addRipple(event) {
+          const target = event.target.closest('button, .button, .nav-link');
+          if (!target || target.disabled || target.classList.contains('text-button')) return;
+          const bounds = target.getBoundingClientRect();
+          const ripple = document.createElement('span');
+          ripple.className = 'ripple';
+          ripple.style.left = `${(event.clientX || bounds.left + bounds.width / 2) - bounds.left}px`;
+          ripple.style.top = `${(event.clientY || bounds.top + bounds.height / 2) - bounds.top}px`;
+          target.append(ripple);
+          window.setTimeout(() => ripple.remove(), 650);
+        }
+
+        csvPreview?.addEventListener('change', event => {
+          const select = event.target.closest('[data-column-map-key]');
+          if (!select || !selectedParsed?.columns) return;
+          const key = select.dataset.columnMapKey;
+          if (!key) return;
+          selectedParsed.columns[key] = select.value || null;
+          const fields = ['revenue', 'order', 'customer', 'date', 'product', 'channel', 'quantity', 'price'];
+          const matched = fields.filter(field => selectedParsed.columns[field] && selectedParsed.columns[field] !== '__calculated_line_total__').length;
+          const feedback = $('[data-mapping-feedback]', csvPreview);
+          if (feedback) feedback.textContent = `${matched} fields are currently mapped. These settings will be saved with this workspace.`;
+          const status = $('.mapping-status', csvPreview);
+          if (status) status.textContent = `${matched} matched`;
+        });
+        fileInput?.addEventListener('change', () => previewSelectedFile(fileInput.files?.[0] || null));
+        const uploadDrop = $('[data-upload-drop]');
+        uploadDrop?.addEventListener('dragover', event => { event.preventDefault(); uploadDrop.classList.add('is-dragging'); });
+        uploadDrop?.addEventListener('dragleave', () => uploadDrop.classList.remove('is-dragging'));
+        uploadDrop?.addEventListener('drop', event => { event.preventDefault(); uploadDrop.classList.remove('is-dragging'); const file = event.dataTransfer?.files?.[0]; if (!file) return; try { const transfer = new DataTransfer(); transfer.items.add(file); fileInput.files = transfer.files; previewSelectedFile(file); } catch { previewSelectedFile(file); } });
+        workspaceForm?.addEventListener('submit', createWorkspace);
+        $$('[data-create-workspace]').forEach(button => button.addEventListener('click', openCreateWorkspace));
+        workspacePicker?.addEventListener('change', () => { if (workspacePicker.value) loadWorkspace(workspacePicker.value); else openCreateWorkspace(); });
+        $('[data-export-report]')?.addEventListener('click', exportCsv);
+        $('[data-delete-workspace]')?.addEventListener('click', deleteActiveWorkspace);
+        globalSearch?.addEventListener('input', () => { searchTerm = globalSearch.value; applySearch(); });
+        $('[data-open-settings]')?.addEventListener('click', () => openDialog(settingsDialog));
+        $('[data-open-notifications]')?.addEventListener('click', () => openDialog(notificationsDialog));
+        $('[data-open-privacy]')?.addEventListener('click', () => openDialog(privacyDialog));
+        $('[data-theme-toggle]')?.addEventListener('click', () => setTheme(root.classList.contains('theme-dark') ? 'light' : 'dark'));
+        $$('[data-settings-theme]').forEach(button => button.addEventListener('click', () => setTheme(button.dataset.settingsTheme)));
+        $('[data-compact-toggle]')?.addEventListener('change', event => { compactTables = event.target.checked; root.classList.toggle('compact-tables', compactTables); });
+        $('[data-motion-toggle]')?.addEventListener('change', event => { reduceMotion = event.target.checked; root.classList.toggle('reduce-motion', reduceMotion); safeStore('metricline-reduced-motion-v1', String(reduceMotion)); });
+        $('[data-save-settings]')?.addEventListener('click', () => { safeStore('metricline-compact-v1', String(compactTables)); safeStore('metricline-reduced-motion-v1', String(reduceMotion)); closeDialog(settingsDialog); showToast('Preferences saved.'); });
+        $$('[data-cookie-choice]').forEach(button => button.addEventListener('click', () => setPrivacyChoice(button.dataset.cookieChoice || 'necessary')));
+        $$('[data-close-mobile-nav]').forEach(button => button.addEventListener('click', closeMobileNav));
+        $('[data-open-mobile-nav]')?.addEventListener('click', openMobileNav);
+        $$('[data-nav-link]').forEach(link => link.addEventListener('click', () => { $$('[data-nav-link]').forEach(item => item.classList.toggle('is-active', item === link)); closeMobileNav(); }));
+        $$('button, .button, .nav-link').forEach(element => element.addEventListener('pointerdown', addRipple));
+        $('[data-back-to-top]')?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' }));
+        window.addEventListener('scroll', () => { backToTop.classList.toggle('is-visible', window.scrollY > 450); }, { passive: true });
+        window.addEventListener('keydown', event => { if (event.key === 'Escape') closeMobileNav(); });
+
+        configureSettings();
+        if (!safeRead('metricline-cookie-choice-v1')) cookieBanner.hidden = false;
+        initWorkspaces();
+      })();
+    </script>
+
+    <style is:global>
+      :root { color-scheme: light; --page:#f4f6f4; --surface:#fff; --surface-soft:#fafbf9; --surface-muted:#f0f4f0; --ink:#172d28; --ink-2:#314840; --muted:#64766f; --faint:#89968f; --line:#dce4df; --line-strong:#cad6cf; --accent:#18796b; --accent-strong:#126457; --accent-soft:#e8f4ef; --coral:#d76c50; --amber:#c68a35; --blue:#6488c4; --rose:#ca777e; --green:#20806e; --shadow:0 10px 30px rgba(20,49,39,.045); --sidebar-width:244px; font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-synthesis:none; text-rendering:optimizeLegibility; -webkit-font-smoothing:antialiased; }
+      :root.theme-dark { color-scheme:dark; --page:#111916; --surface:#17221d; --surface-soft:#1b2722; --surface-muted:#202e27; --ink:#edf4ef; --ink-2:#cbd8d0; --muted:#9cacA2; --faint:#829389; --line:#2d4036; --line-strong:#40564a; --accent:#67c5ae; --accent-strong:#87ddc6; --accent-soft:#1e3b32; --coral:#f08a6b; --amber:#e0b268; --blue:#88a9e1; --rose:#e79ca1; --green:#67c5ae; --shadow:0 10px 32px rgba(0,0,0,.16); }
+      * { box-sizing:border-box; } html { scroll-behavior:smooth; scroll-padding-top:90px; } body { margin:0; background:var(--page); color:var(--ink); font-size:14px; line-height:1.5; } body,button,input,select { font-family:inherit; } button,input,select { font-size:inherit; } button,a,select { -webkit-tap-highlight-color:transparent; } button { cursor:pointer; } button:disabled { cursor:not-allowed; opacity:.56; } [hidden] { display:none !important; } a { color:inherit; } :focus-visible { outline:3px solid color-mix(in srgb,var(--accent) 65%,white); outline-offset:3px; }
+      .skip-link { position:fixed; top:8px; left:8px; z-index:200; padding:10px 14px; transform:translateY(-150%); border-radius:8px; background:var(--ink); color:var(--surface); } .skip-link:focus { transform:translateY(0); }
+      .app-frame { min-height:100vh; display:grid; grid-template-columns:var(--sidebar-width) minmax(0,1fr); } .sidebar { position:sticky; top:0; display:flex; flex-direction:column; gap:0; min-width:0; height:100vh; padding:20px 14px 15px; background:var(--surface); border-right:1px solid var(--line); z-index:50; }
+      .brand { display:flex; align-items:center; gap:10px; width:max-content; max-width:100%; margin:0 0 27px; text-decoration:none; } .brand-mark { display:block; width:40px; height:40px; flex:0 0 auto; filter:drop-shadow(0 3px 5px color-mix(in srgb,var(--accent) 18%,transparent)); } .brand-mark .brand-shell { fill:var(--accent); } .brand-bars { fill:none; stroke:#fff; stroke-width:3.1; stroke-linecap:round; } .brand-trend { fill:none; stroke:var(--coral); stroke-width:2.3; stroke-linecap:round; stroke-linejoin:round; } .brand-node { fill:var(--coral); stroke:var(--surface); stroke-width:1; } .brand-copy { display:grid; gap:1px; } .brand-copy strong { font-size:17px; font-weight:780; letter-spacing:-.045em; } .brand-copy small { font-size:9px; font-weight:750; letter-spacing:.14em; color:var(--muted); }
+      .workspace-control { padding:13px 11px 15px; margin-bottom:19px; border:1px solid var(--line); background:var(--surface-soft); border-radius:13px; } .workspace-control > label { display:block; margin-bottom:8px; font-size:9px; color:var(--muted); letter-spacing:.11em; font-weight:800; } .no-workspace { display:flex; align-items:center; gap:9px; margin-bottom:11px; } .no-workspace strong { display:block; font-size:12px; } .no-workspace small { display:block; color:var(--muted); font-size:10px; margin-top:2px; } .workspace-avatar { display:grid; place-items:center; width:34px; height:34px; flex:0 0 auto; border-radius:9px; background:var(--accent-soft); color:var(--accent); font-weight:800; } .workspace-picker { display:block; width:100%; min-height:39px; margin-bottom:10px; padding:8px 28px 8px 10px; border:1px solid var(--line-strong); border-radius:9px; background:var(--surface); color:var(--ink); } .workspace-create { width:100%; }
+      .nav-label { padding:0 10px; margin:2px 0 9px; color:var(--faint); font-size:9px; font-weight:800; letter-spacing:.12em; } .nav-label-lower { margin-top:27px; } .primary-nav { display:grid; gap:4px; } .nav-link { position:relative; display:flex; align-items:center; gap:11px; width:100%; min-height:41px; padding:9px 11px; text-align:left; color:var(--muted); background:transparent; border:0; border-radius:9px; font-size:12px; font-weight:600; text-decoration:none; transition:background .16s ease,color .16s ease; overflow:hidden; } .nav-link svg { width:17px; height:17px; flex:0 0 auto; fill:none; stroke:currentColor; stroke-width:1.65; stroke-linecap:round; stroke-linejoin:round; } .nav-link:hover { background:var(--surface-muted); color:var(--ink); } .nav-link.is-active { background:var(--accent-soft); color:var(--accent); font-weight:750; } .nav-link.is-active::before { content:""; position:absolute; left:0; top:9px; bottom:9px; width:3px; border-radius:0 4px 4px 0; background:var(--accent); } .sidebar-spacer { flex:1; min-height:24px; } .sidebar-status { display:flex; align-items:center; gap:9px; padding:14px 8px; border-top:1px solid var(--line); } .sidebar-status > div { display:grid; gap:2px; min-width:0; } .sidebar-status strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:11px; } .sidebar-status small { color:var(--muted); font-size:10px; } .status-dot { width:8px; height:8px; flex:0 0 auto; border-radius:50%; background:var(--accent); box-shadow:0 0 0 4px var(--accent-soft); } .sidebar-footer { display:flex; justify-content:space-between; gap:6px; padding:12px 8px 0; border-top:1px solid var(--line); color:var(--faint); font-size:9px; }
+      .main-column { min-width:0; display:flex; flex-direction:column; } .topbar { position:sticky; top:0; z-index:35; min-height:66px; display:flex; align-items:center; justify-content:space-between; gap:18px; padding:0 clamp(20px,3vw,43px); background:color-mix(in srgb,var(--surface) 93%,transparent); backdrop-filter:blur(15px); border-bottom:1px solid var(--line); } .topbar-leading,.topbar-actions { display:flex; align-items:center; gap:10px; min-width:0; } .breadcrumb { display:flex; align-items:center; gap:10px; color:var(--muted); font-size:11px; white-space:nowrap; } .breadcrumb svg { width:13px; height:13px; fill:none; stroke:var(--faint); stroke-width:1.7; } .breadcrumb strong { color:var(--ink); font-weight:750; }
+      .global-search { display:flex; align-items:center; gap:8px; width:198px; height:39px; padding:0 11px; border:1px solid var(--line); border-radius:9px; background:var(--surface); color:var(--muted); } .global-search:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); } .global-search svg { width:15px; height:15px; flex:0 0 auto; fill:none; stroke:currentColor; stroke-width:1.8; } .global-search input { width:100%; min-width:0; border:0; outline:0; background:transparent; color:var(--ink); font-size:11px; } .global-search input::placeholder { color:var(--faint); } .icon-button { position:relative; display:inline-grid; place-items:center; width:39px; height:39px; padding:0; border:1px solid var(--line); border-radius:9px; background:var(--surface); color:var(--ink-2); overflow:hidden; transition:background .16s ease,transform .16s ease; } .icon-button:hover { background:var(--surface-muted); transform:translateY(-1px); } .icon-button svg { width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; } .theme-toggle,.back-to-portfolio { position:relative; display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:39px; padding:0 12px; border:1px solid var(--line); border-radius:9px; background:var(--surface); color:var(--ink-2); font-size:11px; font-weight:700; text-decoration:none; white-space:nowrap; overflow:hidden; transition:border-color .16s ease,background .16s ease,transform .16s ease; } .theme-toggle:hover,.back-to-portfolio:hover { border-color:var(--line-strong); background:var(--surface-muted); transform:translateY(-1px); } .theme-toggle svg,.back-to-portfolio svg { width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; flex:0 0 auto; } .theme-moon { display:none; } .theme-dark .theme-sun { display:none; } .theme-dark .theme-moon { display:block; } .back-to-portfolio { border-color:color-mix(in srgb,var(--accent) 22%,var(--line)); color:var(--accent-strong); }
+      .dashboard-main { flex:1; width:100%; max-width:1600px; margin:0 auto; padding:34px clamp(20px,3vw,43px) 45px; } .setup-view { max-width:850px; margin:0 auto; padding:18px 0 28px; } .setup-intro { max-width:680px; margin:0 auto 30px; text-align:center; } .eyebrow { margin:0 0 10px; color:var(--accent); font-size:9px; font-weight:850; letter-spacing:.14em; line-height:1.3; text-transform:uppercase; } .setup-intro h1 { margin:0; font-size:clamp(35px,5vw,52px); line-height:1.08; font-weight:760; letter-spacing:-.06em; } .setup-intro p { max-width:610px; margin:14px auto 0; color:var(--muted); font-size:15px; line-height:1.7; } .setup-card { padding:clamp(19px,3vw,30px); border:1px solid var(--line); border-radius:17px; background:var(--surface); box-shadow:var(--shadow); } .form-heading { display:flex; align-items:flex-start; gap:13px; } .step-number { display:grid; place-items:center; width:35px; height:35px; flex:0 0 auto; border-radius:10px; background:var(--accent-soft); color:var(--accent); font-size:11px; font-weight:850; } .form-heading h2 { margin:0; font-size:19px; line-height:1.25; letter-spacing:-.035em; } .form-heading p { margin:5px 0 0; color:var(--muted); font-size:12px; } .form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:17px; margin:22px 0 28px 48px; } .field { display:grid; align-content:start; gap:7px; min-width:0; color:var(--ink-2); font-size:11px; font-weight:750; } .field > span { display:block; } .field b { color:var(--coral); } .field input,.field select { width:100%; min-height:45px; padding:10px 12px; border:1px solid var(--line-strong); border-radius:9px; outline:none; background:var(--surface-soft); color:var(--ink); font-size:13px; font-weight:500; } .field input::placeholder { color:var(--faint); } .field input:focus,.field select:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); } .field small { color:var(--muted); font-size:10px; font-weight:450; line-height:1.5; } .upload-section { padding-top:21px; border-top:1px solid var(--line); } .upload-heading { margin-bottom:16px; } .upload-drop { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px; min-height:154px; padding:22px; border:1px dashed var(--line-strong); border-radius:13px; background:var(--surface-soft); text-align:center; cursor:pointer; transition:border-color .15s ease,background .15s ease,transform .15s ease; } .upload-drop:hover,.upload-drop.is-dragging { border-color:var(--accent); background:var(--accent-soft); } .upload-drop.is-dragging { transform:scale(.995); } .upload-drop input { position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; } .upload-icon { display:grid; place-items:center; width:42px; height:42px; margin-bottom:1px; border-radius:12px; background:var(--accent-soft); color:var(--accent); pointer-events:none; } .upload-icon svg { width:21px; height:21px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; } .upload-drop > strong { max-width:100%; color:var(--ink); font-size:13px; overflow-wrap:anywhere; } .upload-drop > span:not(.upload-icon):not(.file-chip) { color:var(--muted); font-size:11px; } .file-chip { display:inline-flex; align-items:center; gap:6px; padding:5px 8px; border-radius:6px; background:var(--accent-soft); color:var(--accent); font-size:10px; font-weight:750; } .csv-preview { margin-top:13px; padding:13px; border:1px solid var(--line); border-radius:10px; background:var(--surface); } .preview-topline { display:flex; justify-content:space-between; gap:10px; margin-bottom:9px; font-size:11px; } .preview-topline span { color:var(--muted); } .preview-table-wrap { max-width:100%; overflow:auto; } .preview-table { width:100%; border-collapse:collapse; font-size:10px; } .preview-table th,.preview-table td { max-width:180px; padding:8px 10px; border-bottom:1px solid var(--line); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; } .preview-table th { background:var(--surface-muted); color:var(--muted); font-size:9px; } .preview-note { margin:8px 0 0; color:var(--faint); font-size:10px; }
+      .column-mapping { margin:12px 0; padding:13px; border:1px solid var(--line); border-radius:11px; background:var(--surface-soft); }
+      .column-mapping-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:11px; }
+      .column-mapping-heading strong { display:block; font-size:12px; color:var(--ink); }
+      .column-mapping-heading p { margin:4px 0 0; color:var(--muted); font-size:10px; }
+      .mapping-status { flex:0 0 auto; padding:4px 8px; border-radius:20px; background:var(--accent-soft); color:var(--accent); font-size:9px; font-weight:800; }
+      .column-map-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
+      .column-map-field { display:grid; gap:5px; min-width:0; color:var(--muted); font-size:10px; font-weight:700; }
+      .column-map-field select { width:100%; min-width:0; min-height:36px; padding:7px 8px; border:1px solid var(--line-strong); border-radius:7px; background:var(--surface); color:var(--ink); font-size:10px; }
+      .mapping-feedback { min-height:0; margin:4px 0 0; color:var(--accent); font-size:10px; } .setup-footer { display:flex; align-items:center; justify-content:space-between; gap:18px; margin-top:23px; padding-top:20px; border-top:1px solid var(--line); } .setup-footer > p { display:flex; align-items:flex-start; gap:8px; max-width:350px; margin:0; color:var(--muted); font-size:10px; line-height:1.6; } .setup-footer > p svg { width:16px; height:16px; flex:0 0 auto; fill:none; stroke:var(--accent); stroke-width:1.8; } .button { position:relative; display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:39px; padding:9px 13px; border:1px solid transparent; border-radius:9px; color:var(--ink-2); background:var(--surface); font-size:11px; font-weight:750; text-decoration:none; overflow:hidden; transition:transform .16s ease,background .16s ease,border-color .16s ease,box-shadow .16s ease; } .button:hover { transform:translateY(-1px); } .button:active { transform:translateY(0) scale(.985); } .button svg { width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; } .button-primary { background:var(--accent); border-color:var(--accent); color:#fff; box-shadow:0 3px 7px color-mix(in srgb,var(--accent) 15%,transparent); } .button-primary:hover { background:var(--accent-strong); border-color:var(--accent-strong); box-shadow:0 5px 13px color-mix(in srgb,var(--accent) 22%,transparent); } .button-outline { background:var(--surface); border-color:var(--line-strong); color:var(--ink-2); } .button-outline:hover { border-color:var(--accent); color:var(--accent); } .button-large { min-height:45px; padding-inline:17px; } .form-feedback { min-height:0; margin:0; color:var(--coral); font-size:11px; } .form-feedback:not(:empty) { margin-top:12px; } .form-feedback.is-error { padding:10px 12px; border:1px solid color-mix(in srgb,var(--coral) 35%,var(--line)); border-radius:8px; background:color-mix(in srgb,var(--coral) 6%,var(--surface)); } .button-spinner { width:13px; height:13px; border:2px solid currentColor; border-right-color:transparent; border-radius:50%; animation:spin .7s linear infinite; } .setup-footnote { display:flex; justify-content:center; flex-wrap:wrap; gap:10px 21px; margin:18px 0 0; color:var(--faint); font-size:10px; } .setup-footnote span::before { content:""; display:inline-block; width:5px; height:5px; margin:0 7px 1px 0; border-radius:50%; background:var(--accent); }
+      .dashboard-view { min-width:0; } .page-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:25px; margin-bottom:22px; } .page-heading h1 { margin:0; overflow-wrap:anywhere; font-size:clamp(30px,3.2vw,43px); font-weight:760; letter-spacing:-.06em; line-height:1.08; } .page-subtitle { margin:9px 0 0; color:var(--muted); font-size:13px; } .heading-actions { display:flex; align-items:center; gap:10px; flex:0 0 auto; } .data-badge { display:inline-flex; align-items:center; gap:8px; min-height:34px; padding:0 11px; border:1px solid var(--line); border-radius:20px; color:var(--muted); font-size:10px; white-space:nowrap; } .data-badge > span:first-child { width:6px; height:6px; border-radius:50%; background:var(--accent); } .dataset-summary { display:flex; align-items:center; gap:12px; margin-bottom:18px; padding:14px 16px; border:1px solid var(--line); border-radius:12px; background:var(--surface); } .dataset-summary > svg { width:20px; height:20px; flex:0 0 auto; fill:none; stroke:var(--accent); stroke-width:1.7; } .dataset-summary > div { flex:1; min-width:0; } .dataset-summary strong { display:block; overflow-wrap:anywhere; font-size:12px; } .dataset-summary p { margin:3px 0 0; color:var(--muted); font-size:10px; line-height:1.5; } .text-button { position:relative; display:inline-flex; align-items:center; justify-content:center; min-height:34px; padding:7px 9px; border:0; border-radius:7px; background:transparent; color:var(--accent); font-size:11px; font-weight:750; text-decoration:none; } .text-button:hover { background:var(--accent-soft); } .danger-text { color:var(--coral); } .danger-text:hover { background:color-mix(in srgb,var(--coral) 9%,transparent); }
+      .kpi-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin-bottom:17px; } .metric-card { position:relative; min-width:0; min-height:137px; overflow:hidden; padding:17px; border:1px solid var(--line); border-radius:14px; background:var(--surface); box-shadow:var(--shadow); transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease; } .metric-card:hover { transform:translateY(-2px); border-color:var(--line-strong); box-shadow:0 12px 28px rgba(20,49,39,.07); } .metric-topline { display:flex; align-items:center; justify-content:space-between; gap:8px; } .metric-label { color:var(--muted); font-size:11px; font-weight:650; } .metric-icon { display:grid; place-items:center; width:30px; height:30px; border-radius:8px; background:var(--accent-soft); color:var(--accent); } .metric-icon svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; } .icon-blue { background:color-mix(in srgb,var(--blue) 14%,var(--surface)); color:var(--blue); } .icon-amber { background:color-mix(in srgb,var(--amber) 14%,var(--surface)); color:var(--amber); } .icon-rose { background:color-mix(in srgb,var(--rose) 14%,var(--surface)); color:var(--rose); } .metric-value { display:block; margin-top:14px; font-size:clamp(24px,2.3vw,32px); font-weight:790; letter-spacing:-.06em; line-height:1.05; overflow-wrap:anywhere; } .metric-foot { display:flex; align-items:center; gap:7px; margin-top:9px; color:var(--muted); font-size:9px; } .metric-note { overflow-wrap:anywhere; }
+      .content-grid { display:grid; grid-template-columns:minmax(0,1.45fr) minmax(270px,1fr); gap:16px; margin-bottom:17px; } .panel { min-width:0; overflow:hidden; border:1px solid var(--line); border-radius:14px; background:var(--surface); box-shadow:var(--shadow); } .revenue-panel,.channel-panel { padding:22px; } .panel-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:15px; } .panel-heading h2 { margin:0; font-size:20px; font-weight:760; letter-spacing:-.045em; } .panel-heading .eyebrow { margin-bottom:8px; } .panel-subtitle { margin:5px 0 0; color:var(--muted); font-size:11px; line-height:1.55; } .panel-badge,.table-count { display:inline-flex; align-items:center; justify-content:center; min-height:28px; padding:0 9px; border:1px solid var(--line); border-radius:7px; color:var(--muted); font-size:9px; white-space:nowrap; } .chart-area { position:relative; min-height:248px; margin-top:21px; padding:8px 0 27px 40px; } .chart-y-labels { position:absolute; top:0; bottom:30px; left:0; display:flex; flex-direction:column; justify-content:space-between; color:var(--faint); font-size:9px; } .chart-bars { position:relative; display:flex; align-items:stretch; justify-content:space-around; gap:clamp(5px,1vw,13px); width:100%; height:213px; border-bottom:1px solid var(--line-strong); background:repeating-linear-gradient(to bottom,transparent 0,transparent 51px,var(--line) 52px,var(--line) 53px); } .chart-bar-wrap { display:flex; flex:1 1 0; min-width:0; flex-direction:column; align-items:center; justify-content:flex-end; gap:6px; } .chart-value { max-width:100%; overflow:hidden; color:var(--muted); font-size:9px; text-overflow:ellipsis; white-space:nowrap; } .chart-bar { width:min(28px,74%); min-height:3px; height:var(--bar-height); border-radius:5px 5px 0 0; background:color-mix(in srgb,var(--accent) 48%,var(--surface)); transition:height .3s ease,background .2s ease; } .chart-bar.is-current { background:var(--accent); } .chart-bar-wrap small { max-width:100%; overflow:hidden; color:var(--faint); font-size:9px; text-overflow:ellipsis; white-space:nowrap; } .chart-footnote { margin:9px 0 0; color:var(--faint); font-size:9px; line-height:1.55; } .empty-panel { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; min-height:190px; padding:22px; color:var(--muted); text-align:center; } .empty-panel strong { color:var(--ink-2); font-size:12px; } .empty-panel p { max-width:270px; margin:0; color:var(--muted); font-size:10px; line-height:1.6; } .empty-symbol { display:grid; place-items:center; width:36px; height:36px; border-radius:10px; background:var(--surface-muted); color:var(--accent); font-size:20px; } .empty-panel code { padding:2px 4px; border-radius:3px; background:var(--surface-muted); color:var(--ink-2); } .field-list { display:flex; flex-wrap:wrap; justify-content:center; gap:5px; padding:0 12px 17px; } .field-list span { padding:4px 7px; border:1px solid var(--line); border-radius:5px; color:var(--muted); font-size:9px; }
+      .breakdown-content { padding-top:18px; } .breakdown-list { display:grid; gap:16px; } .breakdown-row { display:grid; grid-template-columns:8px minmax(0,1fr) auto; align-items:center; gap:7px 9px; } .breakdown-dot { width:8px; height:8px; border-radius:50%; background:var(--dot); } .breakdown-name { overflow:hidden; color:var(--ink-2); font-size:11px; text-overflow:ellipsis; white-space:nowrap; } .breakdown-count { color:var(--ink); font-size:11px; font-weight:750; font-variant-numeric:tabular-nums; } .breakdown-track { grid-column:2/3; height:5px; overflow:hidden; border-radius:8px; background:var(--surface-muted); } .breakdown-track span { display:block; width:var(--bar-width); height:100%; border-radius:8px; background:var(--dot); } .breakdown-row small { grid-column:3/4; grid-row:2/3; color:var(--faint); font-size:9px; }
+      .records-panel { margin-bottom:17px; } .records-heading { align-items:center; padding:21px 22px 17px; } .table-scroll { width:100%; overflow:auto; border-top:1px solid var(--line); } .data-table { width:100%; border-collapse:separate; border-spacing:0; font-size:11px; } .data-table th { padding:12px 19px; border-bottom:1px solid var(--line); background:var(--surface-soft); color:var(--muted); font-size:9px; font-weight:800; letter-spacing:.04em; text-align:left; white-space:nowrap; } .data-table td { max-width:260px; padding:13px 19px; border-bottom:1px solid var(--line); color:var(--ink-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .data-table tbody tr:last-child td { border-bottom:0; } .data-table tbody tr:hover td { background:var(--surface-soft); } .data-table .table-empty { padding:23px 19px; color:var(--muted); text-align:center; white-space:normal; line-height:1.6; } .product-name { font-weight:700; color:var(--ink); } .compact-tables .data-table td { padding-block:8px; } .dashboard-bottom-actions { display:flex; justify-content:space-between; align-items:center; gap:12px; margin:3px 0 8px; }
+      .app-footer { display:flex; align-items:center; flex-wrap:wrap; gap:10px 18px; padding:18px clamp(20px,3vw,43px) 25px; border-top:1px solid var(--line); color:var(--faint); font-size:10px; } .footer-brand { color:var(--ink); font-weight:800; text-decoration:none; } .app-footer > span { flex:1; } .app-footer nav { display:flex; flex-wrap:wrap; gap:13px; } .app-footer nav a { color:var(--muted); text-decoration:none; } .app-footer nav a:hover { color:var(--accent); }
+      .app-dialog { width:min(560px,calc(100vw - 28px)); max-height:min(80dvh,760px); padding:25px; border:1px solid var(--line); border-radius:17px; background:var(--surface); color:var(--ink); box-shadow:0 30px 100px rgba(0,0,0,.22); } .app-dialog::backdrop { background:rgba(12,28,22,.48); backdrop-filter:blur(3px); } .dialog-top { display:flex; align-items:flex-start; justify-content:space-between; gap:15px; margin-bottom:20px; } .dialog-top .eyebrow { margin-bottom:7px; } .dialog-top h2 { margin:0; font-size:25px; letter-spacing:-.05em; } .settings-group { display:flex; align-items:center; justify-content:space-between; gap:22px; padding:16px 0; border-top:1px solid var(--line); } .settings-group > div:first-child { flex:1; } .settings-group strong { font-size:12px; } .settings-group p { margin:4px 0 0; color:var(--muted); font-size:11px; line-height:1.6; } .settings-control { display:flex; gap:4px; padding:3px; border:1px solid var(--line); border-radius:9px; background:var(--surface-muted); } .choice-button { min-height:32px; padding:6px 10px; border:0; border-radius:6px; background:transparent; color:var(--muted); font-size:10px; font-weight:700; } .choice-button.is-selected { background:var(--surface); color:var(--accent); box-shadow:0 1px 4px rgba(0,0,0,.07); } .switch { position:relative; width:42px; height:24px; flex:0 0 auto; } .switch input { position:absolute; width:1px; height:1px; opacity:0; } .switch span { position:absolute; inset:0; border-radius:20px; background:var(--line-strong); cursor:pointer; transition:background .15s; } .switch span::before { content:""; position:absolute; left:3px; top:3px; width:18px; height:18px; border-radius:50%; background:white; box-shadow:0 1px 3px rgba(0,0,0,.18); transition:transform .15s; } .switch input:checked + span { background:var(--accent); } .switch input:checked + span::before { transform:translateX(18px); } .switch input:focus-visible + span { outline:3px solid var(--accent); outline-offset:3px; } .setting-status { flex:0 0 auto; padding:5px 8px; border-radius:6px; background:var(--accent-soft); color:var(--accent); font-size:10px; font-weight:750; } .dialog-actions { display:flex; justify-content:flex-end; flex-wrap:wrap; gap:8px; margin-top:19px; padding-top:18px; border-top:1px solid var(--line); } .status-message { display:flex; align-items:flex-start; gap:12px; padding:14px; border-radius:11px; background:var(--surface-soft); } .status-message strong { font-size:12px; } .status-message p,.dialog-help { margin:4px 0 0; color:var(--muted); font-size:11px; line-height:1.6; } .dialog-help { margin-top:15px; }
+      .cookie-banner { position:fixed; left:50%; bottom:16px; z-index:80; display:flex; align-items:center; justify-content:space-between; gap:20px; width:min(910px,calc(100vw - 28px)); padding:16px 19px; border:1px solid var(--line); border-radius:14px; background:var(--surface); box-shadow:0 18px 60px rgba(0,0,0,.16); transform:translateX(-50%); } .cookie-banner strong { font-size:12px; } .cookie-banner p { margin:5px 0 0; color:var(--muted); font-size:10px; line-height:1.6; } .cookie-actions { display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-end; gap:7px; flex:0 0 auto; } .privacy-dialog { max-width:620px; } .back-to-top { position:fixed; right:22px; bottom:20px; z-index:45; display:flex; align-items:center; justify-content:center; gap:5px; min-width:42px; height:42px; padding:0 13px; border:1px solid var(--line-strong); border-radius:22px; background:var(--surface); color:var(--accent); box-shadow:0 6px 20px rgba(0,0,0,.1); opacity:0; pointer-events:none; transform:translateY(10px); transition:opacity .18s ease,transform .18s ease; } .back-to-top.is-visible { opacity:1; pointer-events:auto; transform:translateY(0); } .back-to-top svg { width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.8; } .back-to-top span { font-size:10px; font-weight:800; } .toast { position:fixed; right:22px; bottom:75px; z-index:100; max-width:min(360px,calc(100vw - 28px)); padding:12px 15px; border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--ink); box-shadow:0 12px 35px rgba(0,0,0,.13); font-size:12px; opacity:0; pointer-events:none; transform:translateY(8px); transition:opacity .18s ease,transform .18s ease; } .toast.is-visible { opacity:1; transform:translateY(0); } .toast.is-error { border-color:color-mix(in srgb,var(--coral) 45%,var(--line)); } .ripple { position:absolute; z-index:0; width:10px; height:10px; border-radius:50%; background:color-mix(in srgb,currentColor 18%,transparent); transform:translate(-50%,-50%) scale(0); pointer-events:none; animation:ripple .55s ease-out forwards; } button > :not(.ripple) { position:relative; z-index:1; }
+      @keyframes ripple { to { opacity:0; transform:translate(-50%,-50%) scale(18); } } @keyframes spin { to { transform:rotate(360deg); } }
+      @media (max-width:1240px) { :root { --sidebar-width:220px; } .topbar { padding-inline:24px; } .global-search { width:160px; } .topbar-actions { gap:7px; } .dashboard-main { padding-inline:24px; } .kpi-grid { gap:10px; } .metric-card { padding-inline:14px; } .metric-value { font-size:clamp(23px,2.2vw,30px); } .content-grid { grid-template-columns:minmax(0,1.3fr) minmax(235px,1fr); } }
+      @media (max-width:1020px) { .global-search { width:136px; } .back-to-portfolio span { display:none; } .back-to-portfolio { width:39px; padding:0; } .content-grid { grid-template-columns:minmax(0,1.2fr) minmax(220px,1fr); } .kpi-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+      .mobile-menu-button { display:none; }
+      @media (max-width:760px) { .column-map-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; } .column-mapping { padding:11px; } .column-map-field select { min-height:42px; font-size:11px; } .app-frame { display:block; } .sidebar { position:fixed; left:0; top:0; z-index:61; width:min(295px,86vw); height:100dvh; overflow-y:auto; transform:translateX(-103%); transition:transform .2s ease; box-shadow:none; } .sidebar.is-mobile-open { transform:translateX(0); box-shadow:20px 0 55px rgba(0,0,0,.15); } .mobile-scrim:not([hidden]) { position:fixed; inset:0; z-index:60; display:block; width:100%; height:100%; border:0; background:rgba(8,20,15,.43); backdrop-filter:blur(2px); } .mobile-menu-button { display:inline-grid; } .topbar { min-height:62px; padding:0 13px; gap:8px; } .topbar-leading,.topbar-actions { gap:6px; } .breadcrumb { gap:5px; font-size:10px; } .breadcrumb span,.breadcrumb svg { display:none; } .topbar-actions { margin-left:auto; } .global-search { width:clamp(92px,27vw,175px); min-height:35px; height:35px; padding-inline:8px; } .global-search input { font-size:10px; } .topbar-actions > .icon-button { width:35px; height:35px; } .theme-toggle { min-height:35px; width:35px; padding:0; } .theme-toggle span { display:none; } .back-to-portfolio { width:35px; min-height:35px; height:35px; } .dashboard-main { padding:24px 14px 32px; } .setup-view { padding-top:12px; } .setup-intro { margin-bottom:22px; } .setup-intro h1 { font-size:clamp(32px,9vw,43px); } .setup-intro p { margin-top:11px; font-size:13px; line-height:1.6; } .setup-card { padding:18px 15px; border-radius:14px; } .form-heading h2 { font-size:17px; } .form-heading p { font-size:11px; } .form-grid { grid-template-columns:minmax(0,1fr); gap:14px; margin:20px 0 23px; } .field input,.field select { min-height:46px; font-size:14px; } .upload-drop { min-height:146px; padding:17px; } .setup-footer { align-items:stretch; flex-direction:column; gap:14px; } .setup-footer > p { max-width:none; } .setup-footer .button { width:100%; } .setup-footnote { justify-content:flex-start; gap:8px 14px; font-size:9px; } .page-heading { align-items:flex-start; flex-direction:column; gap:15px; margin-bottom:17px; } .page-heading h1 { font-size:clamp(29px,8vw,37px); } .page-subtitle { font-size:12px; } .heading-actions { width:100%; justify-content:space-between; } .dataset-summary { align-items:flex-start; gap:9px; padding:12px; } .dataset-summary .text-button { flex:0 0 auto; min-height:31px; padding-inline:7px; font-size:10px; } .kpi-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; margin-bottom:13px; } .metric-card { min-height:130px; padding:13px 11px 16px; border-radius:12px; } .metric-label { font-size:10px; } .metric-icon { width:27px; height:27px; } .metric-value { margin-top:13px; font-size:clamp(22px,6vw,29px); } .metric-foot { font-size:9px; } .content-grid { grid-template-columns:minmax(0,1fr); gap:12px; margin-bottom:13px; } .revenue-panel,.channel-panel { padding:17px 14px; border-radius:13px; } .panel-heading h2 { font-size:19px; } .chart-area { min-height:220px; padding-left:34px; } .chart-bars { height:185px; gap:4px; } .chart-value { font-size:8px; } .chart-bar-wrap small { font-size:8px; } .records-panel { margin-bottom:13px; border-radius:13px; } .records-heading { align-items:flex-start; padding:17px 14px 14px; } .panel-subtitle { max-width:285px; font-size:10px; } .table-scroll { max-width:100%; } .data-table { min-width:510px; } .data-table th { padding:11px 13px; font-size:9px; } .data-table td { max-width:190px; padding:12px 13px; font-size:10px; } .dashboard-bottom-actions { align-items:flex-start; flex-direction:column; } .app-footer { align-items:flex-start; flex-direction:column; padding:17px 14px 26px; } .app-footer > span { flex:auto; } .app-footer nav { gap:11px 15px; } .cookie-banner { align-items:stretch; flex-direction:column; gap:12px; bottom:8px; width:calc(100vw - 16px); padding:14px; } .cookie-actions { display:grid; grid-template-columns:1fr 1fr; } .cookie-actions .text-button { grid-column:1/-1; justify-content:flex-start; } .app-dialog { padding:19px 16px; max-height:calc(100dvh - 25px); } .dialog-top h2 { font-size:23px; } .settings-group { align-items:flex-start; gap:10px; } .dialog-actions .button { flex:1 1 auto; } .toast { right:10px; bottom:64px; } .back-to-top { right:12px; bottom:12px; } }
+      @media (max-width:390px) { .column-map-grid { grid-template-columns:minmax(0,1fr); } .column-mapping-heading { flex-direction:column; } .topbar { padding-inline:8px; } .topbar-leading,.topbar-actions { gap:4px; } .breadcrumb strong { max-width:66px; overflow:hidden; text-overflow:ellipsis; } .global-search { width:78px; } .dashboard-main { padding-inline:10px; } .topbar-actions > .icon-button { display:none; } .kpi-grid { gap:7px; } .metric-card { padding-inline:9px; } .metric-value { font-size:22px; } .dataset-summary p { font-size:9px; } .dataset-summary .text-button { white-space:nowrap; } .heading-actions { gap:7px; } .data-badge { padding-inline:8px; font-size:9px; } .heading-actions .button { padding-inline:10px; } }
+      @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; } .metric-card:hover,.button:hover,.icon-button:hover { transform:none; } }
+      .reduce-motion *, .reduce-motion *::before, .reduce-motion *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; scroll-behavior:auto !important; }
+    </style>
+  </body>
+</html>

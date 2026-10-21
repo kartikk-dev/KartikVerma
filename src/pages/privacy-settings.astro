@@ -1,0 +1,126 @@
+---
+import MovieFlexLegalLayout from "../layouts/MovieFlexLegalLayout.astro";
+---
+
+<MovieFlexLegalLayout
+  title="Privacy settings"
+  description="Manage MovieFlex's on-device watchlist and essential storage choice."
+  eyebrow="YOUR DATA"
+>
+  <h2>Storage preferences</h2>
+  <p>
+    MovieFlex currently uses essential browser storage only. Analytics and
+    advertising trackers are not installed in this version.
+  </p>
+  <div class="setting-row">
+    <div>
+      <strong>Watchlist</strong>
+      <p>Movie entries saved on this browser.</p>
+    </div>
+    <span class="state-pill" data-watchlist-state>
+      Checking…
+    </span>
+  </div>
+  <div class="setting-row">
+    <div>
+      <strong>Essential privacy choice</strong>
+      <p>Remembers your choice to use essential storage only.</p>
+    </div>
+    <span class="state-pill" data-consent-state>
+      Checking…
+    </span>
+  </div>
+  <div class="setting-row">
+    <div>
+      <strong>Analytics and advertising</strong>
+      <p>Not installed in this version of MovieFlex.</p>
+    </div>
+    <span class="state-pill">Off</span>
+  </div>
+  <div class="action-row">
+    <button class="action primary" type="button" data-save-choice>
+      Save essential-only choice
+    </button>
+    <button class="action" type="button" data-clear-watchlist>
+      Clear watchlist
+    </button>
+  </div>
+  <p
+    class="page-status"
+    role="status"
+    aria-live="polite"
+    data-settings-status
+  ></p>
+  <h2>Third-party services</h2>
+  <p>
+    Movie metadata and images are supplied by TMDB. Streaming availability is
+    supplied through TMDB using JustWatch data. MovieFlex's controls do not
+    change your account, cookies, subscription, or privacy settings on those
+    third-party services.
+  </p>
+  <p>
+    For details, read the <a href="/privacy">Privacy policy</a> and{" "}
+    <a href="/cookies">Cookie policy</a>.
+  </p>
+</MovieFlexLegalLayout>
+<script>
+  const watchlistState = document.querySelector<HTMLElement>(
+    "[data-watchlist-state]",
+  );
+  const consentState = document.querySelector<HTMLElement>(
+    "[data-consent-state]",
+  );
+  const status = document.querySelector<HTMLElement>("[data-settings-status]");
+  const saveButton =
+    document.querySelector<HTMLButtonElement>("[data-save-choice]");
+  const clearButton = document.querySelector<HTMLButtonElement>(
+    "[data-clear-watchlist]",
+  );
+
+  const refreshSettings = () => {
+    try {
+      const saved = JSON.parse(
+        localStorage.getItem("movieflex-watchlist-v2") || "[]",
+      );
+      if (watchlistState)
+        watchlistState.textContent = `${Array.isArray(saved) ? saved.length : 0} saved`;
+    } catch {
+      if (watchlistState) watchlistState.textContent = "Unavailable";
+    }
+    try {
+      const choice = localStorage.getItem("movieflex-storage-choice-v1");
+      if (consentState)
+        consentState.textContent =
+          choice === "essential-only" ? "Saved" : "Not saved";
+    } catch {
+      if (consentState) consentState.textContent = "Unavailable";
+    }
+  };
+
+  saveButton?.addEventListener("click", () => {
+    try {
+      localStorage.setItem("movieflex-storage-choice-v1", "essential-only");
+      if (status)
+        status.textContent = "Essential-only choice saved in this browser.";
+    } catch {
+      if (status)
+        status.textContent =
+          "Browser storage is blocked. This preference could not be saved.";
+    }
+    refreshSettings();
+  });
+
+  clearButton?.addEventListener("click", () => {
+    try {
+      localStorage.removeItem("movieflex-watchlist-v2");
+      if (status) status.textContent = "The local watchlist has been cleared.";
+    } catch {
+      if (status)
+        status.textContent =
+          "Browser storage is blocked. The watchlist could not be cleared here.";
+    }
+    refreshSettings();
+  });
+
+  refreshSettings();
+</script>

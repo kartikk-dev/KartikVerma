@@ -1,0 +1,1535 @@
+---
+---
+
+<section class="view serviq-invoices" data-panel="invoices">
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">FINANCE / INVOICES</span>
+      <h1>
+        Revenue starts with a <em>completed job.</em>
+      </h1>
+      <p>
+        Manage billing records, track collections and identify overdue invoices.
+      </p>
+    </div>
+    <button class="primary-action" id="serviq-add-invoice" type="button">
+      <span>+</span>
+      Create Invoice
+    </button>
+  </div>
+
+  <div
+    class="serviq-invoice-feedback"
+    id="serviq-invoice-feedback"
+    role="status"
+    aria-live="polite"
+    hidden
+  ></div>
+
+  <section
+    id="serviq-invoice-summary"
+    class="serviq-invoice-summary"
+    aria-label="Invoice summary"
+  ></section>
+
+  <section class="serviq-invoice-toolbar" aria-label="Invoice filters">
+    <label class="serviq-invoice-search">
+      <span aria-hidden="true">⌕</span>
+      <input
+        id="serviq-invoice-search"
+        type="search"
+        placeholder="Search invoice, customer or work order..."
+        autocomplete="off"
+        aria-label="Search invoices"
+      />
+    </label>
+
+    <label class="serviq-invoice-filter">
+      <span>Payment status</span>
+      <select id="serviq-invoice-status">
+        <option value="all">All statuses</option>
+        <option value="Draft">Draft</option>
+        <option value="Paid">Paid</option>
+        <option value="Overdue">Overdue</option>
+      </select>
+    </label>
+
+    <label class="serviq-invoice-filter">
+      <span>Sort by</span>
+      <select id="serviq-invoice-sort">
+        <option value="date-desc">Newest first</option>
+        <option value="date-asc">Oldest first</option>
+        <option value="amount-desc">Highest amount</option>
+        <option value="amount-asc">Lowest amount</option>
+      </select>
+    </label>
+  </section>
+
+  <div class="serviq-invoice-results-heading">
+    <div>
+      <span class="panel-label">BILLING REGISTER</span>
+      <h2>Invoice records</h2>
+    </div>
+    <span id="serviq-invoice-result-count" class="serviq-invoice-result-count">
+      Loading invoices...
+    </span>
+  </div>
+
+  <section
+    id="serviq-invoice-list"
+    class="serviq-invoice-list"
+    aria-label="Invoices"
+  >
+    <div class="serviq-invoice-table-head" aria-hidden="true">
+      <span>INVOICE / WORK ORDER</span>
+      <span>CUSTOMER</span>
+      <span>AMOUNT</span>
+      <span>ISSUED</span>
+      <span>STATUS</span>
+      <span>ACTIONS</span>
+    </div>
+    <div
+      id="serviq-invoice-rows"
+      class="serviq-invoice-rows"
+      aria-live="polite"
+    ></div>
+  </section>
+
+  <div id="serviq-invoice-empty" class="serviq-invoice-empty" hidden>
+    <span class="serviq-invoice-empty-icon" aria-hidden="true">
+      ₹
+    </span>
+    <h3>No invoices found</h3>
+    <p>Try another search or change the selected payment status.</p>
+    <button class="secondary-action" id="serviq-invoice-reset" type="button">
+      Clear filters
+    </button>
+  </div>
+</section>
+
+<div id="serviq-invoice-modal" class="serviq-invoice-modal" hidden>
+  <section
+    class="serviq-invoice-modal-card"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="serviq-invoice-modal-title"
+  >
+    <header class="serviq-invoice-modal-header">
+      <div>
+        <span class="eyebrow">INVOICE MANAGEMENT</span>
+        <h2 id="serviq-invoice-modal-title">Create invoice</h2>
+        <p id="serviq-invoice-modal-description">
+          Record a bill for a customer and work order.
+        </p>
+      </div>
+      <button
+        type="button"
+        class="serviq-invoice-modal-close"
+        id="serviq-invoice-modal-close"
+        aria-label="Close invoice form"
+      >
+        ×
+      </button>
+    </header>
+
+    <form id="serviq-invoice-form">
+      <div class="serviq-invoice-form-grid">
+        <label class="serviq-invoice-field serviq-invoice-field-wide">
+          <span>
+            Customer <b>*</b>
+          </span>
+          <input
+            name="customer"
+            type="text"
+            maxlength="120"
+            list="serviq-invoice-customer-options"
+            placeholder="Enter a customer name"
+            required
+          />
+          <datalist id="serviq-invoice-customer-options"></datalist>
+        </label>
+
+        <label class="serviq-invoice-field">
+          <span>
+            Work order reference <b>*</b>
+          </span>
+          <input
+            name="workOrder"
+            type="text"
+            maxlength="100"
+            list="serviq-invoice-work-order-options"
+            placeholder="e.g. WO-1048"
+            required
+          />
+          <datalist id="serviq-invoice-work-order-options"></datalist>
+        </label>
+
+        <label class="serviq-invoice-field">
+          <span>
+            Invoice amount (₹) <b>*</b>
+          </span>
+          <input
+            name="amount"
+            type="number"
+            min="0.01"
+            max="100000000000"
+            step="0.01"
+            placeholder="e.g. 2180"
+            required
+          />
+        </label>
+
+        <label class="serviq-invoice-field">
+          <span>
+            Invoice date <b>*</b>
+          </span>
+          <input name="date" type="date" required />
+        </label>
+
+        <label class="serviq-invoice-field">
+          <span>Payment status</span>
+          <select name="status" required>
+            <option value="Draft">Draft</option>
+            <option value="Paid">Paid</option>
+            <option value="Overdue">Overdue</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="serviq-invoice-form-note">
+        <span aria-hidden="true">i</span>
+        This prototype stores invoice records locally. It does not issue legally
+        compliant tax invoices or process payments.
+      </div>
+
+      <div class="serviq-invoice-modal-actions">
+        <button
+          class="secondary-action"
+          id="serviq-invoice-cancel"
+          type="button"
+        >
+          Cancel
+        </button>
+        <button class="primary-action" id="serviq-invoice-save" type="submit">
+          Create Invoice
+        </button>
+      </div>
+    </form>
+  </section>
+</div>
+
+<script>
+  import {
+    createInvoice,
+    deleteInvoice,
+    getState,
+    subscribe,
+    updateInvoice,
+  } from "../../lib/serviq/store";
+
+  import type { Invoice } from "../../data/serviq/invoices";
+
+  const summary = document.querySelector<HTMLElement>(
+    "#serviq-invoice-summary",
+  );
+  const searchInput = document.querySelector<HTMLInputElement>(
+    "#serviq-invoice-search",
+  );
+  const statusFilter = document.querySelector<HTMLSelectElement>(
+    "#serviq-invoice-status",
+  );
+  const sortSelect = document.querySelector<HTMLSelectElement>(
+    "#serviq-invoice-sort",
+  );
+  const resultCount = document.querySelector<HTMLElement>(
+    "#serviq-invoice-result-count",
+  );
+  const invoiceList = document.querySelector<HTMLElement>(
+    "#serviq-invoice-list",
+  );
+  const rowsContainer = document.querySelector<HTMLElement>(
+    "#serviq-invoice-rows",
+  );
+  const emptyState = document.querySelector<HTMLElement>(
+    "#serviq-invoice-empty",
+  );
+  const modal = document.querySelector<HTMLElement>("#serviq-invoice-modal");
+  const form = document.querySelector<HTMLFormElement>("#serviq-invoice-form");
+  const modalTitle = document.querySelector<HTMLElement>(
+    "#serviq-invoice-modal-title",
+  );
+  const modalDescription = document.querySelector<HTMLElement>(
+    "#serviq-invoice-modal-description",
+  );
+  const saveButton = document.querySelector<HTMLButtonElement>(
+    "#serviq-invoice-save",
+  );
+  const feedback = document.querySelector<HTMLElement>(
+    "#serviq-invoice-feedback",
+  );
+  const customerOptions = document.querySelector<HTMLDataListElement>(
+    "#serviq-invoice-customer-options",
+  );
+  const workOrderOptions = document.querySelector<HTMLDataListElement>(
+    "#serviq-invoice-work-order-options",
+  );
+
+  if (
+    summary &&
+    searchInput &&
+    statusFilter &&
+    sortSelect &&
+    resultCount &&
+    invoiceList &&
+    rowsContainer &&
+    emptyState &&
+    modal &&
+    form &&
+    modalTitle &&
+    modalDescription &&
+    saveButton &&
+    feedback &&
+    customerOptions &&
+    workOrderOptions
+  ) {
+    type InvoiceStatus = Invoice["status"];
+
+    const invoiceStatuses: InvoiceStatus[] = ["Draft", "Paid", "Overdue"];
+
+    let editingInvoiceId: string | null = null;
+    let previousBodyOverflow = "";
+    let feedbackTimeout: ReturnType<typeof setTimeout> | undefined;
+
+    const escapeHtml = (value: unknown): string =>
+      String(value ?? "").replace(/[&<>"']/g, (character) => {
+        const entities: Record<string, string> = {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        };
+        return entities[character] ?? character;
+      });
+
+    const formatCurrency = (amount: number): string =>
+      new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 2,
+      }).format(amount);
+
+    const toLocalISODate = (date = new Date()): string => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+
+    const parseDate = (value: string): Date | null => {
+      if (!value.trim()) return null;
+
+      const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+      if (match) {
+        const parsed = new Date(
+          Number(match[1]),
+          Number(match[2]) - 1,
+          Number(match[3]),
+        );
+        return Number.isNaN(parsed.getTime()) ? null : parsed;
+      }
+
+      const parsed = new Date(value);
+      return Number.isNaN(parsed.getTime()) ? null : parsed;
+    };
+
+    const formatDate = (value: string): string => {
+      const date = parseDate(value);
+      if (!date) return value || "—";
+
+      return new Intl.DateTimeFormat("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }).format(date);
+    };
+
+    const toDateInput = (value: string): string => {
+      const date = parseDate(value);
+      return date ? toLocalISODate(date) : toLocalISODate();
+    };
+
+    const showFeedback = (
+      message: string,
+      kind: "success" | "error" = "success",
+    ): void => {
+      if (!feedback) return;
+      if (feedbackTimeout) clearTimeout(feedbackTimeout);
+
+      feedback.textContent = message;
+      feedback.className = `serviq-invoice-feedback ${kind}`;
+      feedback.hidden = false;
+
+      feedbackTimeout = setTimeout(() => {
+        if (feedback) feedback.hidden = true;
+      }, 4000);
+    };
+
+    const updateReferenceOptions = (): void => {
+      const state = getState();
+
+      customerOptions.innerHTML = state.customers
+        .map(
+          (customer) =>
+            `<option value="${escapeHtml(customer.name)}"></option>`,
+        )
+        .join("");
+
+      workOrderOptions.innerHTML = state.workOrders
+        .map(
+          (order) =>
+            `<option value="${escapeHtml(order.id)}">${escapeHtml(order.customer)} — ${escapeHtml(order.service)}</option>`,
+        )
+        .join("");
+    };
+
+    const renderSummary = (invoices: Invoice[]): void => {
+      const total = invoices.reduce((sum, invoice) => sum + invoice.amount, 0);
+      const paidInvoices = invoices.filter(
+        (invoice) => invoice.status === "Paid",
+      );
+      const collected = paidInvoices.reduce(
+        (sum, invoice) => sum + invoice.amount,
+        0,
+      );
+      const outstandingInvoices = invoices.filter(
+        (invoice) => invoice.status !== "Paid",
+      );
+      const outstanding = outstandingInvoices.reduce(
+        (sum, invoice) => sum + invoice.amount,
+        0,
+      );
+      const overdueInvoices = invoices.filter(
+        (invoice) => invoice.status === "Overdue",
+      );
+      const overdue = overdueInvoices.reduce(
+        (sum, invoice) => sum + invoice.amount,
+        0,
+      );
+
+      const metrics = [
+        {
+          label: "Total invoiced",
+          value: formatCurrency(total),
+          note: `${invoices.length} invoice${invoices.length === 1 ? "" : "s"} recorded`,
+          accent: "gold",
+          icon: "₹",
+        },
+        {
+          label: "Collected",
+          value: formatCurrency(collected),
+          note: "Invoices marked as paid",
+          accent: "green",
+          icon: "✓",
+        },
+        {
+          label: "Outstanding",
+          value: formatCurrency(outstanding),
+          note: `${outstandingInvoices.length} unpaid invoice${outstandingInvoices.length === 1 ? "" : "s"}`,
+          accent: "blue",
+          icon: "◷",
+        },
+        {
+          label: "Overdue",
+          value: formatCurrency(overdue),
+          note: `${overdueInvoices.length} overdue invoice${overdueInvoices.length === 1 ? "" : "s"}`,
+          accent: "red",
+          icon: "!",
+        },
+      ];
+
+      summary.innerHTML = metrics
+        .map(
+          (metric) => `
+            <article class="serviq-invoice-metric ${metric.accent}">
+              <div class="serviq-invoice-metric-top">
+                <span>${escapeHtml(metric.label)}</span>
+                <span class="serviq-invoice-metric-icon" aria-hidden="true">${metric.icon}</span>
+              </div>
+              <strong>${escapeHtml(metric.value)}</strong>
+              <small>${escapeHtml(metric.note)}</small>
+            </article>
+          `,
+        )
+        .join("");
+    };
+
+    const renderInvoices = (): void => {
+      const invoices = getState().invoices;
+      const query = searchInput.value.trim().toLowerCase();
+      const selectedStatus = statusFilter.value;
+      const sort = sortSelect.value;
+
+      renderSummary(invoices);
+      updateReferenceOptions();
+
+      const filtered = invoices.filter((invoice) => {
+        const matchesSearch = [
+          invoice.id,
+          invoice.customer,
+          invoice.workOrder,
+          invoice.status,
+          invoice.date,
+        ].some((value) =>
+          String(value ?? "")
+            .toLowerCase()
+            .includes(query),
+        );
+
+        const matchesStatus =
+          selectedStatus === "all" || invoice.status === selectedStatus;
+
+        return matchesSearch && matchesStatus;
+      });
+
+      filtered.sort((first, second) => {
+        if (sort === "amount-desc") return second.amount - first.amount;
+        if (sort === "amount-asc") return first.amount - second.amount;
+
+        const firstDate = parseDate(first.date)?.getTime() ?? 0;
+        const secondDate = parseDate(second.date)?.getTime() ?? 0;
+
+        return sort === "date-asc"
+          ? firstDate - secondDate
+          : secondDate - firstDate;
+      });
+
+      resultCount.textContent = `${filtered.length} of ${invoices.length} invoice${invoices.length === 1 ? "" : "s"}`;
+
+      emptyState.hidden = filtered.length > 0;
+      invoiceList.hidden = filtered.length === 0;
+
+      rowsContainer.innerHTML = filtered
+        .map((invoice) => {
+          const statusClass = invoice.status.toLowerCase();
+
+          const statusOptions = invoiceStatuses
+            .map(
+              (status) =>
+                `<option value="${status}" ${invoice.status === status ? "selected" : ""}>${status}</option>`,
+            )
+            .join("");
+
+          return `
+            <article class="serviq-invoice-row">
+              <div class="serviq-invoice-primary">
+                <strong>${escapeHtml(invoice.id)}</strong>
+                <small>${escapeHtml(invoice.workOrder)}</small>
+              </div>
+
+              <div class="serviq-invoice-customer">
+                <strong>${escapeHtml(invoice.customer)}</strong>
+                <small>Customer</small>
+              </div>
+
+              <strong class="serviq-invoice-amount">${escapeHtml(formatCurrency(invoice.amount))}</strong>
+
+              <span class="serviq-invoice-date">${escapeHtml(formatDate(invoice.date))}</span>
+
+              <label class="serviq-invoice-status-control">
+                <span class="serviq-invoice-status ${statusClass}">
+                  <i></i>
+                  ${escapeHtml(invoice.status)}
+                </span>
+                <select data-action="status" data-invoice-id="${escapeHtml(invoice.id)}" aria-label="Change status for invoice ${escapeHtml(invoice.id)}">
+                  ${statusOptions}
+                </select>
+              </label>
+
+              <div class="serviq-invoice-actions">
+                ${
+                  invoice.status !== "Paid"
+                    ? `<button type="button" class="serviq-invoice-mark-paid" data-action="paid" data-invoice-id="${escapeHtml(invoice.id)}">Mark paid</button>`
+                    : `<span class="serviq-invoice-paid-label">✓ Paid</span>`
+                }
+                <button type="button" class="serviq-invoice-edit" data-action="edit" data-invoice-id="${escapeHtml(invoice.id)}">Edit</button>
+                <button type="button" class="serviq-invoice-delete" data-action="delete" data-invoice-id="${escapeHtml(invoice.id)}" aria-label="Delete invoice ${escapeHtml(invoice.id)}">Delete</button>
+              </div>
+            </article>
+          `;
+        })
+        .join("");
+    };
+
+    const openModal = (invoice?: Invoice): void => {
+      editingInvoiceId = invoice?.id ?? null;
+      form.reset();
+
+      modalTitle.textContent = invoice ? "Edit invoice" : "Create invoice";
+      modalDescription.textContent = invoice
+        ? "Update the customer, work order, amount or payment status."
+        : "Record a bill for a customer and work order.";
+      saveButton.textContent = invoice ? "Save changes" : "Create Invoice";
+
+      const customerInput = form.elements.namedItem(
+        "customer",
+      ) as HTMLInputElement;
+      const workOrderInput = form.elements.namedItem(
+        "workOrder",
+      ) as HTMLInputElement;
+      const amountInput = form.elements.namedItem("amount") as HTMLInputElement;
+      const dateInput = form.elements.namedItem("date") as HTMLInputElement;
+      const statusInput = form.elements.namedItem(
+        "status",
+      ) as HTMLSelectElement;
+
+      if (invoice) {
+        customerInput.value = invoice.customer;
+        workOrderInput.value = invoice.workOrder;
+        amountInput.value = String(invoice.amount);
+        dateInput.value = toDateInput(invoice.date);
+        statusInput.value = invoice.status;
+      } else {
+        dateInput.value = toLocalISODate();
+        statusInput.value = "Draft";
+      }
+
+      previousBodyOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      modal.hidden = false;
+      window.setTimeout(() => customerInput.focus(), 0);
+    };
+
+    const closeModal = (): void => {
+      modal.hidden = true;
+      document.body.style.overflow = previousBodyOverflow;
+      editingInvoiceId = null;
+      form.reset();
+    };
+
+    const setInvoiceStatus = (id: string, status: InvoiceStatus): void => {
+      try {
+        const updated = updateInvoice(id, { status });
+
+        if (!updated) {
+          showFeedback("The invoice could not be found.", "error");
+          return;
+        }
+
+        showFeedback(`${updated.id} status changed to ${updated.status}.`);
+      } catch (error) {
+        showFeedback(
+          error instanceof Error
+            ? error.message
+            : "Unable to update invoice status.",
+          "error",
+        );
+      }
+    };
+
+    const removeInvoice = (id: string): void => {
+      const invoice = getState().invoices.find((item) => item.id === id);
+
+      if (!invoice) {
+        showFeedback("The invoice could not be found.", "error");
+        return;
+      }
+
+      if (
+        !window.confirm(`Delete invoice ${invoice.id} for ${invoice.customer}?`)
+      ) {
+        return;
+      }
+
+      try {
+        if (deleteInvoice(id)) {
+          showFeedback(`${id} was deleted.`);
+        } else {
+          showFeedback("The invoice could not be deleted.", "error");
+        }
+      } catch (error) {
+        showFeedback(
+          error instanceof Error ? error.message : "Unable to delete invoice.",
+          "error",
+        );
+      }
+    };
+
+    document
+      .querySelector<HTMLButtonElement>("#serviq-add-invoice")
+      ?.addEventListener("click", () => openModal());
+
+    document
+      .querySelector<HTMLButtonElement>("#serviq-invoice-modal-close")
+      ?.addEventListener("click", closeModal);
+
+    document
+      .querySelector<HTMLButtonElement>("#serviq-invoice-cancel")
+      ?.addEventListener("click", closeModal);
+
+    document
+      .querySelector<HTMLButtonElement>("#serviq-invoice-reset")
+      ?.addEventListener("click", () => {
+        searchInput.value = "";
+        statusFilter.value = "all";
+        sortSelect.value = "date-desc";
+        renderInvoices();
+      });
+
+    searchInput.addEventListener("input", renderInvoices);
+    statusFilter.addEventListener("change", renderInvoices);
+    sortSelect.addEventListener("change", renderInvoices);
+
+    rowsContainer.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+
+      const button = target.closest<HTMLButtonElement>("button[data-action]");
+      if (!button) return;
+
+      const action = button.dataset.action;
+      const id = button.dataset.invoiceId;
+      if (!id) return;
+
+      const invoice = getState().invoices.find((item) => item.id === id);
+
+      if (!invoice) {
+        showFeedback("The invoice could not be found.", "error");
+        return;
+      }
+
+      if (action === "edit") {
+        openModal(invoice);
+      } else if (action === "paid") {
+        setInvoiceStatus(id, "Paid");
+      } else if (action === "delete") {
+        removeInvoice(id);
+      }
+    });
+
+    rowsContainer.addEventListener("change", (event) => {
+      const target = event.target;
+
+      if (
+        !(target instanceof HTMLSelectElement) ||
+        target.dataset.action !== "status"
+      ) {
+        return;
+      }
+
+      const id = target.dataset.invoiceId;
+      const status = target.value as InvoiceStatus;
+
+      if (id && invoiceStatuses.includes(status)) {
+        setInvoiceStatus(id, status);
+      }
+    });
+
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) closeModal();
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !modal.hidden) closeModal();
+    });
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(form);
+      const customer = String(formData.get("customer") ?? "").trim();
+      const workOrder = String(formData.get("workOrder") ?? "").trim();
+      const amount = Number(formData.get("amount"));
+      const date = String(formData.get("date") ?? "");
+      const status = String(formData.get("status") ?? "") as InvoiceStatus;
+
+      if (!customer || !workOrder || !date) {
+        showFeedback(
+          "Enter the customer, work order reference and invoice date.",
+          "error",
+        );
+        return;
+      }
+
+      if (!Number.isFinite(amount) || amount <= 0 || amount > 100000000000) {
+        showFeedback(
+          "Enter a valid invoice amount greater than zero.",
+          "error",
+        );
+        return;
+      }
+
+      if (!invoiceStatuses.includes(status)) {
+        showFeedback("Choose a valid invoice status.", "error");
+        return;
+      }
+
+      const payload = {
+        customer,
+        workOrder,
+        amount: Math.round(amount * 100) / 100,
+        date,
+        status,
+      };
+
+      try {
+        if (editingInvoiceId) {
+          const updated = updateInvoice(editingInvoiceId, payload);
+
+          if (!updated) {
+            showFeedback("This invoice could not be found.", "error");
+            return;
+          }
+
+          closeModal();
+          showFeedback(`${updated.id} was updated successfully.`);
+          return;
+        }
+
+        const state = getState();
+        const year = new Date().getFullYear();
+        let id = "";
+        let attempts = 0;
+
+        do {
+          id = `INV-${year}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+          attempts += 1;
+        } while (
+          state.invoices.some((invoice) => invoice.id === id) &&
+          attempts < 10
+        );
+
+        if (state.invoices.some((invoice) => invoice.id === id)) {
+          showFeedback(
+            "Could not generate a unique invoice number. Please retry.",
+            "error",
+          );
+          return;
+        }
+
+        createInvoice({ id, ...payload });
+        closeModal();
+        showFeedback(`${id} was created successfully.`);
+      } catch (error) {
+        showFeedback(
+          error instanceof Error ? error.message : "Unable to save invoice.",
+          "error",
+        );
+      }
+    });
+
+    subscribe(renderInvoices);
+    renderInvoices();
+  }
+</script>
+
+<style is:global>
+  .serviq-invoice-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin: 28px 0 24px;
+  }
+
+  .serviq-invoice-metric {
+    min-width: 0;
+    padding: 21px 22px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.09));
+    border-radius: 18px;
+    background: var(--panel, #101814);
+  }
+
+  .serviq-invoice-metric-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--muted, #97a59c);
+    font-size: 12px;
+    font-weight: 650;
+  }
+
+  .serviq-invoice-metric-icon {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    place-items: center;
+    border: 1px solid currentColor;
+    border-radius: 11px;
+    font-size: 16px;
+  }
+
+  .serviq-invoice-metric.gold .serviq-invoice-metric-icon {
+    color: var(--gold, #d6b568);
+    background: rgba(214, 181, 104, 0.08);
+  }
+
+  .serviq-invoice-metric.green .serviq-invoice-metric-icon {
+    color: #79d9a3;
+    background: rgba(121, 217, 163, 0.08);
+  }
+
+  .serviq-invoice-metric.blue .serviq-invoice-metric-icon {
+    color: #85c7ee;
+    background: rgba(133, 199, 238, 0.08);
+  }
+
+  .serviq-invoice-metric.red .serviq-invoice-metric-icon {
+    color: #f09a9a;
+    background: rgba(240, 154, 154, 0.08);
+  }
+
+  .serviq-invoice-metric > strong {
+    display: block;
+    margin: 12px 0 5px;
+    color: var(--text, #edf3ed);
+    font-size: clamp(23px, 2vw, 32px);
+    font-weight: 680;
+    line-height: 1.25;
+    letter-spacing: -0.045em;
+    overflow-wrap: anywhere;
+  }
+
+  .serviq-invoice-metric > small {
+    color: var(--muted, #97a59c);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .serviq-invoice-toolbar {
+    display: flex;
+    align-items: end;
+    gap: 14px;
+    margin-bottom: 32px;
+    padding: 17px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.09));
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.018);
+  }
+
+  .serviq-invoice-search {
+    display: flex;
+    min-width: 180px;
+    min-height: 46px;
+    flex: 1;
+    align-items: center;
+    gap: 10px;
+    padding: 0 13px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+    border-radius: 11px;
+    background: var(--panel, #101814);
+    color: var(--muted, #97a59c);
+  }
+
+  .serviq-invoice-search > span {
+    font-size: 22px;
+    line-height: 1;
+  }
+
+  .serviq-invoice-search input {
+    width: 100%;
+    min-width: 0;
+    padding: 11px 0;
+    border: 0;
+    outline: none;
+    color: var(--text, #edf3ed);
+    background: transparent;
+    font: inherit;
+    font-size: 13px;
+  }
+
+  .serviq-invoice-search input::placeholder {
+    color: var(--muted, #97a59c);
+    opacity: 0.8;
+  }
+
+  .serviq-invoice-filter {
+    display: grid;
+    min-width: 155px;
+    gap: 7px;
+  }
+
+  .serviq-invoice-filter > span {
+    color: var(--muted, #97a59c);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.045em;
+    text-transform: uppercase;
+  }
+
+  .serviq-invoice-filter select {
+    width: 100%;
+    min-height: 46px;
+    padding: 0 31px 0 12px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+    border-radius: 11px;
+    color: var(--text, #edf3ed);
+    background: var(--panel, #101814);
+    font: inherit;
+    font-size: 12px;
+  }
+
+  .serviq-invoice-results-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+  }
+
+  .serviq-invoice-results-heading h2 {
+    margin: 7px 0 0;
+    color: var(--text, #edf3ed);
+    font-size: 21px;
+    font-weight: 620;
+    letter-spacing: -0.025em;
+  }
+
+  .serviq-invoice-result-count {
+    padding-bottom: 3px;
+    color: var(--muted, #97a59c);
+    font-size: 12px;
+  }
+
+  .serviq-invoice-list {
+    overflow: hidden;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.09));
+    border-radius: 17px;
+    background: var(--panel, #101814);
+  }
+
+  .serviq-invoice-table-head,
+  .serviq-invoice-row {
+    display: grid;
+    grid-template-columns:
+      minmax(130px, 1.05fr)
+      minmax(120px, 1fr)
+      minmax(115px, 0.8fr)
+      minmax(95px, 0.75fr)
+      minmax(100px, 0.7fr)
+      minmax(160px, 1.2fr);
+    align-items: center;
+    gap: 15px;
+  }
+
+  .serviq-invoice-table-head {
+    padding: 15px 19px;
+    border-bottom: 1px solid var(--line, rgba(255, 255, 255, 0.09));
+    color: var(--muted, #97a59c);
+    font-size: 9px;
+    font-weight: 750;
+    letter-spacing: 0.06em;
+  }
+
+  .serviq-invoice-row {
+    padding: 18px 19px;
+    border-bottom: 1px solid var(--line, rgba(255, 255, 255, 0.065));
+    transition: background 150ms ease;
+  }
+
+  .serviq-invoice-row:last-child {
+    border-bottom: 0;
+  }
+
+  .serviq-invoice-row:hover {
+    background: rgba(255, 255, 255, 0.018);
+  }
+
+  .serviq-invoice-primary,
+  .serviq-invoice-customer {
+    display: grid;
+    min-width: 0;
+    gap: 6px;
+  }
+
+  .serviq-invoice-primary strong,
+  .serviq-invoice-customer strong {
+    color: var(--text, #edf3ed);
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  .serviq-invoice-primary small,
+  .serviq-invoice-customer small {
+    color: var(--muted, #97a59c);
+    font-size: 10px;
+    overflow-wrap: anywhere;
+  }
+
+  .serviq-invoice-amount {
+    color: var(--text, #edf3ed);
+    font-size: 13px;
+    font-weight: 680;
+    overflow-wrap: anywhere;
+  }
+
+  .serviq-invoice-date {
+    color: var(--muted, #97a59c);
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  .serviq-invoice-status-control {
+    display: grid;
+    min-width: 0;
+    gap: 7px;
+  }
+
+  .serviq-invoice-status {
+    display: inline-flex;
+    width: fit-content;
+    max-width: 100%;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    border: 1px solid rgba(214, 181, 104, 0.2);
+    border-radius: 8px;
+    color: #e6c078;
+    background: rgba(214, 181, 104, 0.055);
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .serviq-invoice-status > i {
+    width: 6px;
+    height: 6px;
+    flex: 0 0 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .serviq-invoice-status.paid {
+    border-color: rgba(121, 217, 163, 0.2);
+    color: #79d9a3;
+    background: rgba(121, 217, 163, 0.055);
+  }
+
+  .serviq-invoice-status.overdue {
+    border-color: rgba(240, 154, 154, 0.23);
+    color: #f09a9a;
+    background: rgba(240, 154, 154, 0.055);
+  }
+
+  .serviq-invoice-status-control select {
+    width: 100%;
+    min-width: 0;
+    padding: 5px 7px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.09));
+    border-radius: 7px;
+    color: var(--muted, #97a59c);
+    background: var(--panel, #101814);
+    font: inherit;
+    font-size: 10px;
+  }
+
+  .serviq-invoice-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .serviq-invoice-mark-paid,
+  .serviq-invoice-edit,
+  .serviq-invoice-delete {
+    min-height: 31px;
+    padding: 0 8px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+    border-radius: 8px;
+    color: var(--text, #edf3ed);
+    background: rgba(255, 255, 255, 0.025);
+    font: inherit;
+    font-size: 10px;
+    cursor: pointer;
+  }
+
+  .serviq-invoice-mark-paid {
+    border-color: rgba(121, 217, 163, 0.22);
+    color: #8fddb0;
+    background: rgba(121, 217, 163, 0.05);
+  }
+
+  .serviq-invoice-mark-paid:hover {
+    border-color: rgba(121, 217, 163, 0.5);
+  }
+
+  .serviq-invoice-edit:hover {
+    border-color: rgba(214, 181, 104, 0.4);
+  }
+
+  .serviq-invoice-delete {
+    border-color: rgba(237, 117, 117, 0.2);
+    color: #e99a9a;
+  }
+
+  .serviq-invoice-delete:hover {
+    border-color: rgba(237, 117, 117, 0.45);
+    background: rgba(237, 117, 117, 0.06);
+  }
+
+  .serviq-invoice-paid-label {
+    color: #79d9a3;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .serviq-invoice-feedback {
+    margin: 18px 0 0;
+    padding: 12px 15px;
+    border: 1px solid rgba(121, 217, 163, 0.25);
+    border-radius: 11px;
+    color: #a1e8bb;
+    background: rgba(121, 217, 163, 0.055);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .serviq-invoice-feedback.error {
+    border-color: rgba(237, 117, 117, 0.3);
+    color: #f0a5a5;
+    background: rgba(237, 117, 117, 0.06);
+  }
+
+  .serviq-invoice-feedback[hidden],
+  .serviq-invoice-list[hidden],
+  .serviq-invoice-modal[hidden],
+  .serviq-invoice-empty[hidden] {
+    display: none !important;
+  }
+
+  .serviq-invoice-empty {
+    padding: 56px 20px;
+    border: 1px dashed var(--line, rgba(255, 255, 255, 0.12));
+    border-radius: 18px;
+    text-align: center;
+  }
+
+  .serviq-invoice-empty-icon {
+    display: inline-grid;
+    width: 46px;
+    height: 46px;
+    place-items: center;
+    border-radius: 14px;
+    color: var(--gold, #d6b568);
+    background: rgba(214, 181, 104, 0.08);
+    font-size: 24px;
+  }
+
+  .serviq-invoice-empty h3 {
+    margin: 16px 0 7px;
+    color: var(--text, #edf3ed);
+    font-size: 18px;
+  }
+
+  .serviq-invoice-empty p {
+    margin: 0 0 18px;
+    color: var(--muted, #97a59c);
+    font-size: 13px;
+  }
+
+  .serviq-invoice-modal {
+    position: fixed;
+    z-index: 10000;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    overflow: auto;
+    padding: 24px;
+    background: rgba(2, 7, 5, 0.78);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .serviq-invoice-modal-card {
+    width: min(100%, 650px);
+    max-height: min(90vh, 850px);
+    overflow: auto;
+    padding: 28px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.12));
+    border-radius: 20px;
+    background: var(--panel, #101814);
+    box-shadow: 0 28px 100px rgba(0, 0, 0, 0.5);
+  }
+
+  .serviq-invoice-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 25px;
+  }
+
+  .serviq-invoice-modal-header h2 {
+    margin: 9px 0 7px;
+    color: var(--text, #edf3ed);
+    font-size: 25px;
+    font-weight: 680;
+    letter-spacing: -0.035em;
+  }
+
+  .serviq-invoice-modal-header p {
+    margin: 0;
+    color: var(--muted, #97a59c);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .serviq-invoice-modal-close {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    place-items: center;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+    border-radius: 11px;
+    color: var(--text, #edf3ed);
+    background: rgba(255, 255, 255, 0.025);
+    font: inherit;
+    font-size: 25px;
+    cursor: pointer;
+  }
+
+  .serviq-invoice-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 14px;
+  }
+
+  .serviq-invoice-field {
+    display: grid;
+    min-width: 0;
+    gap: 8px;
+  }
+
+  .serviq-invoice-field-wide {
+    grid-column: 1 / -1;
+  }
+
+  .serviq-invoice-field > span {
+    color: var(--text, #edf3ed);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .serviq-invoice-field > span b {
+    color: var(--gold, #d6b568);
+  }
+
+  .serviq-invoice-field input,
+  .serviq-invoice-field select {
+    width: 100%;
+    min-width: 0;
+    min-height: 45px;
+    padding: 11px 12px;
+    border: 1px solid var(--line, rgba(255, 255, 255, 0.12));
+    border-radius: 10px;
+    outline-offset: 3px;
+    color: var(--text, #edf3ed);
+    background: rgba(255, 255, 255, 0.025);
+    font: inherit;
+    font-size: 13px;
+  }
+
+  .serviq-invoice-field input:focus,
+  .serviq-invoice-field select:focus,
+  .serviq-invoice-search:focus-within,
+  .serviq-invoice-filter select:focus {
+    border-color: rgba(214, 181, 104, 0.55);
+  }
+
+  .serviq-invoice-field input::placeholder {
+    color: var(--muted, #97a59c);
+    opacity: 0.75;
+  }
+
+  .serviq-invoice-form-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    margin-top: 20px;
+    color: var(--muted, #97a59c);
+    font-size: 11px;
+    line-height: 1.6;
+  }
+
+  .serviq-invoice-form-note > span {
+    display: inline-grid;
+    width: 17px;
+    height: 17px;
+    flex: 0 0 17px;
+    place-items: center;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    font-size: 10px;
+  }
+
+  .serviq-invoice-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 26px;
+    padding-top: 19px;
+    border-top: 1px solid var(--line, rgba(255, 255, 255, 0.09));
+  }
+
+  .serviq-invoice-modal-actions button {
+    min-height: 43px;
+    justify-content: center;
+  }
+
+  @media (max-width: 1250px) {
+    .serviq-invoice-table-head {
+      display: none;
+    }
+
+    .serviq-invoice-row {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      padding: 20px;
+    }
+
+    .serviq-invoice-primary,
+    .serviq-invoice-customer {
+      grid-column: span 1;
+    }
+
+    .serviq-invoice-actions {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 1050px) {
+    .serviq-invoice-summary {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .serviq-invoice-toolbar {
+      flex-wrap: wrap;
+    }
+
+    .serviq-invoice-search {
+      flex-basis: 100%;
+    }
+
+    .serviq-invoice-filter {
+      flex: 1;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .serviq-invoice-summary {
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .serviq-invoice-metric {
+      padding: 15px;
+      border-radius: 14px;
+    }
+
+    .serviq-invoice-metric-top {
+      align-items: flex-start;
+      font-size: 11px;
+    }
+
+    .serviq-invoice-metric-icon {
+      width: 29px;
+      height: 29px;
+      flex-basis: 29px;
+    }
+
+    .serviq-invoice-metric > strong {
+      margin-top: 13px;
+      font-size: 23px;
+    }
+
+    .serviq-invoice-metric > small {
+      font-size: 11px;
+    }
+
+    .serviq-invoice-toolbar {
+      align-items: stretch;
+      gap: 12px;
+      padding: 12px;
+    }
+
+    .serviq-invoice-filter {
+      min-width: calc(50% - 6px);
+    }
+
+    .serviq-invoice-filter select {
+      min-height: 43px;
+      padding-left: 9px;
+      font-size: 11px;
+    }
+
+    .serviq-invoice-results-heading {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .serviq-invoice-row {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px 12px;
+      padding: 16px;
+    }
+
+    .serviq-invoice-primary,
+    .serviq-invoice-customer,
+    .serviq-invoice-amount,
+    .serviq-invoice-date,
+    .serviq-invoice-status-control {
+      grid-column: span 1;
+    }
+
+    .serviq-invoice-status-control select {
+      font-size: 10px;
+    }
+
+    .serviq-invoice-actions {
+      grid-column: 1 / -1;
+    }
+
+    .serviq-invoice-modal {
+      align-items: start;
+      padding: 12px;
+    }
+
+    .serviq-invoice-modal-card {
+      max-height: none;
+      padding: 20px;
+      border-radius: 16px;
+    }
+
+    .serviq-invoice-modal-header h2 {
+      font-size: 22px;
+    }
+
+    .serviq-invoice-form-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .serviq-invoice-field-wide {
+      grid-column: auto;
+    }
+
+    .serviq-invoice-modal-actions {
+      flex-direction: column-reverse;
+    }
+
+    .serviq-invoice-modal-actions button {
+      width: 100%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .serviq-invoice-row {
+      transition: none;
+    }
+  }
+</style>

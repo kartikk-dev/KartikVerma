@@ -1,0 +1,57 @@
+---
+interface Props {
+  id: string;
+  customer: string;
+  service: string;
+  location: string;
+  status: string;
+  priority: string;
+  amount: number;
+  issue: string;
+}
+
+const { id, customer, service, location, status, priority, amount, issue } =
+  Astro.props;
+
+const initials = customer
+  .split(" ")
+  .map((word) => word[0])
+  .join("");
+
+const statusClass = status.toLowerCase().replaceAll(" ", "-");
+const priorityClass = priority.toLowerCase();
+---
+
+<button
+  type="button"
+  class="work-order-card work-order-trigger"
+  data-work-order={id}
+>
+  <div class="wo-card-top">
+    <span>{id}</span>
+
+    <span class={`priority ${priorityClass}`}>{priority}</span>
+  </div>
+
+  <h3>{service}</h3>
+
+  <p>{issue}</p>
+
+  <div class="wo-card-customer">
+    <span class="mini-avatar">{initials}</span>
+
+    <div>
+      <strong>{customer}</strong>
+      <small>{location}</small>
+    </div>
+  </div>
+
+  <div class="wo-card-footer">
+    <span class={`status-badge status-${statusClass}`}>
+      <i></i>
+      {status}
+    </span>
+
+    <strong>₹{amount.toLocaleString("en-IN")}</strong>
+  </div>
+</button>

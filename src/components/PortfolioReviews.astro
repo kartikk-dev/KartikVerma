@@ -1,0 +1,832 @@
+
+---
+const supabaseUrl = (
+  import.meta.env.PUBLIC_SUPABASE_URL ?? ""
+).trim().replace(/\/+$/, "");
+
+const supabaseKey = (
+  import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+  import.meta.env.PUBLIC_SUPABASE_ANON_KEY ??
+  ""
+).trim();
+
+const isDev = import.meta.env.DEV;
+---
+
+<section
+  id="reviews"
+  class="portfolio-reviews"
+  data-reviews-root
+  data-supabase-url={supabaseUrl}
+  data-supabase-key={supabaseKey}
+  data-dev-preview={String(isDev)}
+  aria-labelledby="reviews-heading"
+>
+  <div class="reviews-atmosphere" aria-hidden="true"></div>
+
+  <div class="reviews-container">
+    <header class="reviews-header">
+      <div class="reviews-heading-copy">
+        <p class="reviews-eyebrow">
+          <span class="reviews-eyebrow-mark" aria-hidden="true"></span>
+          REVIEWS
+        </p>
+
+        <h2 id="reviews-heading">
+          Work speaks.
+          <span>Feedback matters.</span>
+        </h2>
+
+        <p class="reviews-description">
+          Feedback from people who have worked with Kartik.
+          Each published review is checked before it appears here.
+        </p>
+      </div>
+
+      <button
+        class="reviews-add-button"
+        type="button"
+        data-review-open
+        aria-controls="review-form-dialog"
+      >
+        <span aria-hidden="true">+</span>
+        Add a Review
+      </button>
+    </header>
+
+    <div
+      class="reviews-stage"
+      data-review-stage
+      aria-label="Published reviews carousel"
+      aria-roledescription="carousel"
+    >
+      <div class="reviews-track" data-review-track hidden></div>
+
+      <div class="reviews-empty" data-review-empty>
+        <span class="reviews-empty-mark" aria-hidden="true"></span>
+        <h3 class="reviews-empty-title">No reviews published yet.</h3>
+        <p>
+          Have you worked with Kartik? Share your honest experience.
+          Approved reviews will appear here.
+        </p>
+
+        <button
+          type="button"
+          class="reviews-empty-button"
+          data-review-open
+        >
+          Write a Review
+          <span aria-hidden="true">↗</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <dialog
+    class="reviews-dialog"
+    id="review-form-dialog"
+    data-review-dialog
+    aria-labelledby="review-form-title"
+    aria-describedby="review-form-description"
+  >
+    <form class="reviews-form" data-review-form>
+      <header class="reviews-form-header">
+        <div class="reviews-form-heading">
+          <p class="reviews-eyebrow">
+            <span class="reviews-eyebrow-mark" aria-hidden="true"></span>
+            YOUR EXPERIENCE
+          </p>
+
+          <h3 id="review-form-title">Write a Review</h3>
+
+          <p id="review-form-description">
+            Tell others about your genuine experience of working with Kartik.
+          </p>
+        </div>
+
+        <button
+          class="reviews-close-button"
+          type="button"
+          data-review-close
+          aria-label="Close review form"
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+      </header>
+
+      <label class="reviews-field">
+        <span>Your name</span>
+        <input
+          name="reviewer_name"
+          type="text"
+          required
+          minlength="2"
+          maxlength="60"
+          autocomplete="name"
+          placeholder="Enter your name"
+        />
+      </label>
+
+      <label class="reviews-field">
+        <span>Your review</span>
+        <textarea
+          name="review_text"
+          data-review-text
+          required
+          minlength="10"
+          maxlength="1000"
+          rows="5"
+          placeholder="Share your experience in your own words."
+        ></textarea>
+
+        <span class="reviews-character-count">
+          <span data-review-count>0</span> / 1000 characters
+        </span>
+      </label>
+
+      <div class="reviews-consent">
+        <input
+          id="review-consent"
+          type="checkbox"
+          name="review_consent"
+          required
+        />
+
+        <label for="review-consent">
+          I confirm that this is my own honest feedback. I agree to the
+          <a href="/portfolio-terms" target="_blank" rel="noopener noreferrer">
+            Terms of Use
+          </a>
+          and
+          <a href="/portfolio-privacy" target="_blank" rel="noopener noreferrer">
+            Privacy Policy
+          </a>
+          and consent to my name and review being displayed publicly if the
+          review is approved.
+        </label>
+      </div>
+
+      <p class="reviews-privacy-note">
+        Please do not include passwords, financial details, or other sensitive
+        personal information.
+      </p>
+
+      <label class="reviews-honeypot" aria-hidden="true">
+        Leave this field empty
+        <input
+          name="website"
+          type="text"
+          tabindex="-1"
+          autocomplete="off"
+        />
+      </label>
+
+      <p
+        class="reviews-form-message"
+        data-review-message
+        role="alert"
+        aria-live="assertive"
+        hidden
+      ></p>
+
+      <button
+        class="reviews-submit-button"
+        type="submit"
+        data-review-submit
+      >
+        <span>Submit Review</span>
+        <span aria-hidden="true">↗</span>
+      </button>
+
+      <p class="reviews-form-footnote">
+        Your review will be checked before publication. Submitting a review
+        does not guarantee publication.
+      </p>
+    </form>
+  </dialog>
+
+  <div
+    class="reviews-toast"
+    data-review-toast
+    role="status"
+    aria-live="polite"
+    hidden
+  ></div>
+</section>
+
+<script>
+  import "./PortfolioReviews.client.ts";
+</script>
+
+<style is:global>
+  .portfolio-reviews {
+    --reviews-background: #0c090a;
+    --reviews-surface: #151012;
+    --reviews-text: #f5e7e8;
+    --reviews-muted: #b7a7aa;
+    --reviews-accent: #e44752;
+
+    position: relative;
+    isolation: isolate;
+    width: 100%;
+    padding: clamp(74px, 8vw, 108px) 0;
+    overflow: clip;
+    color: var(--reviews-text);
+    background: var(--reviews-background);
+    scroll-margin-top: 95px;
+  }
+
+  .portfolio-reviews *,
+  .portfolio-reviews *::before,
+  .portfolio-reviews *::after {
+    box-sizing: border-box;
+  }
+
+  .portfolio-reviews .reviews-atmosphere {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(
+        ellipse at 84% 18%,
+        rgba(228, 71, 82, 0.075),
+        transparent 35%
+      ),
+      radial-gradient(
+        ellipse at 12% 82%,
+        rgba(132, 29, 46, 0.05),
+        transparent 32%
+      );
+  }
+
+  .portfolio-reviews .reviews-container {
+    width: min(1160px, calc(100% - 48px));
+    margin-inline: auto;
+  }
+
+  .portfolio-reviews .reviews-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 28px;
+    margin-bottom: 20px;
+  }
+
+  .portfolio-reviews .reviews-heading-copy {
+    max-width: 720px;
+    min-width: 0;
+  }
+
+  .portfolio-reviews .reviews-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 17px;
+    color: #cba9ae;
+    font-size: 0.7rem;
+    font-weight: 650;
+    letter-spacing: 0.14em;
+    line-height: 1.6;
+  }
+
+  .portfolio-reviews .reviews-eyebrow-mark {
+    width: 22px;
+    height: 2px;
+    flex: 0 0 auto;
+    background: var(--reviews-accent);
+  }
+
+  .portfolio-reviews .reviews-heading-copy h2 {
+    margin: 0;
+    color: var(--reviews-text);
+    font-size: clamp(2.25rem, 4.6vw, 3.8rem);
+    font-weight: 650;
+    letter-spacing: -0.045em;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+  }
+
+  .portfolio-reviews .reviews-heading-copy h2 span {
+    display: block;
+    color: #e66a73;
+  }
+
+  .portfolio-reviews .reviews-description {
+    max-width: 580px;
+    margin: 16px 0 0;
+    color: var(--reviews-muted);
+    font-size: 0.91rem;
+    line-height: 1.8;
+  }
+
+  .portfolio-reviews .reviews-add-button,
+  .portfolio-reviews .reviews-empty-button,
+  .portfolio-reviews .reviews-submit-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 11px;
+    min-height: 46px;
+    padding: 11px 16px;
+    border: 1px solid #77404a;
+    border-radius: 5px;
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 650;
+    line-height: 1.45;
+    text-align: center;
+    cursor: pointer;
+    transition:
+      color 160ms ease,
+      background-color 160ms ease,
+      border-color 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .portfolio-reviews .reviews-add-button {
+    flex: 0 0 auto;
+    color: var(--reviews-text);
+    background: #140e10;
+  }
+
+  .portfolio-reviews .reviews-add-button > span {
+    color: var(--reviews-accent);
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+
+  .portfolio-reviews .reviews-add-button:hover {
+    border-color: var(--reviews-accent);
+    background: #1b1013;
+  }
+
+  .portfolio-reviews .reviews-empty-button,
+  .portfolio-reviews .reviews-submit-button {
+    color: #fff;
+    border-color: var(--reviews-accent);
+    background: var(--reviews-accent);
+  }
+
+  .portfolio-reviews .reviews-empty-button:hover,
+  .portfolio-reviews .reviews-submit-button:hover {
+    border-color: var(--form-accent, #f15b66);
+    background: var(--form-accent, #f15b66);
+  }
+
+  .portfolio-reviews .reviews-stage {
+    position: relative;
+    min-height: 340px;
+    overflow: hidden;
+    perspective: 1200px;
+    perspective-origin: 50% 48%;
+    transform-style: preserve-3d;
+    touch-action: pan-y;
+  }
+
+  .portfolio-reviews .reviews-track {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+  }
+
+  .portfolio-reviews .reviews-track[hidden],
+  .portfolio-reviews .reviews-empty[hidden],
+  .portfolio-reviews .reviews-toast[hidden],
+  .portfolio-reviews .reviews-form-message[hidden] {
+    display: none !important;
+  }
+
+  /* Each card gets its own accent color from the client script. */
+
+  .portfolio-reviews .review-card {
+    --review-color: #e44752;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: min(400px, calc(100% - 36px));
+    min-height: 235px;
+    max-height: 315px;
+    padding: clamp(22px, 3vw, 32px);
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--review-color) 45%, #392329);
+    border-radius: 17px;
+    background:
+      linear-gradient(
+        145deg,
+        color-mix(in srgb, var(--review-color) 7%, #171012),
+        #110c0e 78%
+      );
+    transform-origin: center center;
+    backface-visibility: hidden;
+    transition:
+      transform 520ms ease,
+      opacity 450ms ease,
+      filter 450ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .portfolio-reviews .review-card.is-active {
+    border-color: var(--review-color);
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--review-color) 20%, transparent),
+      0 15px 42px rgba(0, 0, 0, 0.32),
+      0 0 28px color-mix(in srgb, var(--review-color) 20%, transparent);
+  }
+
+  .portfolio-reviews .review-card:focus-visible {
+    outline: 2px solid var(--review-color);
+    outline-offset: 4px;
+  }
+
+  .portfolio-reviews .review-card-name {
+    margin: 0 0 15px;
+    color: var(--review-color);
+    font-size: clamp(1.25rem, 1.9vw, 1.55rem);
+    font-weight: 650;
+    letter-spacing: -0.03em;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+
+  .portfolio-reviews .review-card-text {
+    display: -webkit-box;
+    margin: 0;
+    overflow: hidden;
+    color: #d0c1c4;
+    font-size: 0.91rem;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 6;
+    line-clamp: 6;
+  }
+
+  .portfolio-reviews .reviews-empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 13px;
+    padding: 24px;
+    color: var(--reviews-muted);
+    text-align: center;
+  }
+
+  .portfolio-reviews .reviews-empty-mark {
+    width: 28px;
+    height: 2px;
+    margin-bottom: 6px;
+    background: var(--reviews-accent);
+  }
+
+  .portfolio-reviews .reviews-empty-title {
+    margin: 0;
+    color: var(--reviews-text);
+    font-size: 1.25rem;
+    font-weight: 650;
+    line-height: 1.4;
+  }
+
+  .portfolio-reviews .reviews-empty p:not(.reviews-empty-title) {
+    max-width: 430px;
+    margin: 0 0 8px;
+    color: var(--reviews-muted);
+    font-size: 0.84rem;
+    line-height: 1.8;
+  }
+
+  /* Review form dialog */
+
+  .portfolio-reviews .reviews-dialog {
+    --reviews-accent: var(--form-accent, #e44752);
+
+    width: min(590px, calc(100% - 28px));
+    max-width: 100%;
+    max-height: min(90vh, 790px);
+    max-height: min(90svh, 790px);
+    padding: 0;
+    overflow: auto;
+    border: 1px solid color-mix(in srgb, var(--reviews-accent) 52%, #392329);
+    border-radius: 10px;
+    color: var(--reviews-text);
+    background: #110b0d;
+    box-shadow: 0 24px 90px rgba(0, 0, 0, 0.7);
+  }
+
+  .portfolio-reviews .reviews-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.78);
+    backdrop-filter: blur(5px);
+  }
+
+  .portfolio-reviews .reviews-form {
+    padding: clamp(21px, 4vw, 33px);
+  }
+
+  .portfolio-reviews .reviews-form-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 26px;
+  }
+
+  .portfolio-reviews .reviews-form-heading {
+    min-width: 0;
+  }
+
+  .portfolio-reviews .reviews-form-header .reviews-eyebrow {
+    margin-bottom: 14px;
+  }
+
+  .portfolio-reviews .reviews-form-header h3 {
+    margin: 0;
+    color: var(--reviews-text);
+    font-size: clamp(1.65rem, 4.5vw, 1.95rem);
+    font-weight: 650;
+    letter-spacing: -0.04em;
+    line-height: 1.2;
+  }
+
+  .portfolio-reviews .reviews-form-header p:not(.reviews-eyebrow) {
+    margin: 9px 0 0;
+    color: var(--reviews-muted);
+    font-size: 0.84rem;
+    line-height: 1.75;
+  }
+
+  .portfolio-reviews .reviews-close-button {
+    display: grid;
+    flex: 0 0 auto;
+    width: 37px;
+    height: 37px;
+    place-items: center;
+    border: 1px solid #57313a;
+    border-radius: 6px;
+    color: var(--reviews-text);
+    background: #1a1013;
+    cursor: pointer;
+  }
+
+  .portfolio-reviews .reviews-close-button:hover {
+    border-color: var(--reviews-accent);
+  }
+
+  .portfolio-reviews .reviews-close-button span {
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .portfolio-reviews .reviews-field {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin: 0 0 21px;
+    color: #f0e2e4;
+    font-size: 0.83rem;
+    font-weight: 650;
+  }
+
+  .portfolio-reviews .reviews-field input,
+  .portfolio-reviews .reviews-field textarea {
+    width: 100%;
+    min-width: 0;
+    border: 1px solid #42272d;
+    border-radius: 6px;
+    padding: 13px 14px;
+    color: var(--reviews-text);
+    background: #171012;
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 450;
+    line-height: 1.7;
+    outline: none;
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .portfolio-reviews .reviews-field input:focus,
+  .portfolio-reviews .reviews-field textarea:focus {
+    border-color: var(--reviews-accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--reviews-accent) 18%, transparent);
+  }
+
+  .portfolio-reviews .reviews-field input::placeholder,
+  .portfolio-reviews .reviews-field textarea::placeholder {
+    color: #938186;
+  }
+
+  .portfolio-reviews .reviews-field textarea {
+    min-height: 132px;
+    max-height: 320px;
+    resize: vertical;
+  }
+
+  .portfolio-reviews .reviews-character-count {
+    color: #a28d91;
+    font-size: 0.72rem;
+    font-weight: 450;
+    text-align: right;
+  }
+
+  .portfolio-reviews .reviews-consent {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 4px 0 14px;
+    color: #d0c0c3;
+    font-size: 0.78rem;
+    line-height: 1.8;
+  }
+
+  .portfolio-reviews .reviews-consent input {
+    flex: 0 0 auto;
+    width: 16px;
+    height: 16px;
+    margin-top: 4px;
+    accent-color: var(--reviews-accent);
+  }
+
+  .portfolio-reviews .reviews-consent label {
+    min-width: 0;
+    cursor: pointer;
+  }
+
+  .portfolio-reviews .reviews-consent a,
+  .portfolio-reviews .reviews-privacy-note a {
+    color: var(--reviews-accent);
+    text-underline-offset: 3px;
+  }
+
+  .portfolio-reviews .reviews-consent a:hover,
+  .portfolio-reviews .reviews-privacy-note a:hover {
+    text-decoration-thickness: 2px;
+  }
+
+  .portfolio-reviews .reviews-privacy-note {
+    margin: 0 0 20px;
+    color: #a9979b;
+    font-size: 0.75rem;
+    line-height: 1.8;
+  }
+
+  .portfolio-reviews .reviews-honeypot {
+    position: absolute !important;
+    left: -10000px !important;
+    width: 1px !important;
+    height: 1px !important;
+    overflow: hidden !important;
+  }
+
+  .portfolio-reviews .reviews-form-message {
+    margin: 0 0 16px;
+    color: #ff9aa1;
+    font-size: 0.8rem;
+    line-height: 1.7;
+  }
+
+  .portfolio-reviews .reviews-submit-button {
+    width: 100%;
+    justify-content: space-between;
+    min-height: 49px;
+  }
+
+  .portfolio-reviews .reviews-submit-button:disabled {
+    opacity: 0.62;
+    cursor: wait;
+  }
+
+  .portfolio-reviews .reviews-form-footnote {
+    margin: 14px 0 0;
+    color: #a28d91;
+    font-size: 0.72rem;
+    line-height: 1.7;
+  }
+
+  .portfolio-reviews .reviews-toast {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 2000;
+    width: min(410px, calc(100vw - 36px));
+    padding: 15px 17px;
+    border: 1px solid #71343e;
+    border-radius: 7px;
+    color: var(--reviews-text);
+    background: #171012;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4);
+    font-size: 0.82rem;
+    line-height: 1.7;
+  }
+
+  .portfolio-reviews button:focus-visible,
+  .portfolio-reviews a:focus-visible {
+    outline: 2px solid var(--reviews-accent, #ff9299);
+    outline-offset: 4px;
+  }
+
+  @media (max-width: 760px) {
+    .portfolio-reviews .reviews-container {
+      width: calc(100% - 36px);
+    }
+
+    .portfolio-reviews .reviews-header {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .portfolio-reviews .reviews-heading-copy h2 {
+      font-size: clamp(2.15rem, 7.8vw, 3.15rem);
+    }
+
+    .portfolio-reviews .reviews-description {
+      font-size: 0.87rem;
+    }
+
+    .portfolio-reviews .reviews-stage {
+      min-height: 330px;
+      perspective: 950px;
+    }
+
+    .portfolio-reviews .review-card {
+      width: min(330px, calc(100% - 28px));
+      min-height: 228px;
+      max-height: 300px;
+      padding: 22px;
+      border-radius: 15px;
+    }
+
+    .portfolio-reviews .review-card-name {
+      margin-bottom: 13px;
+      font-size: 1.32rem;
+    }
+
+    .portfolio-reviews .review-card-text {
+      font-size: 0.86rem;
+      line-height: 1.75;
+    }
+  }
+
+  @media (max-width: 430px) {
+    .portfolio-reviews {
+      padding: 66px 0;
+      scroll-margin-top: 80px;
+    }
+
+    .portfolio-reviews .reviews-container {
+      width: calc(100% - 28px);
+    }
+
+    .portfolio-reviews .reviews-stage {
+      min-height: 315px;
+    }
+
+    .portfolio-reviews .review-card {
+      width: min(300px, calc(100% - 22px));
+      min-height: 220px;
+      max-height: 295px;
+      padding: 19px;
+      border-radius: 14px;
+    }
+
+    .portfolio-reviews .review-card-text {
+      font-size: 0.82rem;
+      -webkit-line-clamp: 7;
+      line-clamp: 7;
+    }
+
+    .portfolio-reviews .reviews-dialog {
+      width: calc(100% - 20px);
+      border-radius: 9px;
+    }
+
+    .portfolio-reviews .reviews-form {
+      padding: 19px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .portfolio-reviews *,
+    .portfolio-reviews *::before,
+    .portfolio-reviews *::after {
+      scroll-behavior: auto !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      transition-delay: 0ms !important;
+    }
+  }
+</style>

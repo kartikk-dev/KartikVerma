@@ -1,0 +1,1180 @@
+
+---
+const navItems = [
+  { id: "home", label: "Home" },
+  { id: "about", label: "About" },
+  { id: "engineering-core", label: "Engineering" },
+  { id: "technologies", label: "Technologies" },
+  { id: "projects", label: "Projects" },
+  { id: "reviews", label: "Reviews" },
+  { id: "blog", label: "Blog" },
+  { id: "contact", label: "Contact" },
+];
+---
+
+<header class="site-header">
+  <nav class="navbar" aria-label="Main navigation">
+    <a class="navbar-brand" href="#home" aria-label="Kartik Verma, home">
+      <span class="brand-avatar">
+        <img
+          src="/memoji/kartik.png"
+          alt=""
+          width="36"
+          height="36"
+          decoding="async"
+        />
+      </span>
+      <span class="brand-name">Kartik Verma</span>
+    </a>
+
+    <div class="desktop-nav">
+      {
+        navItems.map((item) => (
+          <a
+            href={`#${item.id}`}
+            class:list={["nav-link", item.id === "home" && "is-active"]}
+            data-section={item.id}
+          >
+            <span>{item.label}</span>
+          </a>
+        ))
+      }
+    </div>
+
+    <a class="connect-button" href="#contact">
+      <span>Let's Connect</span>
+      <span class="connect-arrow" aria-hidden="true">↗</span>
+    </a>
+
+    <button
+      class="mobile-menu-button"
+      type="button"
+      aria-label="Open navigation"
+      aria-expanded="false"
+      aria-controls="mobile-menu"
+    >
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+      {
+        navItems.map((item) => (
+          <a
+            href={`#${item.id}`}
+            class:list={[
+              "mobile-nav-link",
+              item.id === "home" && "is-active",
+            ]}
+            data-section={item.id}
+          >
+            <span class="mobile-link-label">{item.label}</span>
+          </a>
+        ))
+      }
+
+      <a class="mobile-connect" href="#contact">
+        <span>Let's Connect</span>
+        <span aria-hidden="true">↗</span>
+      </a>
+    </div>
+  </nav>
+</header>
+
+<button
+  class="go-top-button"
+  type="button"
+  data-go-top
+  aria-label="Go on top"
+  aria-hidden="true"
+  tabindex="-1"
+>
+  <span class="go-top-icon-wrap" aria-hidden="true">
+    <svg
+      class="go-top-rocket"
+      data-go-top-rocket
+      viewBox="0 0 32 32"
+      fill="none"
+    >
+      <path
+        d="M18.8 4.1C23.1 2.7 27.1 3 28.8 3.2C29 5 29.3 9 27.9 13.3C26.4 17.9 22.2 22.1 16.4 24.1L10 17.7C12 11.9 16.2 7.7 18.8 4.1Z"
+        fill="currentColor"
+        fill-opacity=".2"
+        stroke="currentColor"
+        stroke-width="1.7"
+        stroke-linejoin="round"
+      />
+      <circle
+        cx="21.4"
+        cy="10.8"
+        r="2.6"
+        stroke="currentColor"
+        stroke-width="1.7"
+      />
+      <path
+        d="m10 17.7-4.8 1.1-2.1 5.5 7.5-1.8M16.4 24.1l-1.1 4.8-5.5 2.1 1.8-7.5"
+        stroke="currentColor"
+        stroke-width="1.7"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+      <path
+        class="rocket-flame"
+        d="M10.7 21.9C7.8 23.2 6.5 26 6.1 28.5C8.8 28.1 11.5 26.8 12.8 23.9"
+        stroke="#FFB1B8"
+        stroke-width="2"
+        stroke-linecap="round"
+      />
+      <path
+        d="M4.2 13.3L2 15.7M6.8 8.9L4.8 9.3M20.5 28.1L21 25.9"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        opacity=".75"
+      />
+    </svg>
+  </span>
+
+  <span class="go-top-label">Go on Top</span>
+  <span class="go-top-spark" aria-hidden="true"></span>
+</button>
+
+<script>
+  type SectionEntry = {
+    id: string;
+    section: HTMLElement;
+  };
+
+  const header = document.querySelector<HTMLElement>(".site-header");
+  const navbar = document.querySelector<HTMLElement>(".navbar");
+  const menuButton = document.querySelector<HTMLButtonElement>(
+    ".mobile-menu-button",
+  );
+  const mobileMenu = document.querySelector<HTMLElement>("#mobile-menu");
+
+  const goTopButton = document.querySelector<HTMLButtonElement>(
+    "[data-go-top]",
+  );
+  const rocketIcon = document.querySelector<SVGElement>(
+    "[data-go-top-rocket]",
+  );
+
+  const navLinks = Array.from(
+    document.querySelectorAll<HTMLAnchorElement>("[data-section]"),
+  );
+
+  const desktopLinks = navLinks.filter((link) =>
+    link.classList.contains("nav-link"),
+  );
+
+  const reducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  );
+
+  const sections: SectionEntry[] = desktopLinks
+    .map((link): SectionEntry | null => {
+      const id = link.dataset.section ?? "";
+      const element = document.getElementById(id);
+
+      return element instanceof HTMLElement
+        ? { id, section: element }
+        : null;
+    })
+    .filter((entry): entry is SectionEntry => entry !== null);
+
+  const mobileMenuLinks = mobileMenu
+    ? Array.from(mobileMenu.querySelectorAll<HTMLAnchorElement>("a"))
+    : [];
+
+  let menuOpen = false;
+  let activeFrame: number | null = null;
+  let pendingScrollId: string | null = null;
+
+  let isRocketLaunching = false;
+  let rocketAnimationFinished = false;
+  let hasReachedTop = false;
+
+  const setActiveSection = (activeId: string): void => {
+    navLinks.forEach((link) => {
+      const isActive = link.dataset.section === activeId;
+
+      link.classList.toggle("is-active", isActive);
+
+      if (isActive) {
+        link.setAttribute("aria-current", "location");
+      } else {
+        link.removeAttribute("aria-current");
+      }
+    });
+  };
+
+  const setMenuState = (open: boolean): void => {
+    menuOpen = open;
+
+    mobileMenu?.classList.toggle("is-open", open);
+    menuButton?.classList.toggle("is-open", open);
+
+    menuButton?.setAttribute("aria-expanded", String(open));
+    menuButton?.setAttribute(
+      "aria-label",
+      open ? "Close navigation" : "Open navigation",
+    );
+
+    mobileMenu?.setAttribute("aria-hidden", String(!open));
+  };
+
+  const closeMenu = (): void => setMenuState(false);
+
+  const openMenu = (): void => setMenuState(true);
+
+  const updateGoTopVisibility = (): void => {
+    if (!goTopButton) return;
+
+    const shouldShow = window.scrollY > 350 || isRocketLaunching;
+
+    goTopButton.classList.toggle("is-visible", shouldShow);
+    goTopButton.setAttribute("aria-hidden", String(!shouldShow));
+    goTopButton.tabIndex = shouldShow ? 0 : -1;
+  };
+
+  const getScrollOffset = (): number => {
+    const navbarBottom = navbar?.getBoundingClientRect().bottom ?? 82;
+    return navbarBottom + 20;
+  };
+
+  const scrollToSection = (
+    target: HTMLElement,
+    id: string,
+    instant = false,
+  ): void => {
+    pendingScrollId = id;
+    setActiveSection(id);
+
+    const targetTop =
+      target.getBoundingClientRect().top +
+      window.scrollY -
+      getScrollOffset();
+
+    window.scrollTo({
+      top: Math.max(0, targetTop),
+      behavior:
+        instant || reducedMotion.matches ? "auto" : "smooth",
+    });
+
+    requestActiveUpdate();
+  };
+
+  const updateActiveSection = (): void => {
+    activeFrame = null;
+
+    updateGoTopVisibility();
+
+    if (sections.length === 0) return;
+
+    const isAtPageBottom =
+      window.innerHeight + window.scrollY >=
+      document.documentElement.scrollHeight - 8;
+
+    const homeEntry = sections.find((entry) => entry.id === "home");
+
+    if (window.scrollY < 80 && homeEntry) {
+      pendingScrollId = null;
+      setActiveSection("home");
+      return;
+    }
+
+    const marker = getScrollOffset() + 8;
+
+    // Keep the clicked link active throughout smooth scrolling.
+    if (pendingScrollId) {
+      const targetEntry = sections.find(
+        (entry) => entry.id === pendingScrollId,
+      );
+
+      if (targetEntry) {
+        const targetTop = targetEntry.section.getBoundingClientRect().top;
+
+        const targetReached =
+          Math.abs(targetTop - getScrollOffset()) < 45 ||
+          (isAtPageBottom &&
+            targetEntry.id === sections[sections.length - 1].id) ||
+          (pendingScrollId === "home" && window.scrollY < 5);
+
+        if (!targetReached) {
+          setActiveSection(pendingScrollId);
+          return;
+        }
+
+        pendingScrollId = null;
+      } else {
+        pendingScrollId = null;
+      }
+    }
+
+    let activeId = sections[0].id;
+
+    for (const entry of sections) {
+      const sectionTop = entry.section.getBoundingClientRect().top;
+
+      if (sectionTop <= marker) {
+        activeId = entry.id;
+      } else {
+        break;
+      }
+    }
+
+    // The final section should become active at the very end of the page.
+    if (isAtPageBottom) {
+      activeId = sections[sections.length - 1].id;
+    }
+
+    setActiveSection(activeId);
+  };
+
+  function requestActiveUpdate(): void {
+    if (activeFrame !== null) return;
+
+    activeFrame = window.requestAnimationFrame(updateActiveSection);
+  }
+
+  const navigateToHash = (hash: string, instant = false): void => {
+    if (!hash.startsWith("#") || hash.length < 2) return;
+
+    const id = decodeURIComponent(hash.slice(1));
+    const target = document.getElementById(id);
+
+    if (!(target instanceof HTMLElement)) return;
+
+    scrollToSection(target, id, instant);
+  };
+
+  // Intercept local navbar links for a consistent header offset and immediate highlight.
+  const localNavAnchors = navbar
+    ? Array.from(navbar.querySelectorAll<HTMLAnchorElement>('a[href^="#"]'))
+    : [];
+
+  localNavAnchors.forEach((link) => {
+    link.addEventListener("click", (event: MouseEvent) => {
+      const href = link.getAttribute("href");
+
+      if (!href || !href.startsWith("#")) return;
+
+      const target = document.getElementById(href.slice(1));
+
+      if (!(target instanceof HTMLElement)) return;
+
+      event.preventDefault();
+      closeMenu();
+
+      const id = target.id;
+      setActiveSection(id);
+
+      if (window.location.hash !== href) {
+        window.history.pushState({ section: id }, "", href);
+      }
+
+      scrollToSection(target, id);
+    });
+  });
+
+  menuButton?.addEventListener("click", () => {
+    if (menuOpen) {
+      closeMenu();
+    } else {
+      openMenu();
+    }
+  });
+
+  mobileMenuLinks.forEach((link) => {
+    link.addEventListener("click", closeMenu);
+  });
+
+  document.addEventListener("pointerdown", (event: PointerEvent) => {
+    if (!menuOpen || !(event.target instanceof Node)) return;
+
+    if (header && !header.contains(event.target)) {
+      closeMenu();
+    }
+  });
+
+  document.addEventListener("keydown", (event: KeyboardEvent) => {
+    if (event.key === "Escape" && menuOpen) {
+      closeMenu();
+      menuButton?.focus();
+    }
+
+    if (
+      isRocketLaunching &&
+      ["PageDown", "ArrowDown", "Home", "End", " "].includes(event.key)
+    ) {
+      pendingScrollId = null;
+    }
+  });
+
+  window.addEventListener(
+    "wheel",
+    () => {
+      pendingScrollId = null;
+    },
+    { passive: true },
+  );
+
+  window.addEventListener(
+    "touchmove",
+    () => {
+      pendingScrollId = null;
+    },
+    { passive: true },
+  );
+
+  window.addEventListener("scroll", requestActiveUpdate, {
+    passive: true,
+  });
+
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 900) closeMenu();
+    requestActiveUpdate();
+  });
+
+  window.addEventListener("hashchange", () => {
+    navigateToHash(window.location.hash);
+  });
+
+  window.addEventListener("popstate", () => {
+    if (window.location.hash) {
+      navigateToHash(window.location.hash);
+    } else {
+      window.scrollTo({
+        top: 0,
+        behavior: reducedMotion.matches ? "auto" : "smooth",
+      });
+      setActiveSection("home");
+    }
+  });
+
+  // The button remains visible during flight and until the page actually reaches the top.
+  const finishRocketLaunch = (): void => {
+    if (!isRocketLaunching) return;
+
+    isRocketLaunching = false;
+    rocketAnimationFinished = false;
+    hasReachedTop = false;
+
+    goTopButton?.classList.remove("is-launching");
+    goTopButton?.setAttribute("aria-label", "Go on top");
+
+    pendingScrollId = null;
+    setActiveSection("home");
+    updateGoTopVisibility();
+    requestActiveUpdate();
+  };
+
+  const watchScrollToTop = (): void => {
+    if (!isRocketLaunching) return;
+
+    if (window.scrollY <= 2) {
+      hasReachedTop = true;
+
+      if (rocketAnimationFinished || reducedMotion.matches) {
+        finishRocketLaunch();
+      }
+
+      return;
+    }
+
+    window.requestAnimationFrame(watchScrollToTop);
+  };
+
+  rocketIcon?.addEventListener("animationend", (event: AnimationEvent) => {
+    if (event.animationName !== "go-top-rocket-launch") return;
+
+    rocketAnimationFinished = true;
+
+    if (hasReachedTop || window.scrollY <= 2) {
+      finishRocketLaunch();
+    }
+  });
+
+  goTopButton?.addEventListener("click", () => {
+    if (isRocketLaunching || window.scrollY <= 2) return;
+
+    isRocketLaunching = true;
+    rocketAnimationFinished = false;
+    hasReachedTop = false;
+    pendingScrollId = "home";
+
+    setActiveSection("home");
+
+    goTopButton.classList.add("is-visible", "is-launching");
+    goTopButton.setAttribute("aria-label", "Rocket returning to top");
+    goTopButton.setAttribute("aria-hidden", "false");
+    goTopButton.tabIndex = 0;
+
+    if (reducedMotion.matches) {
+      window.scrollTo({ top: 0, behavior: "auto" });
+      hasReachedTop = true;
+      rocketAnimationFinished = true;
+      finishRocketLaunch();
+      return;
+    }
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.requestAnimationFrame(watchScrollToTop);
+  });
+
+  reducedMotion.addEventListener("change", () => {
+    if (reducedMotion.matches && isRocketLaunching) {
+      window.scrollTo({ top: 0, behavior: "auto" });
+      hasReachedTop = true;
+      rocketAnimationFinished = true;
+      finishRocketLaunch();
+    }
+
+    requestActiveUpdate();
+  });
+
+  // Respect a direct link such as /#engineering-core on initial page load.
+  window.addEventListener(
+    "load",
+    () => {
+      if (window.location.hash) {
+        navigateToHash(window.location.hash, true);
+      } else {
+        requestActiveUpdate();
+      }
+    },
+    { once: true },
+  );
+
+  requestActiveUpdate();
+</script>
+
+<style>
+  :global(html) {
+    scroll-behavior: smooth;
+  }
+
+  .site-header {
+    position: fixed;
+    top: 16px;
+    right: 0;
+    left: 0;
+    z-index: 1000;
+    padding-inline: 20px;
+    pointer-events: none;
+  }
+
+  .navbar {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 22px;
+    width: min(1240px, 100%);
+    min-height: 66px;
+    margin-inline: auto;
+    padding: 8px 12px;
+    border: 1px solid rgba(228, 71, 82, 0.2);
+    border-radius: 10px;
+    background: rgba(18, 13, 15, 0.92);
+    box-shadow:
+      0 14px 40px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.025);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    pointer-events: auto;
+  }
+
+  .navbar-brand {
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    gap: 10px;
+    min-width: 0;
+    color: #f5e7e8;
+    text-decoration: none;
+  }
+
+  .brand-avatar {
+    display: grid;
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    overflow: hidden;
+    border: 1px solid rgba(228, 71, 82, 0.4);
+    border-radius: 7px;
+    background: #1b1013;
+  }
+
+  .brand-avatar img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .brand-name {
+    color: #f5e7e8;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+
+  .desktop-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(3px, 0.45vw, 8px);
+    min-width: 0;
+  }
+
+  .nav-link {
+    position: relative;
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    border-radius: 4px;
+    color: #b7a7aa;
+    font-size: 12px;
+    font-weight: 550;
+    line-height: 1.4;
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      color 200ms ease,
+      background-color 200ms ease;
+  }
+
+  .nav-link::after {
+    position: absolute;
+    right: 10px;
+    bottom: 4px;
+    left: 10px;
+    height: 2px;
+    border-radius: 2px;
+    background: #e44752;
+    box-shadow: 0 0 9px rgba(228, 71, 82, 0.25);
+    content: "";
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 240ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .nav-link:hover,
+  .nav-link.is-active {
+    color: #fff0f0;
+    background: rgba(228, 71, 82, 0.08);
+  }
+
+  .nav-link.is-active::after {
+    transform: scaleX(1);
+  }
+
+  .connect-button {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    justify-self: end;
+    gap: 12px;
+    padding: 0 14px;
+    border: 1px solid #e44752;
+    border-radius: 5px;
+    color: #fff;
+    background: #e44752;
+    font-size: 12px;
+    font-weight: 650;
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms ease;
+  }
+
+  .connect-button:hover {
+    border-color: #f15b66;
+    background: #f15b66;
+    box-shadow: 0 0 22px rgba(228, 71, 82, 0.22);
+    transform: translateY(-1px);
+  }
+
+  .connect-arrow {
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  .mobile-menu-button,
+  .mobile-menu {
+    display: none;
+  }
+
+  .navbar a:focus-visible,
+  .mobile-menu-button:focus-visible {
+    outline: 2px solid #ff8990;
+    outline-offset: 4px;
+  }
+
+  /* Floating Go on Top button */
+
+  .go-top-button {
+    position: fixed;
+    right: 25px;
+    bottom: 24px;
+    z-index: 1200;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 0 15px;
+    overflow: visible;
+    border: 1px solid rgba(240, 91, 105, 0.72);
+    border-radius: 7px;
+    color: #fff2f3;
+    background:
+      linear-gradient(180deg, rgba(240, 91, 105, 0.22), rgba(228, 71, 82, 0.09)),
+      rgba(18, 11, 14, 0.96);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.11),
+      0 5px 20px rgba(0, 0, 0, 0.24),
+      0 0 15px rgba(228, 71, 82, 0.09);
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.35;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(12px) scale(0.97);
+    transition:
+      opacity 220ms ease,
+      visibility 220ms ease,
+      transform 220ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      background-color 180ms ease;
+  }
+
+  .go-top-button.is-visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+  }
+
+  .go-top-button::before {
+    position: absolute;
+    z-index: -1;
+    inset: -6px;
+    border-radius: 10px;
+    background: rgba(228, 71, 82, 0.18);
+    content: "";
+    filter: blur(15px);
+    opacity: 0;
+    transition: opacity 220ms ease;
+  }
+
+  .go-top-button:hover,
+  .go-top-button:focus-visible {
+    border-color: #ff8a94;
+    background:
+      linear-gradient(180deg, rgba(240, 91, 105, 0.35), rgba(228, 71, 82, 0.16)),
+      rgba(18, 11, 14, 0.98);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.16),
+      0 7px 25px rgba(0, 0, 0, 0.3),
+      0 0 24px rgba(228, 71, 82, 0.22);
+  }
+
+  .go-top-button:hover::before,
+  .go-top-button:focus-visible::before {
+    opacity: 1;
+  }
+
+  .go-top-button:focus-visible {
+    outline: 2px solid #ff9aa1;
+    outline-offset: 4px;
+  }
+
+  .go-top-icon-wrap {
+    position: relative;
+    display: grid;
+    width: 25px;
+    height: 25px;
+    flex: 0 0 25px;
+    place-items: center;
+    overflow: visible;
+  }
+
+  .go-top-rocket {
+    display: block;
+    width: 23px;
+    height: 23px;
+    overflow: visible;
+    transform: rotate(-35deg);
+    transform-origin: center;
+  }
+
+  .rocket-flame {
+    transform-origin: 10px 24px;
+    animation: rocket-idle-flame 260ms ease-in-out infinite alternate;
+  }
+
+  .go-top-label {
+    display: inline-block;
+    white-space: nowrap;
+    transition:
+      opacity 150ms ease,
+      transform 180ms ease;
+  }
+
+  .go-top-spark {
+    position: absolute;
+    right: 8px;
+    bottom: 5px;
+    left: 8px;
+    height: 1px;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, #ff7f8a, transparent);
+    opacity: 0;
+  }
+
+  .go-top-button.is-launching {
+    border-color: #ff9ca4;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      0 0 20px rgba(228, 71, 82, 0.25),
+      0 0 40px rgba(228, 71, 82, 0.22);
+    animation: go-top-button-glow 700ms ease-in-out infinite alternate;
+  }
+
+  .go-top-button.is-launching::before {
+    opacity: 1;
+    animation: go-top-aura 850ms ease-in-out infinite alternate;
+  }
+
+  .go-top-button.is-launching .go-top-rocket {
+    animation: go-top-rocket-launch 900ms cubic-bezier(0.22, 0.72, 0.22, 1) forwards;
+  }
+
+  .go-top-button.is-launching .rocket-flame {
+    animation: rocket-flight-flame 100ms ease-in-out infinite alternate;
+  }
+
+  .go-top-button.is-launching .go-top-label {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+
+  .go-top-button.is-launching .go-top-spark {
+    opacity: 1;
+    animation: go-top-spark-flash 500ms ease-in-out infinite alternate;
+  }
+
+  @keyframes go-top-rocket-launch {
+    0% {
+      opacity: 1;
+      transform: translate(0, 0) rotate(-35deg) scale(1);
+    }
+    25% {
+      opacity: 1;
+      transform: translate(2px, -12px) rotate(-42deg) scale(1.08);
+    }
+    65% {
+      opacity: 1;
+      transform: translate(13px, -54px) rotate(-45deg) scale(1.12);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(24px, -100px) rotate(-48deg) scale(0.8);
+    }
+  }
+
+  @keyframes rocket-idle-flame {
+    from { opacity: 0.6; }
+    to { opacity: 1; }
+  }
+
+  @keyframes rocket-flight-flame {
+    from { opacity: 0.55; }
+    to { opacity: 1; }
+  }
+
+  @keyframes go-top-button-glow {
+    from { box-shadow: 0 0 14px rgba(228, 71, 82, 0.17); }
+    to { box-shadow: 0 0 31px rgba(228, 71, 82, 0.4); }
+  }
+
+  @keyframes go-top-aura {
+    from { opacity: 0.55; }
+    to { opacity: 1; }
+  }
+
+  @keyframes go-top-spark-flash {
+    from { opacity: 0.3; transform: scaleX(0.6); }
+    to { opacity: 1; transform: scaleX(1); }
+  }
+
+  @media (max-width: 1120px) {
+    .navbar {
+      gap: 12px;
+    }
+
+    .nav-link {
+      padding-inline: 7px;
+      font-size: 11px;
+    }
+
+    .brand-name {
+      font-size: 12px;
+    }
+
+    .connect-button {
+      gap: 8px;
+      padding-inline: 10px;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .site-header {
+      top: 12px;
+      padding-inline: 12px;
+    }
+
+    .navbar {
+      display: flex;
+      min-height: 58px;
+      gap: 12px;
+      padding: 8px;
+      border-radius: 9px;
+    }
+
+    .brand-name {
+      font-size: 13px;
+    }
+
+    .desktop-nav,
+    .connect-button {
+      display: none;
+    }
+
+    .mobile-menu-button {
+      display: inline-flex;
+      flex: 0 0 40px;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 5px;
+      width: 40px;
+      height: 40px;
+      margin-left: auto;
+      padding: 0;
+      border: 1px solid rgba(228, 71, 82, 0.28);
+      border-radius: 6px;
+      background: #1a1013;
+      cursor: pointer;
+    }
+
+    .mobile-menu-button > span {
+      display: block;
+      width: 17px;
+      height: 2px;
+      border-radius: 1px;
+      background: #f5e7e8;
+      transition:
+        transform 180ms ease,
+        opacity 180ms ease,
+        background-color 180ms ease;
+    }
+
+    .mobile-menu-button:hover > span {
+      background: #ff707a;
+    }
+
+    .mobile-menu-button.is-open > span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+
+    .mobile-menu-button.is-open > span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .mobile-menu-button.is-open > span:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+
+    .mobile-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      max-height: calc(100svh - 100px);
+      padding: 9px;
+      overflow-y: auto;
+      border: 1px solid rgba(228, 71, 82, 0.24);
+      border-radius: 9px;
+      background: rgba(18, 13, 15, 0.98);
+      box-shadow: 0 22px 48px rgba(0, 0, 0, 0.42);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(-5px);
+      transition:
+        opacity 180ms ease,
+        visibility 180ms ease,
+        transform 180ms ease;
+    }
+
+    .mobile-menu.is-open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .mobile-nav-link {
+      display: flex;
+      min-height: 44px;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 16px;
+      padding: 0 13px;
+      border-left: 2px solid transparent;
+      border-radius: 3px;
+      color: #c5b7ba;
+      font-size: 13px;
+      font-weight: 550;
+      text-decoration: none;
+      transition:
+        color 180ms ease,
+        background-color 180ms ease,
+        border-color 180ms ease;
+    }
+
+    .mobile-nav-link:hover,
+    .mobile-nav-link.is-active {
+      border-left-color: #e44752;
+      background: rgba(228, 71, 82, 0.09);
+      color: #fff0f0;
+    }
+
+    .mobile-connect {
+      display: flex;
+      min-height: 45px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 7px;
+      padding: 0 13px;
+      border: 1px solid #e44752;
+      border-radius: 5px;
+      background: #e44752;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 650;
+      text-decoration: none;
+      transition:
+        background-color 180ms ease,
+        box-shadow 180ms ease;
+    }
+
+    .mobile-connect:hover {
+      background: #f15b66;
+      box-shadow: 0 0 18px rgba(228, 71, 82, 0.2);
+    }
+
+    .mobile-connect > span:last-child {
+      font-size: 16px;
+    }
+
+    .go-top-button {
+      right: 16px;
+      bottom: 17px;
+      min-height: 45px;
+      padding-inline: 12px;
+    }
+
+    .go-top-icon-wrap {
+      width: 23px;
+      height: 23px;
+      flex-basis: 23px;
+    }
+
+    .go-top-rocket {
+      width: 21px;
+      height: 21px;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .site-header {
+      padding-inline: 9px;
+    }
+
+    .brand-avatar {
+      flex-basis: 32px;
+      width: 32px;
+      height: 32px;
+    }
+
+    .brand-name {
+      font-size: 12px;
+    }
+
+    .go-top-button {
+      right: 12px;
+      bottom: 13px;
+      min-height: 42px;
+      padding-inline: 10px;
+      font-size: 0.73rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(html) {
+      scroll-behavior: auto;
+    }
+
+    .nav-link,
+    .nav-link::after,
+    .connect-button,
+    .mobile-menu-button > span,
+    .mobile-menu,
+    .mobile-nav-link,
+    .mobile-connect,
+    .go-top-button,
+    .go-top-button::before,
+    .go-top-label {
+      transition: none !important;
+    }
+
+    .go-top-button,
+    .go-top-button.is-launching {
+      animation: none !important;
+    }
+
+    .go-top-button.is-launching .go-top-rocket {
+      animation: none !important;
+      opacity: 1;
+      transform: rotate(-35deg);
+    }
+
+    .go-top-button.is-launching .rocket-flame,
+    .go-top-button.is-launching .go-top-spark {
+      animation: none !important;
+    }
+  }
+</style>

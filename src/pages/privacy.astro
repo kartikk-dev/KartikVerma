@@ -1,0 +1,81 @@
+---
+import MovieFlexLegalLayout from "../layouts/MovieFlexLegalLayout.astro";
+---
+
+<MovieFlexLegalLayout
+  title="Privacy policy"
+  description="What MovieFlex stores, what it sends to data providers, and how to control your local data."
+  eyebrow="PRIVACY"
+>
+  <h2>At a glance</h2>
+  <p>
+    MovieFlex is a movie-discovery interface. It lets you search titles, view
+    metadata, and check reported streaming availability. The current version
+    does not require an account.
+  </p>
+  <div class="legal-note">
+    The watchlist and privacy choice are stored in your browser. MovieFlex does
+    not currently install analytics or advertising trackers.
+  </div>
+  <h2>Information processed</h2>
+  <ul>
+    <li>
+      <strong>Searches and filters:</strong> the movie title, list, genre, page,
+      or country you choose is sent to the MovieFlex API endpoint so it can
+      request the relevant data from TMDB.
+    </li>
+    <li>
+      <strong>Watchlist:</strong> saved movie IDs and basic display details are
+      stored in your browser's local storage on this device.
+    </li>
+    <li>
+      <strong>Privacy choice:</strong> a small local-storage entry remembers
+      that you selected essential-only storage.
+    </li>
+    <li>
+      <strong>Technical requests:</strong> the browser and server may process
+      standard connection information needed to deliver pages and API responses.
+      Hosting and network providers may maintain their own logs.
+    </li>
+  </ul>
+  <h2>Data sources</h2>
+  <p>
+    Movie metadata and poster images are supplied by TMDB. Streaming
+    availability is returned through TMDB using data powered by JustWatch. When
+    your browser loads third-party images or you follow an external link, those
+    services may receive technical information under their own policies.
+  </p>
+  <h2>How data is used</h2>
+  <p>
+    Data is used to return search results, display movie details and reported
+    availability, save your on-device list, and remember your privacy setting.
+    The current version does not use your searches for advertising or analytics
+    profiling.
+  </p>
+  <h2>Retention and deletion</h2>
+  <p>
+    Your watchlist remains in this browser until you remove saved titles or
+    clear this site's local storage. Use{" "}
+    <a href="/privacy-settings">Privacy settings</a> to clear the watchlist.
+    Clearing site data in your browser also removes the saved list and local
+    privacy choice.
+  </p>
+  <h2>Children and sensitive information</h2>
+  <p>
+    MovieFlex is not designed to collect personal profiles or sensitive personal
+    information. Do not submit sensitive information in search fields.
+  </p>
+  <h2>Third-party sites</h2>
+  <p>
+    TMDB, JustWatch, and streaming providers operate independently. Once you
+    leave MovieFlex, their terms and privacy notices apply to your interactions
+    with them.
+  </p>
+  <h2>Changes and contact</h2>
+  <p>
+    This notice may be updated as the project changes. This is a portfolio
+    project; no dedicated privacy contact address has been configured yet. For
+    questions, use the contact method published by the project owner on the
+    portfolio site.
+  </p>
+</MovieFlexLegalLayout>
