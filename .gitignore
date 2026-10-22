@@ -61,3 +61,5 @@ public/favicon copy.svg
 # Local notes and diagnostic output
 REPAIR-NOTES.md
 serviq-build-errors.txt
+.vercel
+.env*
