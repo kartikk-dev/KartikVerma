@@ -1,4 +1,4 @@
--- Portfolio review carousel: run once in Supabase Dashboard > SQL Editor.
+-- Portfolio review carousel for new Supabase installations.
 -- Public visitors can read approved reviews and submit new pending reviews.
 -- Visitors cannot approve, edit, or delete reviews.
 
@@ -8,12 +8,15 @@ create table if not exists public.portfolio_reviews (
   id uuid primary key default gen_random_uuid(),
   reviewer_name text not null check (char_length(btrim(reviewer_name)) between 2 and 60),
   reviewer_role text check (reviewer_role is null or char_length(reviewer_role) <= 80),
-  work_area text not null check (char_length(work_area) between 1 and 100),
-  relationship text not null check (char_length(relationship) between 1 and 100),
-  rating integer not null check (rating between 1 and 5),
   review_title text check (review_title is null or char_length(review_title) <= 90),
-  review_text text not null check (char_length(btrim(review_text)) between 20 and 1200),
+  review_text text not null check (char_length(btrim(review_text)) between 20 and 1000),
   status text not null default 'pending' check (status in ('pending', 'approved', 'rejected')),
+  publication_consent boolean not null default false,
+  publication_consent_at timestamptz,
+  constraint portfolio_reviews_consent_timestamp_check check (
+    (publication_consent is false and publication_consent_at is null)
+    or (publication_consent is true and publication_consent_at is not null)
+  ),
   created_at timestamptz not null default now()
 );
 
@@ -49,12 +52,17 @@ create policy "Public can read approved portfolio reviews"
   to anon, authenticated
   using (status = 'approved');
 
--- The website may submit pending reviews only; no public approval path exists.
+-- The website may submit explicitly consented pending reviews only; no public
+-- approval path exists.
 create policy "Public can submit pending portfolio reviews"
   on public.portfolio_reviews
   for insert
   to anon, authenticated
-  with check (status = 'pending');
+  with check (
+    status = 'pending'
+    and publication_consent is true
+    and publication_consent_at is not null
+  );
 
 -- Explicitly deny public UPDATE and DELETE capabilities via table grants.
 revoke update, delete on table public.portfolio_reviews from anon, authenticated;

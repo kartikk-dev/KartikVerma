@@ -346,7 +346,7 @@
 
     const formatDate = (value: string): string => {
       const date = parseDate(value);
-      if (!date) return value || "—";
+      if (!date) return value || "-";
 
       return new Intl.DateTimeFormat("en-IN", {
         day: "2-digit",
@@ -389,7 +389,7 @@
       workOrderOptions.innerHTML = state.workOrders
         .map(
           (order) =>
-            `<option value="${escapeHtml(order.id)}">${escapeHtml(order.customer)} — ${escapeHtml(order.service)}</option>`,
+            `<option value="${escapeHtml(order.id)}">${escapeHtml(order.customer)} - ${escapeHtml(order.service)}</option>`,
         )
         .join("");
     };

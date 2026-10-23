@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import { getSecret } from "astro:env/server";
 
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const DEFAULT_LANGUAGE = "en-US";
@@ -20,16 +21,14 @@ const isValidId = (value: string): boolean => /^\d{1,12}$/.test(value);
 export const prerender = false;
 
 export const GET: APIRoute = async ({ request }) => {
-  const env = import.meta.env as Record<string, string | boolean | undefined>;
-  const accessTokenValue = env.TMDB_READ_ACCESS_TOKEN;
-  const accessToken =
-    typeof accessTokenValue === "string" ? accessTokenValue.trim() : "";
+  // `getSecret` is server-only and reads the current runtime environment.
+  const accessToken = getSecret("TMDB_READ_ACCESS_TOKEN")?.trim() ?? "";
 
   if (!accessToken) {
     return json(
       {
         error:
-          "TMDB token is missing. Add TMDB_READ_ACCESS_TOKEN to the project-root .env file and restart the development server.",
+          "MovieFlex is not configured yet. Set the TMDB_READ_ACCESS_TOKEN server environment variable and try again.",
       },
       503,
     );
@@ -145,7 +144,7 @@ export const GET: APIRoute = async ({ request }) => {
         return json(
           {
             error:
-              "TMDB rejected the access token. Verify TMDB_READ_ACCESS_TOKEN in .env, then restart the development server.",
+              "TMDB rejected the server configuration. Verify TMDB_READ_ACCESS_TOKEN and try again.",
           },
           502,
         );

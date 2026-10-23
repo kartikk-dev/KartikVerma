@@ -47,12 +47,12 @@
 
         <div class="detail-row">
           <small>Customer</small>
-          <strong id="modal-customer">—</strong>
+          <strong id="modal-customer">-</strong>
         </div>
 
         <div class="detail-row">
           <small>Location</small>
-          <strong id="modal-location">—</strong>
+          <strong id="modal-location">-</strong>
         </div>
 
         <div class="detail-row">
@@ -62,12 +62,12 @@
 
         <div class="detail-row">
           <small>Scheduled</small>
-          <strong id="modal-scheduled">—</strong>
+          <strong id="modal-scheduled">-</strong>
         </div>
 
         <div class="detail-row">
           <small>Created</small>
-          <strong id="modal-created">—</strong>
+          <strong id="modal-created">-</strong>
         </div>
       </div>
 
@@ -81,12 +81,12 @@
 
         <div class="detail-row">
           <small>Category</small>
-          <strong id="serviq-modal-category">—</strong>
+          <strong id="serviq-modal-category">-</strong>
         </div>
 
         <div class="detail-row">
           <small>Work order ID</small>
-          <strong id="serviq-modal-id">—</strong>
+          <strong id="serviq-modal-id">-</strong>
         </div>
       </div>
     </div>
@@ -415,10 +415,10 @@
       setText("#modal-location", order.location);
       setText("#modal-technician", order.technician || "Unassigned");
       setText("#modal-scheduled", order.scheduled || "Not scheduled");
-      setText("#modal-created", order.created || "—");
+      setText("#modal-created", order.created || "-");
       setText("#modal-amount", formatCurrency(order.amount));
       setText("#modal-issue", order.issue || "No issue details provided.");
-      setText("#serviq-modal-category", order.category || "—");
+      setText("#serviq-modal-category", order.category || "-");
       setText("#serviq-modal-id", order.id);
 
       setDetailStatus(order);
@@ -480,7 +480,7 @@
           .map(
             (tech) => `
           <option value="${escapeHtml(tech.id)}">
-            ${escapeHtml(tech.name)} — ${escapeHtml(tech.status)}
+            ${escapeHtml(tech.name)} - ${escapeHtml(tech.status)}
           </option>
         `,
           )
