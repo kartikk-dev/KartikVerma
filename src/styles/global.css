@@ -168,3 +168,33 @@ summary,
     transition-delay: 0ms !important;
   }
 }
+
+
+/* PORTFOLIO_DECORATIVE_LINES_CLEANUP
+   Hide short decorative accent lines only.
+   Preserve card borders, button borders, glows and animations.
+*/
+.contact-section .contact-divider,
+.portfolio-reviews .reviews-eyebrow-mark,
+.portfolio-reviews .reviews-empty-mark,
+.eyebrow-rule,
+[class*="decorative-line"],
+[class*="section-divider"],
+[class*="section-mark"],
+[class*="heading-rule"],
+[class*="heading-mark"],
+[class*="accent-line"],
+[class*="accent-rule"],
+[class*="eyebrow-mark"],
+[class*="empty-mark"] {
+  display: none !important;
+}
+
+[class*="eyebrow"]::before,
+[class*="eyebrow"]::after,
+.nav-link::after,
+.portrait-greeting::after {
+  display: none !important;
+  content: none !important;
+}
+/* End portfolio decorative-line cleanup */

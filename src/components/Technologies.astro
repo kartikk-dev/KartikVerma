@@ -379,8 +379,7 @@ const logoUrl = (technology: Technology) => {
       </p>
 
       <h2 id="technologies-heading">
-        The tools
-        <span>behind the work.</span>
+        The tools <span>behind the work.</span>
       </h2>
 
       <p class="section-description">
@@ -501,7 +500,6 @@ const logoUrl = (technology: Technology) => {
     </div>
 
     <footer class="technology-footer">
-      <span class="footer-rule" aria-hidden="true"></span>
       <p>
         Technology choices depend on the problem, product requirements, and
         implementation context.
@@ -778,13 +776,18 @@ const logoUrl = (technology: Technology) => {
     margin-inline: auto;
   }
 
+  /* Centre the heading group without changing the carousel or toolbar layout. */
   .section-header {
-    max-width: 780px;
+    width: 100%;
+    max-width: 100%;
+    margin-inline: auto;
+    text-align: center;
   }
 
   .section-eyebrow {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 11px;
     margin: 0 0 21px;
     color: #d3a4a9;
@@ -802,26 +805,32 @@ const logoUrl = (technology: Technology) => {
   }
 
   .section-header h2 {
+    width: 100%;
     margin: 0;
     color: #f5e7e8;
-    font-size: clamp(2.5rem, 5.1vw, 4.35rem);
+    font-size: clamp(1rem, 4.5vw, 3.6rem);
     font-weight: 650;
-    line-height: 1.08;
+    line-height: 1.1;
     letter-spacing: -0.05em;
-    overflow-wrap: anywhere;
+    text-align: center;
+    white-space: nowrap;
+    overflow-wrap: normal;
   }
 
   .section-header h2 span {
-    display: block;
+    display: inline;
     color: #e66a73;
+    white-space: nowrap;
   }
 
   .section-description {
+    width: 100%;
     max-width: 610px;
-    margin: 20px 0 0;
+    margin: 20px auto 0;
     color: #b7a7aa;
     font-size: 0.93rem;
     line-height: 1.85;
+    text-align: center;
   }
 
   .technology-toolbar {
@@ -1134,14 +1143,6 @@ const logoUrl = (technology: Technology) => {
     margin-top: 25px;
   }
 
-  .footer-rule {
-    width: 22px;
-    height: 2px;
-    flex: 0 0 22px;
-    margin-top: 10px;
-    background: #e44752;
-  }
-
   .technology-footer p {
     margin: 0;
     color: #a9989c;
@@ -1167,7 +1168,7 @@ const logoUrl = (technology: Technology) => {
     }
 
     .section-header h2 {
-      font-size: clamp(2.35rem, 7.8vw, 3.5rem);
+      font-size: clamp(1rem, 4.5vw, 3.5rem);
     }
 
     .technology-stage {
@@ -1198,7 +1199,7 @@ const logoUrl = (technology: Technology) => {
     }
 
     .section-header h2 {
-      font-size: clamp(2.1rem, 8.8vw, 2.9rem);
+      font-size: clamp(1rem, 4.5vw, 1.35rem);
       line-height: 1.12;
     }
 
